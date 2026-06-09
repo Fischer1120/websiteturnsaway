@@ -1,0 +1,13 @@
+"$schema" = "./node_modules/wrangler/config-schema.json"
+name = "website-turns-away"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-06-08"
+
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "website-turns-away-media"
+preview_bucket_name = "website-turns-away-media-preview"
+
+[vars]
+PUBLIC_MEDIA_BASE_URL = ""
+ALLOWED_ORIGINS = "http://localhost:4321,http://127.0.0.1:4321"

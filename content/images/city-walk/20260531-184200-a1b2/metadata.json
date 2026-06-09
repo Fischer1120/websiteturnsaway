@@ -1,0 +1,27 @@
+{
+  "id": "20260531-184200-a1b2",
+  "folder": "city-walk",
+  "title": "粉色天空下的球体",
+  "description": "广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。",
+  "objectKey": "images/city-walk/20260531-184200-a1b2/original.svg",
+  "thumbKey": "images/city-walk/20260531-184200-a1b2/thumb.svg",
+  "imageUrl": "/assets/media/sphere-photo.svg",
+  "thumbUrl": "/assets/media/sphere-photo.svg",
+  "capturedAt": "2026-05-31T18:42:00+08:00",
+  "location": {
+    "label": "Shanghai",
+    "latitude": 31.2304,
+    "longitude": 121.4737,
+    "precision": "city"
+  },
+  "camera": {
+    "make": "Apple",
+    "model": "iPhone",
+    "lens": "26mm",
+    "iso": 64,
+    "aperture": "f/1.8",
+    "shutter": "1/120"
+  },
+  "alt": "粉色天空下，一座巨大的球体建筑位于广场中央。",
+  "visibility": "public"
+}

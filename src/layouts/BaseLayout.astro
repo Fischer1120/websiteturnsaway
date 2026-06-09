@@ -1,0 +1,47 @@
+---
+import "../styles/global.css";
+
+type Props = {
+  title?: string;
+  description?: string;
+};
+
+const {
+  title = "Website Turns Away",
+  description = "A retro-future personal archive for articles and photos.",
+} = Astro.props;
+
+const navItems = [
+  { href: "/", label: "首页" },
+  { href: "/articles", label: "文章" },
+  { href: "/images", label: "图片" },
+  { href: "/admin", label: "管理入口" },
+];
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <div class="site-frame">
+      <header class="topbar" aria-label="主导航">
+        <a class="brand" href="/" aria-label="Website Turns Away 首页">
+          <span class="brand-mark" aria-hidden="true"></span>
+          <span>Website Turns Away</span>
+        </a>
+        <nav class="system-strip">
+          {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+        </nav>
+      </header>
+      <slot />
+      <footer class="footer system-text">
+        ORBITAL MONOLITH INDEX / STATIC FRONTEND + CLOUDFLARE PAGES FUNCTIONS + R2
+      </footer>
+    </div>
+  </body>
+</html>

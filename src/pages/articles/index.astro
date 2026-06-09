@@ -1,0 +1,42 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RouteMatrix from "@/components/RouteMatrix.astro";
+import RecordCard from "@/components/RecordCard.astro";
+import FolderRows from "@/components/FolderRows.astro";
+import { getArticleFolders, getArticles } from "@/lib/content";
+
+const articles = getArticles();
+const folders = getArticleFolders();
+---
+
+<BaseLayout title="文章栏目 - Website Turns Away">
+  <div class="layout-grid">
+    <RouteMatrix />
+    <main class="content-stack">
+      <section class="panel dark">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Articles / Folder Index</p>
+            <h1>文章栏目</h1>
+          </div>
+          <p>文章以 folder 和 slug 建立稳定地址；详情页保留标题、副标题、二级标题和正文插图。</p>
+        </div>
+        <div class="record-grid">
+          {articles.map((article) => (
+            <RecordCard
+              href={article.url}
+              title={article.title}
+              subtitle={article.subtitle}
+              summary={article.summary}
+              image={article.coverImage}
+              date={article.publishedAt}
+              folder={article.folder}
+              kind="article"
+            />
+          ))}
+        </div>
+        <FolderRows folders={folders} basePath="/articles" />
+      </section>
+    </main>
+  </div>
+</BaseLayout>

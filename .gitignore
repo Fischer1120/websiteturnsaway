@@ -6,11 +6,24 @@ dist/
 build/
 .next/
 out/
+.astro/
+.wrangler/
+.mf/
+.vite/
+.cache/
+coverage/
+playwright-report/
+test-results/
+tmp/
+*.tsbuildinfo
 
 # Environment variables
 .env
 .env.*
 !.env.example
+.dev.vars
+.dev.vars.*
+*.local
 
 # Logs
 *.log
@@ -21,6 +34,9 @@ pnpm-debug.log*
 
 # OS and editor files
 .DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
 .idea/
 .vscode/
-
+.history/

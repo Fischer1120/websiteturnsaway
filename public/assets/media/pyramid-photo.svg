@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
+  <title id="title">Pyramid entrance</title>
+  <desc id="desc">A pyramid entrance with long shadows and a navy archival frame.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#f4ecd9"/>
+      <stop offset=".52" stop-color="#e4a38e"/>
+      <stop offset="1" stop-color="#96aaa4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1000" height="700" fill="url(#bg)"/>
+  <path d="M132 610H872" stroke="#182434" stroke-width="12" opacity=".18"/>
+  <path d="M270 610 622 128 844 610Z" fill="#182434"/>
+  <path d="M622 128 844 610 568 486Z" fill="#f0dfc0"/>
+  <path d="M568 486 844 610 304 610Z" fill="#d96f57"/>
+  <rect x="196" y="168" width="96" height="450" fill="#182434"/>
+  <rect x="292" y="182" width="42" height="438" fill="#d8c7a4"/>
+  <circle cx="366" cy="192" r="96" fill="#d6ad54" stroke="#182434" stroke-width="7"/>
+  <circle cx="332" cy="154" r="24" fill="#fff6ca"/>
+  <g fill="#182434" font-family="Courier New, monospace" font-size="20">
+    <text x="62" y="72">ARCHIVE / 20260531-191000-C3D4</text>
+    <text x="650" y="122">ENTRANCE 19:10</text>
+  </g>
+</svg>

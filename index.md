@@ -18,6 +18,8 @@
 
 - 视觉风格提示词：[design/prompt.md](design/prompt.md)
 - 项目说明：[README.md](README.md)
+- 已选定前端方案：[Orbital Monolith Index](design/concepts/concept-02-orbital-monolith-index/notes.md)
+- 网站维护说明书：[docs/website-maintenance-manual.md](docs/website-maintenance-manual.md)
 
 `design/prompt.md` 当前方向为复古未来主义几何建筑风格，关键词包括巨型球体、金字塔、方碑、1970s speculative future、world exposition poster、navy blue 与 coral orange、Moebius 与 Syd Mead 早期概念艺术气质。前端设计 agent 必须读取原文件，而不是只依赖本摘要。
 
@@ -80,3 +82,17 @@
 - 三个前端设计方案与审核记录。
 - 用户选定方案后的实现版本。
 - 本文档及 `workflows/` 下所有流程文档的持续更新版本。
+
+## 当前实现状态
+
+- 用户已选择 B 方案：`Orbital Monolith Index`。
+- 当前实现采用 Astro + TypeScript 静态前端，部署目标为 Cloudflare Pages。
+- 后端 API 使用 Cloudflare Pages Functions，R2 binding 名称为 `MEDIA_BUCKET`。
+- 本地种子内容位于 `content/articles/` 与 `content/images/`。
+- 管理入口 `/admin` 和 `/api/admin/*` 已预留上传文章、上传文章插图、上传图片与编辑图片元数据流程。
+- Cloudflare Pages 项目已创建：`website-turns-away`。
+- 正式域名已绑定并验证通过：`https://zero-bytes-turns-away.red`。
+- Pages 默认域名：`https://website-turns-away.pages.dev`。
+- R2 bucket 已创建：`website-turns-away-media` 与 `website-turns-away-media-preview`。
+- `ADMIN_TOKEN_SECRET` 已在 Cloudflare Pages 项目中设置，仓库中不保存 secret 值。
+- 后续维护请优先阅读 [网站维护说明书](docs/website-maintenance-manual.md)。

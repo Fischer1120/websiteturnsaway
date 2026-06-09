@@ -1,0 +1,41 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RouteMatrix from "@/components/RouteMatrix.astro";
+import RecordCard from "@/components/RecordCard.astro";
+import FolderRows from "@/components/FolderRows.astro";
+import { formatDate, getPhotoFolders, getPhotos } from "@/lib/content";
+
+const photos = getPhotos();
+const folders = getPhotoFolders();
+---
+
+<BaseLayout title="图片栏目 - Website Turns Away">
+  <div class="layout-grid">
+    <RouteMatrix />
+    <main class="content-stack">
+      <section class="panel dark">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Images / Metadata Index</p>
+            <h1>图片栏目</h1>
+          </div>
+          <p>图片按相册文件夹组织；详情页展示大图、拍摄时间、地点、相机信息和下方描述。</p>
+        </div>
+        <div class="record-grid">
+          {photos.map((photo) => (
+            <RecordCard
+              href={`/images/${photo.folder}/${photo.id}`}
+              title={photo.title}
+              summary={`${formatDate(photo.capturedAt, true)} / ${photo.location.label} / ${photo.description}`}
+              image={photo.thumbUrl}
+              date={photo.capturedAt}
+              folder={photo.folder}
+              kind="photo"
+            />
+          ))}
+        </div>
+        <FolderRows folders={folders} basePath="/images" />
+      </section>
+    </main>
+  </div>
+</BaseLayout>

@@ -1,0 +1,27 @@
+{
+  "id": "20260531-191000-c3d4",
+  "folder": "archive",
+  "title": "金字塔入口",
+  "description": "入口被长阴影压低，行人显得像比例尺。",
+  "objectKey": "images/archive/20260531-191000-c3d4/original.svg",
+  "thumbKey": "images/archive/20260531-191000-c3d4/thumb.svg",
+  "imageUrl": "/assets/media/pyramid-photo.svg",
+  "thumbUrl": "/assets/media/pyramid-photo.svg",
+  "capturedAt": "2026-05-31T19:10:00+08:00",
+  "location": {
+    "label": "Shanghai",
+    "latitude": 31.2304,
+    "longitude": 121.4737,
+    "precision": "city"
+  },
+  "camera": {
+    "make": "Apple",
+    "model": "iPhone",
+    "lens": "26mm",
+    "iso": 80,
+    "aperture": "f/1.8",
+    "shutter": "1/90"
+  },
+  "alt": "金字塔形入口在黄昏下投出长阴影。",
+  "visibility": "public"
+}

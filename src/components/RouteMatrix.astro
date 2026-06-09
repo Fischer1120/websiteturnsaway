@@ -1,0 +1,22 @@
+---
+const items = [
+  { href: "/", code: "00", label: "Home station" },
+  { href: "/articles", code: "01", label: "Article folders" },
+  { href: "/images", code: "02", label: "Image albums" },
+  { href: "/articles/notes/monolith-at-sunset", code: "03", label: "Article record" },
+  { href: "/images/city-walk/20260531-184200-a1b2", code: "04", label: "Photo sidecar" },
+  { href: "/admin", code: "05", label: "Admin reserve" },
+];
+---
+
+<aside class="route-matrix" aria-label="Route Matrix">
+  <h2>Route Matrix</h2>
+  <nav>
+    {items.map((item) => (
+      <a href={item.href}>
+        <span class="code">{item.code}</span>
+        <span>{item.label}</span>
+      </a>
+    ))}
+  </nav>
+</aside>

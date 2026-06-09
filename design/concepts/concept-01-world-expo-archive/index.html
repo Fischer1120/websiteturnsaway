@@ -1,0 +1,1078 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>World Expo Archive - Website Turns Away</title>
+  <style>
+    :root {
+      --navy: #142b46;
+      --navy-deep: #0f2238;
+      --coral: #ef775f;
+      --sun: #f4c76a;
+      --paper: #f5ead4;
+      --paper-soft: #fff6e6;
+      --sage: #8aa79a;
+      --ink: #1b2630;
+      --line: rgba(20, 43, 70, 0.24);
+      --shadow: rgba(31, 39, 48, 0.18);
+      --radius: 8px;
+      --step: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(20, 43, 70, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(20, 43, 70, 0.05) 1px, transparent 1px),
+        radial-gradient(circle at 18% 10%, rgba(244, 199, 106, 0.26), transparent 32%),
+        linear-gradient(160deg, #fff3dc 0%, #f5ead4 54%, #e8d8bc 100%);
+      background-size: 24px 24px, 24px 24px, auto, auto;
+      font-family: Optima, Candara, "Segoe UI", sans-serif;
+      line-height: 1.55;
+      text-wrap: pretty;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.18;
+      mix-blend-mode: multiply;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(20, 43, 70, 0.08) 0 1px, transparent 1px 8px),
+        repeating-linear-gradient(90deg, rgba(239, 119, 95, 0.06) 0 1px, transparent 1px 11px);
+      z-index: 10;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 64px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      min-height: 72px;
+      margin-bottom: 24px;
+      padding: 12px 0;
+      background: linear-gradient(180deg, rgba(245, 234, 212, 0.96), rgba(245, 234, 212, 0.82));
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(20, 43, 70, 0.18);
+    }
+
+    .brand {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+      color: var(--navy);
+      font-family: Copperplate, "Copperplate Gothic Light", Georgia, serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 44px;
+      height: 44px;
+      border: 2px solid var(--navy);
+      background: linear-gradient(135deg, var(--sun), var(--coral));
+      box-shadow: 6px 6px 0 var(--navy);
+      flex: 0 0 auto;
+    }
+
+    .brand-mark::before {
+      content: "";
+      position: absolute;
+      left: 10px;
+      bottom: 8px;
+      width: 17px;
+      height: 17px;
+      border-radius: 50%;
+      background: var(--paper);
+      border: 2px solid var(--navy);
+    }
+
+    .brand strong {
+      display: block;
+      overflow-wrap: anywhere;
+      font-size: 0.9rem;
+      line-height: 1.1;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    .nav a {
+      min-height: 40px;
+      padding: 9px 12px;
+      border: 1px solid var(--line);
+      background: rgba(255, 246, 230, 0.72);
+      color: var(--navy);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      outline: none;
+      background: var(--navy);
+      color: var(--paper);
+      transform: translateY(-2px);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(360px, 1.05fr);
+      gap: 28px;
+      min-height: 590px;
+      align-items: stretch;
+    }
+
+    .hero-copy {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 32px;
+      border: 2px solid var(--navy);
+      background: linear-gradient(180deg, rgba(255, 246, 230, 0.84), rgba(245, 234, 212, 0.72));
+      box-shadow: 12px 12px 0 rgba(20, 43, 70, 0.16);
+    }
+
+    .kicker,
+    .section-kicker {
+      margin: 0 0 12px;
+      color: var(--coral);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--navy-deep);
+      font-family: Georgia, "Times New Roman", serif;
+      font-weight: 700;
+      line-height: 0.98;
+      letter-spacing: 0;
+    }
+
+    h1 {
+      max-width: 780px;
+      font-size: clamp(3rem, 8vw, 6.5rem);
+    }
+
+    .hero-copy p {
+      max-width: 58ch;
+      margin: 22px 0 0;
+      font-size: clamp(1rem, 2vw, 1.16rem);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 32px;
+    }
+
+    .button {
+      display: inline-flex;
+      min-height: 44px;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 16px;
+      border: 2px solid var(--navy);
+      background: var(--navy);
+      color: var(--paper);
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      box-shadow: 5px 5px 0 rgba(239, 119, 95, 0.55);
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .button.secondary {
+      background: var(--paper-soft);
+      color: var(--navy);
+      box-shadow: 5px 5px 0 rgba(20, 43, 70, 0.18);
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      outline: none;
+      transform: translate(-2px, -2px);
+      box-shadow: 8px 8px 0 rgba(239, 119, 95, 0.55);
+    }
+
+    .ticket-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 40px;
+    }
+
+    .ticket {
+      min-height: 92px;
+      padding: 12px;
+      border: 1px dashed rgba(20, 43, 70, 0.46);
+      background: rgba(255, 246, 230, 0.58);
+    }
+
+    .ticket span {
+      display: block;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.72rem;
+      color: var(--coral);
+      letter-spacing: 0.12em;
+    }
+
+    .ticket strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--navy);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1rem, 2vw, 1.4rem);
+      line-height: 1.08;
+    }
+
+    .expo-map {
+      position: relative;
+      overflow: hidden;
+      min-height: 590px;
+      border: 2px solid var(--navy);
+      background:
+        linear-gradient(180deg, #f3bfa4 0%, #f2d5a8 34%, #f6ead4 64%, #d4c9a9 100%);
+      box-shadow: inset 0 0 0 12px rgba(255, 246, 230, 0.35), 12px 12px 0 rgba(20, 43, 70, 0.16);
+    }
+
+    .expo-map::before {
+      content: "";
+      position: absolute;
+      inset: auto -10% 15% -10%;
+      height: 36%;
+      background:
+        linear-gradient(115deg, transparent 0 20%, rgba(20, 43, 70, 0.16) 20% 24%, transparent 24%),
+        linear-gradient(68deg, transparent 0 38%, rgba(20, 43, 70, 0.15) 38% 42%, transparent 42%);
+      transform: skewY(-7deg);
+    }
+
+    .sun-disc {
+      position: absolute;
+      top: 46px;
+      right: 58px;
+      width: 114px;
+      height: 114px;
+      border-radius: 50%;
+      border: 2px solid var(--navy);
+      background: radial-gradient(circle at 32% 30%, #fff5d6 0 14%, var(--sun) 15% 56%, var(--coral) 57% 100%);
+      box-shadow: -20px 20px 0 rgba(20, 43, 70, 0.08);
+    }
+
+    .expo-sphere {
+      position: absolute;
+      left: 10%;
+      top: 24%;
+      width: min(28vw, 260px);
+      aspect-ratio: 1;
+      border: 2px solid var(--navy);
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 34% 26%, #fff5d6 0 8%, transparent 9%),
+        radial-gradient(circle at 38% 32%, #ffd78f 0 28%, #ef775f 58%, #8aa79a 100%);
+      box-shadow: 26px 30px 0 rgba(20, 43, 70, 0.18);
+    }
+
+    .expo-pyramid {
+      position: absolute;
+      right: 13%;
+      bottom: 19%;
+      width: min(23vw, 210px);
+      height: min(23vw, 210px);
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: linear-gradient(145deg, #fbe3bd 0 44%, var(--coral) 45% 62%, var(--navy) 63% 100%);
+      filter: drop-shadow(28px 28px 0 rgba(20, 43, 70, 0.18));
+    }
+
+    .expo-monolith {
+      position: absolute;
+      left: 47%;
+      bottom: 20%;
+      width: 58px;
+      height: 270px;
+      border: 2px solid var(--navy);
+      background: linear-gradient(90deg, var(--navy) 0 45%, #254563 46% 70%, #d7c198 71% 100%);
+      transform: skewY(-4deg);
+      box-shadow: 44px 46px 0 rgba(20, 43, 70, 0.18);
+    }
+
+    .map-label {
+      position: absolute;
+      display: grid;
+      min-width: 116px;
+      padding: 8px 10px;
+      border: 2px solid var(--navy);
+      background: rgba(255, 246, 230, 0.88);
+      color: var(--navy);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      box-shadow: 5px 5px 0 rgba(20, 43, 70, 0.18);
+    }
+
+    .map-label.article {
+      left: 7%;
+      bottom: 15%;
+    }
+
+    .map-label.image {
+      right: 6%;
+      top: 30%;
+    }
+
+    .map-label.detail {
+      left: 42%;
+      top: 14%;
+    }
+
+    section {
+      margin-top: 34px;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--navy);
+    }
+
+    h2 {
+      font-size: clamp(2.2rem, 5vw, 4.2rem);
+    }
+
+    .section-head p {
+      max-width: 36ch;
+      margin: 0;
+      color: rgba(27, 38, 48, 0.72);
+      font-size: 0.95rem;
+    }
+
+    .two-column {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .pavilion {
+      display: grid;
+      grid-template-columns: 128px minmax(0, 1fr);
+      gap: 16px;
+      min-height: 230px;
+      padding: 16px;
+      border: 2px solid var(--navy);
+      background: rgba(255, 246, 230, 0.72);
+      box-shadow: 8px 8px 0 rgba(20, 43, 70, 0.12);
+      transition: transform 180ms ease, box-shadow 180ms ease;
+    }
+
+    .pavilion:hover {
+      transform: translateY(-3px);
+      box-shadow: 8px 12px 0 rgba(239, 119, 95, 0.32);
+    }
+
+    .poster-thumb {
+      position: relative;
+      overflow: hidden;
+      min-height: 190px;
+      border: 1px solid var(--navy);
+      background: linear-gradient(180deg, #efad94, #f5d693 54%, #d7c198);
+    }
+
+    .poster-thumb::before {
+      content: "";
+      position: absolute;
+      left: 18%;
+      bottom: 30%;
+      width: 56%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--navy);
+      background: radial-gradient(circle at 35% 30%, #fff5d6 0 12%, #f4c76a 13% 48%, #ef775f 49% 100%);
+    }
+
+    .poster-thumb::after {
+      content: "";
+      position: absolute;
+      right: 12%;
+      bottom: 0;
+      width: 44%;
+      height: 62%;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: linear-gradient(140deg, #fff0c9, var(--navy));
+    }
+
+    .pavilion h3 {
+      font-size: clamp(1.45rem, 3vw, 2.25rem);
+    }
+
+    .meta-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .chip {
+      display: inline-flex;
+      min-height: 28px;
+      align-items: center;
+      padding: 4px 8px;
+      border: 1px solid rgba(20, 43, 70, 0.32);
+      background: rgba(245, 234, 212, 0.72);
+      color: var(--navy);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .pavilion p {
+      margin: 0;
+      color: rgba(27, 38, 48, 0.76);
+    }
+
+    .folder-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .folder {
+      min-height: 126px;
+      padding: 14px;
+      border: 2px solid var(--navy);
+      background: linear-gradient(180deg, rgba(255, 246, 230, 0.82), rgba(245, 234, 212, 0.68));
+      transition: background 180ms ease, transform 180ms ease;
+    }
+
+    .folder:hover {
+      background: var(--sun);
+      transform: translateY(-2px);
+    }
+
+    .folder .code {
+      display: block;
+      color: var(--coral);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .folder strong {
+      display: block;
+      margin-top: 14px;
+      color: var(--navy);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.24rem;
+      line-height: 1.08;
+    }
+
+    .folder span:last-child {
+      display: block;
+      margin-top: 8px;
+      color: rgba(27, 38, 48, 0.72);
+      font-size: 0.86rem;
+    }
+
+    .article-detail,
+    .photo-detail {
+      border: 2px solid var(--navy);
+      background: rgba(255, 246, 230, 0.8);
+      box-shadow: 12px 12px 0 rgba(20, 43, 70, 0.12);
+    }
+
+    .article-detail {
+      display: grid;
+      grid-template-columns: minmax(0, 0.78fr) minmax(320px, 0.42fr);
+      gap: 0;
+    }
+
+    .article-main {
+      padding: clamp(22px, 4vw, 42px);
+      border-right: 2px solid var(--navy);
+    }
+
+    .article-side {
+      padding: 22px;
+      background: var(--navy);
+      color: var(--paper);
+    }
+
+    .article-main h2 {
+      font-size: clamp(2.4rem, 5vw, 5rem);
+    }
+
+    .subtitle {
+      margin: 14px 0 28px;
+      color: rgba(27, 38, 48, 0.7);
+      font-size: clamp(1rem, 2vw, 1.22rem);
+    }
+
+    .article-main h3 {
+      margin-top: 28px;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+    }
+
+    .article-main p {
+      max-width: 70ch;
+      margin: 12px 0 0;
+    }
+
+    .quote-block {
+      margin: 24px 0;
+      padding: 16px;
+      border-left: 6px solid var(--coral);
+      background: rgba(244, 199, 106, 0.24);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.22rem;
+      line-height: 1.35;
+    }
+
+    .inline-image {
+      margin: 28px 0;
+      border: 2px solid var(--navy);
+      background: var(--paper);
+    }
+
+    .image-plate {
+      position: relative;
+      overflow: hidden;
+      min-height: 300px;
+      background: linear-gradient(180deg, #eeab9c, #f1c97c 45%, #d9ccb0 46% 100%);
+    }
+
+    .image-plate::before {
+      content: "";
+      position: absolute;
+      left: 16%;
+      bottom: 24%;
+      width: 30%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--navy);
+      background: radial-gradient(circle at 32% 28%, #fff5d6 0 14%, var(--sun) 15% 48%, var(--coral) 49% 100%);
+      box-shadow: 56px 48px 0 rgba(20, 43, 70, 0.18);
+    }
+
+    .image-plate::after {
+      content: "";
+      position: absolute;
+      right: 14%;
+      bottom: 0;
+      width: 28%;
+      height: 68%;
+      clip-path: polygon(48% 0, 100% 100%, 0 100%);
+      background: linear-gradient(140deg, #fff0c9, var(--navy));
+      filter: drop-shadow(42px 38px 0 rgba(20, 43, 70, 0.17));
+    }
+
+    figcaption {
+      padding: 10px 14px;
+      border-top: 2px solid var(--navy);
+      color: rgba(27, 38, 48, 0.75);
+      font-size: 0.9rem;
+    }
+
+    .article-side h3 {
+      color: var(--paper);
+      font-size: 1.8rem;
+    }
+
+    .route-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .route {
+      padding: 12px;
+      border: 1px solid rgba(245, 234, 212, 0.32);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.82rem;
+      color: rgba(255, 246, 230, 0.84);
+      word-break: break-word;
+    }
+
+    .photo-detail {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+      grid-template-areas:
+        "photo meta"
+        "desc meta";
+      gap: 0;
+    }
+
+    .photo-stage {
+      grid-area: photo;
+      position: relative;
+      min-height: 560px;
+      overflow: hidden;
+      border-right: 2px solid var(--navy);
+      border-bottom: 2px solid var(--navy);
+      background: linear-gradient(180deg, #efaa9b 0%, #f2c97b 43%, #d7c7a6 44% 100%);
+    }
+
+    .photo-stage::before {
+      content: "";
+      position: absolute;
+      left: 16%;
+      top: 21%;
+      width: 40%;
+      max-width: 380px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 3px solid var(--navy);
+      background: radial-gradient(circle at 35% 30%, #fff8de 0 12%, var(--sun) 13% 52%, var(--coral) 53% 100%);
+      box-shadow: 74px 88px 0 rgba(20, 43, 70, 0.17);
+    }
+
+    .photo-stage::after {
+      content: "";
+      position: absolute;
+      right: 14%;
+      bottom: 0;
+      width: 22%;
+      height: 62%;
+      background: var(--navy);
+      box-shadow: -44px 42px 0 rgba(20, 43, 70, 0.15);
+    }
+
+    .photo-meta {
+      grid-area: meta;
+      padding: 24px;
+      background: var(--navy);
+      color: var(--paper);
+    }
+
+    .photo-meta h3 {
+      color: var(--paper);
+      font-size: 2rem;
+    }
+
+    .meta-table {
+      display: grid;
+      gap: 0;
+      margin-top: 20px;
+      border-top: 1px solid rgba(245, 234, 212, 0.34);
+    }
+
+    .meta-row {
+      display: grid;
+      grid-template-columns: 112px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(245, 234, 212, 0.28);
+      font-size: 0.93rem;
+    }
+
+    .meta-row span:first-child {
+      color: var(--sun);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .photo-description {
+      grid-area: desc;
+      padding: 22px 24px;
+      background: rgba(255, 246, 230, 0.86);
+      color: rgba(27, 38, 48, 0.8);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.2rem, 2.4vw, 1.7rem);
+      line-height: 1.35;
+    }
+
+    @media (max-width: 920px) {
+      .page {
+        width: min(100% - 22px, 760px);
+      }
+
+      .topbar,
+      .hero,
+      .two-column,
+      .article-detail,
+      .photo-detail {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        position: relative;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .hero {
+        min-height: 0;
+      }
+
+      .hero-copy,
+      .expo-map {
+        min-height: 460px;
+      }
+
+      .ticket-row,
+      .folder-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .article-main {
+        border-right: 0;
+        border-bottom: 2px solid var(--navy);
+      }
+
+      .photo-detail {
+        grid-template-areas:
+          "photo"
+          "meta"
+          "desc";
+      }
+
+      .photo-stage {
+        min-height: 430px;
+        border-right: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .page {
+        width: min(100% - 16px, 420px);
+        padding-top: 12px;
+      }
+
+      .brand {
+        align-items: flex-start;
+      }
+
+      .nav a {
+        flex: 1 1 calc(50% - 8px);
+        justify-content: center;
+        text-align: center;
+      }
+
+      .hero-copy,
+      .article-main,
+      .photo-meta {
+        padding: 18px;
+      }
+
+      .hero-copy,
+      .expo-map {
+        min-height: 390px;
+      }
+
+      .ticket-row,
+      .folder-grid,
+      .pavilion {
+        grid-template-columns: 1fr;
+      }
+
+      .poster-thumb {
+        min-height: 180px;
+      }
+
+      .section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .meta-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+
+      .photo-stage {
+        min-height: 340px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="topbar" aria-label="主导航">
+      <a class="brand" href="#home" aria-label="Website Turns Away 首页">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <strong>Website<br>Turns Away</strong>
+      </a>
+      <nav class="nav">
+        <a href="#home">首页</a>
+        <a href="#articles">文章</a>
+        <a href="#images">图片</a>
+        <a href="#article-detail">文章详情</a>
+        <a href="#photo-detail">图片详情</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="home" aria-labelledby="home-title">
+        <div class="hero-copy">
+          <div>
+            <p class="kicker">World Expo Archive / 1976 guide system</p>
+            <h1 id="home-title">把每一次转身，登记成一座未来展馆。</h1>
+            <p>这里收纳文章、散步中的图片和几何建筑的记忆。文章按文件夹成为展区，照片按相册成为馆藏，所有入口都从第一屏可达。</p>
+            <div class="hero-actions" aria-label="主要入口">
+              <a class="button" href="#articles">进入文章馆</a>
+              <a class="button secondary" href="#images">进入图片馆</a>
+            </div>
+          </div>
+          <div class="ticket-row" aria-label="站点摘要">
+            <div class="ticket"><span>Route 01</span><strong>notes / monolith-at-sunset</strong></div>
+            <div class="ticket"><span>Route 02</span><strong>travel / world-expo-dream</strong></div>
+            <div class="ticket"><span>Photo 18:42</span><strong>city-walk / sphere</strong></div>
+          </div>
+        </div>
+
+        <div class="expo-map" aria-label="复古未来主义展馆地图插画">
+          <span class="sun-disc" aria-hidden="true"></span>
+          <span class="expo-sphere" aria-hidden="true"></span>
+          <span class="expo-monolith" aria-hidden="true"></span>
+          <span class="expo-pyramid" aria-hidden="true"></span>
+          <span class="map-label article">A-01 Articles</span>
+          <span class="map-label image">P-04 Photos</span>
+          <span class="map-label detail">Index Tower</span>
+        </div>
+      </section>
+
+      <section id="articles" aria-labelledby="articles-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Article Pavilion</p>
+            <h2 id="articles-title">文章栏目</h2>
+          </div>
+          <p>文件夹像展馆，文章像从不同入口取得的导览册。</p>
+        </div>
+
+        <div class="two-column">
+          <article class="pavilion">
+            <div class="poster-thumb" aria-hidden="true"></div>
+            <div>
+              <h3>黄昏中的方碑</h3>
+              <div class="meta-line">
+                <span class="chip">notes</span>
+                <span class="chip">2026-05-31</span>
+                <span class="chip">geometry</span>
+              </div>
+              <p>一次关于城市边缘与几何记忆的记录。穿过一条笔直道路后，建筑像沉默的仪器一样排列在远处。</p>
+            </div>
+          </article>
+          <article class="pavilion">
+            <div class="poster-thumb" aria-hidden="true"></div>
+            <div>
+              <h3>像世博会海报一样散步</h3>
+              <div class="meta-line">
+                <span class="chip">travel</span>
+                <span class="chip">2026-05-31</span>
+                <span class="chip">walk</span>
+              </div>
+              <p>在粉色天空下经过球体、金字塔和长阴影，把城市当成一条临时开放的中央轴线。</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="folder-grid" aria-label="文章文件夹入口">
+          <a class="folder" href="#article-detail">
+            <span class="code">/articles/notes</span>
+            <strong>Notes 展馆</strong>
+            <span>几何记忆、短札与观察</span>
+          </a>
+          <a class="folder" href="#article-detail">
+            <span class="code">/articles/travel</span>
+            <strong>Travel 展馆</strong>
+            <span>散步路线与城市片段</span>
+          </a>
+          <a class="folder" href="#article-detail">
+            <span class="code">/articles/archive-2026</span>
+            <strong>Archive 2026</strong>
+            <span>年度索引预留入口</span>
+          </a>
+          <a class="folder" href="#article-detail">
+            <span class="code">/admin/articles</span>
+            <strong>Upload 预留</strong>
+            <span>未来文章上传接口</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="images" aria-labelledby="images-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Photo Pavilion</p>
+            <h2 id="images-title">图片栏目</h2>
+          </div>
+          <p>图片文件夹显示拍摄时间，详情页把照片、地点和说明分开陈列。</p>
+        </div>
+
+        <div class="two-column">
+          <article class="pavilion">
+            <div class="poster-thumb" aria-hidden="true"></div>
+            <div>
+              <h3>粉色天空下的球体</h3>
+              <div class="meta-line">
+                <span class="chip">city-walk</span>
+                <span class="chip">2026-05-31 18:42</span>
+                <span class="chip">Shanghai</span>
+              </div>
+              <p>广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+            </div>
+          </article>
+          <article class="pavilion">
+            <div class="poster-thumb" aria-hidden="true"></div>
+            <div>
+              <h3>金字塔入口</h3>
+              <div class="meta-line">
+                <span class="chip">archive</span>
+                <span class="chip">2026-05-31 19:10</span>
+                <span class="chip">Shanghai</span>
+              </div>
+              <p>入口被长阴影压低，行人显得像比例尺。</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="folder-grid" aria-label="图片文件夹入口">
+          <a class="folder" href="#photo-detail">
+            <span class="code">/images/city-walk</span>
+            <strong>City Walk</strong>
+            <span>按拍摄时间排序</span>
+          </a>
+          <a class="folder" href="#photo-detail">
+            <span class="code">/images/archive</span>
+            <strong>Archive</strong>
+            <span>旧照片与展馆入口</span>
+          </a>
+          <a class="folder" href="#photo-detail">
+            <span class="code">/images/indexes</span>
+            <strong>R2 Index</strong>
+            <span>元数据 JSON 映射</span>
+          </a>
+          <a class="folder" href="#photo-detail">
+            <span class="code">/admin/images</span>
+            <strong>Upload 预留</strong>
+            <span>未来图片上传入口</span>
+          </a>
+        </div>
+      </section>
+
+      <section id="article-detail" aria-labelledby="article-detail-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Article Detail Example</p>
+            <h2 id="article-detail-title">文章详情示例</h2>
+          </div>
+          <p>标题、副标题、二级标题、正文插图和文件路径同时出现。</p>
+        </div>
+
+        <article class="article-detail">
+          <div class="article-main">
+            <p class="kicker">/articles/notes/monolith-at-sunset</p>
+            <h2>黄昏中的方碑</h2>
+            <p class="subtitle">一次关于城市边缘与几何记忆的记录</p>
+
+            <h3>第一段路</h3>
+            <p>道路被夕阳拉长，路口的指示牌像展馆编号一样安静。方碑在远处没有动作，却把视线组织成一条近乎数学的轴线。</p>
+
+            <figure class="inline-image">
+              <div class="image-plate" role="img" aria-label="黄昏中的几何建筑插图"></div>
+              <figcaption>长阴影把广场切成两半，球体和金字塔像旧世博会海报里未完工的未来。</figcaption>
+            </figure>
+
+            <h3>广场尽头</h3>
+            <p>越靠近建筑，人的比例越小。它们并不解释自己，只留下可被存档的轮廓、时间和拍摄位置。</p>
+
+            <blockquote class="quote-block">“一座建筑转过身去，网站只负责记住它背面的光。”</blockquote>
+
+            <h3>折返</h3>
+            <p>折返时天空从珊瑚色降到海军蓝，文件夹名成为回家的路标：notes、travel、city-walk、archive。</p>
+          </div>
+          <aside class="article-side" aria-label="文章索引信息">
+            <h3>展馆索引</h3>
+            <div class="route-list">
+              <div class="route">folder: notes</div>
+              <div class="route">slug: monolith-at-sunset</div>
+              <div class="route">coverImage: ./images/sunset-monolith.jpg</div>
+              <div class="route">asset: articles/notes/monolith-at-sunset/assets/sunset-monolith.jpg</div>
+            </div>
+          </aside>
+        </article>
+      </section>
+
+      <section id="photo-detail" aria-labelledby="photo-detail-title">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Photo Detail Example</p>
+            <h2 id="photo-detail-title">图片详情示例</h2>
+          </div>
+          <p>桌面右侧元数据，移动端自动移动到大图下方。</p>
+        </div>
+
+        <article class="photo-detail">
+          <div class="photo-stage" role="img" aria-label="粉色天空下的球体大图"></div>
+          <aside class="photo-meta" aria-label="拍摄元数据">
+            <p class="kicker">city-walk / 20260531-184200-a1b2</p>
+            <h3>粉色天空下的球体</h3>
+            <div class="meta-table">
+              <div class="meta-row"><span>Captured</span><strong>2026-05-31 18:42</strong></div>
+              <div class="meta-row"><span>Location</span><strong>Shanghai</strong></div>
+              <div class="meta-row"><span>Folder</span><strong>city-walk</strong></div>
+              <div class="meta-row"><span>Camera</span><strong>Apple iPhone / 26mm</strong></div>
+              <div class="meta-row"><span>R2 Key</span><strong>images/city-walk/20260531-184200-a1b2/original.jpg</strong></div>
+            </div>
+          </aside>
+          <p class="photo-description">广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

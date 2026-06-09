@@ -1,0 +1,46 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RouteMatrix from "@/components/RouteMatrix.astro";
+import { getR2KeyRules } from "@/lib/content";
+
+const rules = getR2KeyRules();
+---
+
+<BaseLayout title="管理入口预留 - Website Turns Away">
+  <div class="layout-grid">
+    <RouteMatrix />
+    <main class="content-stack">
+      <section class="panel dark">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Admin Reserve</p>
+            <h1>管理入口</h1>
+          </div>
+          <p>当前阶段保留上传文章、上传图片、编辑元数据和 R2 key 规则，正式后台可在此基础上继续扩展。</p>
+        </div>
+        <div class="admin-grid">
+          <a class="admin-card" href="/api/admin/articles">
+            <span class="path">POST /api/admin/articles</span>
+            <strong>文章上传接口</strong>
+            <p>{rules.article}</p>
+          </a>
+          <a class="admin-card" href="/api/admin/articles/notes/monolith-at-sunset/assets">
+            <span class="path">POST /api/admin/articles/:folder/:slug/assets</span>
+            <strong>文章插图上传</strong>
+            <p>{rules.articleAsset}</p>
+          </a>
+          <a class="admin-card" href="/api/admin/images">
+            <span class="path">POST /api/admin/images</span>
+            <strong>图片上传接口</strong>
+            <p>{rules.imageOriginal}</p>
+          </a>
+          <a class="admin-card" href="/api/admin/images/city-walk/20260531-184200-a1b2/metadata">
+            <span class="path">PATCH /api/admin/images/:folder/:photoId/metadata</span>
+            <strong>图片元数据编辑</strong>
+            <p>{rules.imageMetadata}</p>
+          </a>
+        </div>
+      </section>
+    </main>
+  </div>
+</BaseLayout>

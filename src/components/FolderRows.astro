@@ -1,0 +1,28 @@
+---
+type Folder = {
+  slug: string;
+  label: string;
+  description: string;
+  count: number;
+};
+
+type Props = {
+  folders: Folder[];
+  basePath: string;
+};
+
+const { folders, basePath } = Astro.props;
+---
+
+<div class="folder-grid" aria-label="文件夹入口">
+  {folders.map((folder) => (
+    <a class="folder-row" href={`${basePath}/${folder.slug}`}>
+      <span class="path">{basePath}/{folder.slug}</span>
+      <span>
+        <strong>{folder.label}</strong>
+        <p>{folder.description}</p>
+      </span>
+      <span class="count">{folder.count} records</span>
+    </a>
+  ))}
+</div>

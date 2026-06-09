@@ -1,0 +1,1066 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Orbital Monolith Index - Website Turns Away</title>
+  <style>
+    :root {
+      --ink: #182434;
+      --ink-2: #22354a;
+      --panel: #e9deca;
+      --panel-2: #d8cbb5;
+      --paper: #f4ecd9;
+      --coral: #d96f57;
+      --amber: #d6ad54;
+      --oxide: #865d4c;
+      --mist: #96aaa4;
+      --line: rgba(24, 36, 52, 0.28);
+      --line-strong: rgba(24, 36, 52, 0.72);
+      --shadow: rgba(24, 36, 52, 0.16);
+      --radius: 4px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(24, 36, 52, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(24, 36, 52, 0.06) 1px, transparent 1px),
+        linear-gradient(180deg, #f0e6d2 0%, #ded2bd 100%);
+      background-size: 18px 18px, 18px 18px, auto;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      line-height: 1.45;
+      text-wrap: pretty;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      opacity: 0.14;
+      background:
+        repeating-linear-gradient(90deg, transparent 0 9px, rgba(24, 36, 52, 0.14) 9px 10px),
+        repeating-linear-gradient(0deg, transparent 0 13px, rgba(217, 111, 87, 0.11) 13px 14px);
+      mix-blend-mode: multiply;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .shell {
+      width: min(1320px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 16px 0 56px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 0;
+      background: rgba(233, 222, 202, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .brand {
+      display: grid;
+      grid-template-columns: 46px minmax(0, 1fr);
+      gap: 10px;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      border: 1px solid var(--ink);
+      background: var(--ink);
+      overflow: hidden;
+    }
+
+    .brand-mark::before,
+    .brand-mark::after {
+      content: "";
+      position: absolute;
+      border: 1px solid var(--amber);
+    }
+
+    .brand-mark::before {
+      left: 10px;
+      top: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+    }
+
+    .brand-mark::after {
+      left: 21px;
+      top: 5px;
+      width: 7px;
+      height: 36px;
+      background: var(--coral);
+    }
+
+    .brand small,
+    .system-readout,
+    .eyebrow,
+    .data,
+    .nav a,
+    .cell-label,
+    .code {
+      font-family: "Courier New", Courier, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--coral);
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .brand strong {
+      display: block;
+      overflow-wrap: anywhere;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.08rem;
+      line-height: 1.05;
+    }
+
+    .system-readout {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      border: 1px solid var(--line);
+      background: rgba(244, 236, 217, 0.58);
+    }
+
+    .system-readout span {
+      padding: 8px 10px;
+      border-right: 1px solid var(--line);
+      color: rgba(24, 36, 52, 0.74);
+      font-size: 0.68rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .system-readout span:last-child {
+      border-right: 0;
+    }
+
+    .nav {
+      display: flex;
+      gap: 6px;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      min-height: 38px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 10px;
+      border: 1px solid var(--line-strong);
+      color: var(--ink);
+      background: rgba(244, 236, 217, 0.68);
+      font-size: 0.68rem;
+      font-weight: 700;
+      transition: background 160ms ease, color 160ms ease;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      outline: none;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .grid-frame {
+      display: grid;
+      grid-template-columns: 224px minmax(0, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+    }
+
+    .side-index {
+      position: sticky;
+      top: 88px;
+      align-self: start;
+      border: 1px solid var(--line-strong);
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .side-index header {
+      padding: 14px;
+      border-bottom: 1px solid rgba(244, 236, 217, 0.24);
+    }
+
+    .side-index h2 {
+      margin: 0;
+      color: var(--paper);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.42rem;
+      line-height: 1.05;
+    }
+
+    .side-index a {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 10px;
+      min-height: 52px;
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(244, 236, 217, 0.14);
+      color: rgba(244, 236, 217, 0.82);
+      font-size: 0.88rem;
+      transition: background 160ms ease;
+    }
+
+    .side-index a:hover,
+    .side-index a:focus-visible {
+      outline: none;
+      background: rgba(217, 111, 87, 0.24);
+    }
+
+    .side-index code {
+      color: var(--amber);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.72rem;
+    }
+
+    .content {
+      display: grid;
+      gap: 14px;
+      min-width: 0;
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 0.92fr) minmax(380px, 1.08fr);
+      gap: 14px;
+      min-height: 600px;
+    }
+
+    .welcome-panel,
+    .instrument,
+    .module,
+    .article-record,
+    .photo-record {
+      border: 1px solid var(--line-strong);
+      background: rgba(244, 236, 217, 0.76);
+      box-shadow: 0 18px 48px var(--shadow);
+    }
+
+    .welcome-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(18px, 3vw, 32px);
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      color: var(--coral);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      letter-spacing: 0;
+      line-height: 1;
+    }
+
+    h1 {
+      font-size: clamp(3rem, 6.8vw, 6.2rem);
+      max-width: 820px;
+    }
+
+    .welcome-panel p {
+      max-width: 58ch;
+      margin: 18px 0 0;
+      color: rgba(24, 36, 52, 0.76);
+      font-size: 1.02rem;
+    }
+
+    .command-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 28px;
+    }
+
+    .command {
+      min-height: 74px;
+      padding: 12px;
+      border: 1px solid var(--line-strong);
+      background: rgba(233, 222, 202, 0.82);
+      transition: transform 160ms ease, background 160ms ease;
+    }
+
+    .command:hover {
+      transform: translateY(-2px);
+      background: rgba(214, 173, 84, 0.32);
+    }
+
+    .command .code {
+      display: block;
+      color: var(--coral);
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .command strong {
+      display: block;
+      margin-top: 8px;
+      color: var(--ink);
+      font-size: 1rem;
+    }
+
+    .instrument {
+      position: relative;
+      overflow: hidden;
+      min-height: 600px;
+      background:
+        radial-gradient(ellipse at 50% 50%, transparent 0 33%, rgba(24, 36, 52, 0.16) 34% 35%, transparent 36% 48%, rgba(24, 36, 52, 0.14) 49% 50%, transparent 51%),
+        linear-gradient(180deg, #e7c599 0%, #dca184 38%, #d8cbb5 39% 100%);
+    }
+
+    .instrument::before {
+      content: "";
+      position: absolute;
+      inset: 34px;
+      border: 1px solid rgba(24, 36, 52, 0.34);
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(24, 36, 52, 0.38) 49% 50%, transparent 50%),
+        linear-gradient(0deg, transparent 49%, rgba(24, 36, 52, 0.38) 49% 50%, transparent 50%);
+    }
+
+    .instrument::after {
+      content: "";
+      position: absolute;
+      left: 10%;
+      right: 8%;
+      bottom: 18%;
+      height: 30%;
+      background:
+        linear-gradient(112deg, transparent 0 30%, rgba(24, 36, 52, 0.24) 31% 36%, transparent 37%),
+        linear-gradient(68deg, transparent 0 58%, rgba(24, 36, 52, 0.18) 59% 63%, transparent 64%);
+      transform: skewY(-6deg);
+    }
+
+    .scope-sphere {
+      position: absolute;
+      left: 18%;
+      top: 22%;
+      width: min(250px, 28vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      background:
+        radial-gradient(circle at 34% 28%, #fff4d8 0 10%, transparent 11%),
+        radial-gradient(circle at 38% 34%, var(--amber) 0 30%, var(--coral) 31% 64%, var(--mist) 65% 100%);
+      box-shadow: 46px 52px 0 rgba(24, 36, 52, 0.18);
+    }
+
+    .scope-monolith {
+      position: absolute;
+      right: 26%;
+      bottom: 18%;
+      width: 58px;
+      height: 330px;
+      border: 2px solid var(--ink);
+      background: linear-gradient(90deg, var(--ink) 0 52%, #314b65 53% 77%, #c7b18b 78% 100%);
+      box-shadow: 62px 70px 0 rgba(24, 36, 52, 0.2);
+    }
+
+    .scope-pyramid {
+      position: absolute;
+      right: 9%;
+      bottom: 12%;
+      width: 170px;
+      height: 170px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: linear-gradient(145deg, #f0dec3 0 46%, var(--coral) 47% 61%, var(--ink) 62% 100%);
+      filter: drop-shadow(40px 48px 0 rgba(24, 36, 52, 0.18));
+    }
+
+    .axis-label {
+      position: absolute;
+      padding: 8px 10px;
+      border: 1px solid var(--line-strong);
+      background: rgba(244, 236, 217, 0.86);
+      color: var(--ink);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .axis-label.one {
+      left: 38px;
+      bottom: 36px;
+    }
+
+    .axis-label.two {
+      right: 44px;
+      top: 38px;
+    }
+
+    .axis-label.three {
+      left: 48%;
+      top: 16%;
+    }
+
+    .section-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      padding: 12px 14px;
+      border: 1px solid var(--line-strong);
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .section-head h2 {
+      color: var(--paper);
+      font-size: clamp(1.8rem, 4vw, 3.6rem);
+    }
+
+    .section-head p:last-child {
+      max-width: 38ch;
+      margin: 0;
+      color: rgba(244, 236, 217, 0.76);
+      font-size: 0.88rem;
+    }
+
+    .module {
+      padding: 0;
+    }
+
+    .record-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0;
+      border-top: 1px solid var(--line);
+      border-left: 1px solid var(--line);
+    }
+
+    .record-card {
+      display: grid;
+      grid-template-columns: 108px minmax(0, 1fr);
+      gap: 12px;
+      min-height: 184px;
+      padding: 14px;
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 236, 217, 0.72);
+      transition: background 160ms ease;
+    }
+
+    .record-card:hover {
+      background: rgba(214, 173, 84, 0.22);
+    }
+
+    .micro-visual {
+      position: relative;
+      min-height: 156px;
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      background: linear-gradient(180deg, #d99d83, #d6ad54 46%, #d8cbb5 47% 100%);
+    }
+
+    .micro-visual::before {
+      content: "";
+      position: absolute;
+      left: 16%;
+      top: 24%;
+      width: 54%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 1px solid var(--ink);
+      background: radial-gradient(circle at 36% 30%, #fff4d8 0 11%, var(--amber) 12% 48%, var(--coral) 49% 100%);
+    }
+
+    .micro-visual::after {
+      content: "";
+      position: absolute;
+      right: 8%;
+      bottom: 0;
+      width: 42%;
+      height: 62%;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: var(--ink);
+    }
+
+    .record-card h3 {
+      font-size: clamp(1.28rem, 2.2vw, 1.78rem);
+      line-height: 1.08;
+    }
+
+    .data-line {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 9px 0 10px;
+    }
+
+    .data {
+      min-height: 24px;
+      padding: 3px 6px;
+      border: 1px solid rgba(24, 36, 52, 0.34);
+      color: rgba(24, 36, 52, 0.78);
+      font-size: 0.64rem;
+      font-weight: 700;
+    }
+
+    .record-card p {
+      margin: 0;
+      color: rgba(24, 36, 52, 0.74);
+      font-size: 0.92rem;
+    }
+
+    .folder-table {
+      display: grid;
+      border-top: 1px solid var(--line);
+    }
+
+    .folder-row {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr) 120px;
+      gap: 12px;
+      align-items: center;
+      min-height: 64px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(244, 236, 217, 0.64);
+      transition: background 160ms ease;
+    }
+
+    .folder-row:hover {
+      background: rgba(150, 170, 164, 0.25);
+    }
+
+    .folder-row .code {
+      color: var(--coral);
+      font-size: 0.68rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .folder-row strong {
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 1.18rem;
+    }
+
+    .folder-row span:last-child {
+      justify-self: end;
+      color: rgba(24, 36, 52, 0.62);
+      font-family: "Courier New", Courier, monospace;
+      font-size: 0.72rem;
+    }
+
+    .article-record {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 330px;
+    }
+
+    .article-body {
+      padding: clamp(22px, 4vw, 40px);
+      border-right: 1px solid var(--line-strong);
+    }
+
+    .article-body h2 {
+      font-size: clamp(2.4rem, 5vw, 5rem);
+    }
+
+    .subtitle {
+      margin: 12px 0 28px;
+      color: rgba(24, 36, 52, 0.68);
+      font-size: 1.1rem;
+    }
+
+    .article-body h3 {
+      margin-top: 26px;
+      padding-top: 12px;
+      border-top: 1px solid var(--line);
+      font-size: clamp(1.25rem, 2.8vw, 1.8rem);
+    }
+
+    .article-body p {
+      max-width: 72ch;
+      margin: 12px 0 0;
+      color: rgba(24, 36, 52, 0.82);
+    }
+
+    .article-figure {
+      margin: 28px 0;
+      border: 1px solid var(--line-strong);
+      background: var(--panel);
+    }
+
+    .figure-visual {
+      position: relative;
+      min-height: 330px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #d89f86 0%, #d6ad54 44%, #d8cbb5 45% 100%);
+    }
+
+    .figure-visual::before {
+      content: "";
+      position: absolute;
+      left: 14%;
+      top: 20%;
+      width: 30%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--ink);
+      background: radial-gradient(circle at 34% 28%, #fff4d8 0 11%, var(--amber) 12% 48%, var(--coral) 49% 100%);
+      box-shadow: 74px 64px 0 rgba(24, 36, 52, 0.18);
+    }
+
+    .figure-visual::after {
+      content: "";
+      position: absolute;
+      left: 58%;
+      bottom: 0;
+      width: 54px;
+      height: 74%;
+      background: var(--ink);
+      box-shadow: 66px 70px 0 rgba(24, 36, 52, 0.18);
+    }
+
+    figcaption {
+      padding: 10px 12px;
+      border-top: 1px solid var(--line-strong);
+      color: rgba(24, 36, 52, 0.68);
+      font-size: 0.86rem;
+    }
+
+    .record-sidebar {
+      padding: 18px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .record-sidebar h3 {
+      color: var(--paper);
+      font-size: 1.75rem;
+    }
+
+    .record-grid {
+      display: grid;
+      margin-top: 16px;
+      border-top: 1px solid rgba(244, 236, 217, 0.28);
+    }
+
+    .record-cell {
+      display: grid;
+      gap: 4px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(244, 236, 217, 0.22);
+    }
+
+    .cell-label {
+      color: var(--amber);
+      font-size: 0.66rem;
+      font-weight: 700;
+    }
+
+    .record-cell strong {
+      color: rgba(244, 236, 217, 0.88);
+      font-size: 0.88rem;
+      word-break: break-word;
+    }
+
+    .photo-record {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 336px;
+      grid-template-areas:
+        "photo meta"
+        "desc meta";
+    }
+
+    .photo-large {
+      grid-area: photo;
+      position: relative;
+      min-height: 560px;
+      overflow: hidden;
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      background:
+        radial-gradient(ellipse at 50% 48%, transparent 0 34%, rgba(24, 36, 52, 0.14) 35% 36%, transparent 37%),
+        linear-gradient(180deg, #d89f86 0%, #d6ad54 45%, #d8cbb5 46% 100%);
+    }
+
+    .photo-large::before {
+      content: "";
+      position: absolute;
+      left: 16%;
+      top: 18%;
+      width: min(390px, 43%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 3px solid var(--ink);
+      background: radial-gradient(circle at 34% 28%, #fff4d8 0 10%, var(--amber) 11% 48%, var(--coral) 49% 100%);
+      box-shadow: 92px 104px 0 rgba(24, 36, 52, 0.18);
+    }
+
+    .photo-large::after {
+      content: "";
+      position: absolute;
+      right: 16%;
+      bottom: 0;
+      width: 68px;
+      height: 70%;
+      background: var(--ink);
+      box-shadow: -84px 76px 0 rgba(24, 36, 52, 0.18);
+    }
+
+    .photo-meta {
+      grid-area: meta;
+      padding: 18px;
+      background: var(--ink);
+      color: var(--paper);
+    }
+
+    .photo-meta h3 {
+      color: var(--paper);
+      font-size: 1.9rem;
+    }
+
+    .photo-description {
+      grid-area: desc;
+      padding: 18px 20px;
+      background: rgba(244, 236, 217, 0.86);
+      color: rgba(24, 36, 52, 0.82);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(1.2rem, 2.2vw, 1.65rem);
+      line-height: 1.34;
+    }
+
+    @media (max-width: 1100px) {
+      .topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .system-readout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .grid-frame {
+        grid-template-columns: 1fr;
+      }
+
+      .side-index {
+        position: static;
+      }
+
+      .side-index nav {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+
+      .hero,
+      .article-record,
+      .photo-record {
+        grid-template-columns: 1fr;
+      }
+
+      .article-body {
+        border-right: 0;
+        border-bottom: 1px solid var(--line-strong);
+      }
+
+      .photo-record {
+        grid-template-areas:
+          "photo"
+          "meta"
+          "desc";
+      }
+
+      .photo-large {
+        border-right: 0;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .shell {
+        width: min(100% - 16px, 520px);
+        padding-top: 8px;
+      }
+
+      .system-readout,
+      .side-index nav,
+      .record-list,
+      .command-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .section-head {
+        grid-template-columns: 1fr;
+      }
+
+      .record-card {
+        grid-template-columns: 1fr;
+      }
+
+      .micro-visual {
+        min-height: 190px;
+      }
+
+      .folder-row {
+        grid-template-columns: 1fr;
+        align-items: start;
+      }
+
+      .folder-row span:last-child {
+        justify-self: start;
+      }
+
+      .instrument {
+        min-height: 420px;
+      }
+
+      .scope-monolith {
+        height: 240px;
+      }
+
+      .scope-pyramid {
+        width: 120px;
+        height: 120px;
+      }
+
+      .photo-large {
+        min-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar" aria-label="主导航">
+      <a class="brand" href="#home">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span><small>Orbital Monolith Index</small><strong>Website Turns Away</strong></span>
+      </a>
+      <div class="system-readout" aria-label="系统读数">
+        <span>Articles: folder indexed</span>
+        <span>Images: R2 sidecar metadata</span>
+        <span>Camera fields reserved</span>
+        <span>Admin route pending</span>
+      </div>
+      <nav class="nav">
+        <a href="#home">首页</a>
+        <a href="#articles">文章</a>
+        <a href="#images">图片</a>
+        <a href="#article-detail">文章详情</a>
+        <a href="#photo-detail">图片详情</a>
+      </nav>
+    </header>
+
+    <div class="grid-frame">
+      <aside class="side-index" aria-label="索引导航">
+        <header>
+          <p class="eyebrow">Index Spine</p>
+          <h2>Route Matrix</h2>
+        </header>
+        <nav>
+          <a href="#articles"><code>01</code><span>Article folders</span></a>
+          <a href="#images"><code>02</code><span>Image albums</span></a>
+          <a href="#article-detail"><code>03</code><span>Article record</span></a>
+          <a href="#photo-detail"><code>04</code><span>Photo sidecar</span></a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <section class="hero" id="home" aria-labelledby="home-title">
+          <div class="welcome-panel">
+            <div>
+              <p class="eyebrow">Welcome / archive station</p>
+              <h1 id="home-title">一座观测站，用来存放转身后的证据。</h1>
+              <p>这里不急着讲故事。文章、图片、文件夹和元数据先被精确归档，再慢慢显出黄昏、球体、方碑和金字塔的轮廓。</p>
+            </div>
+            <div class="command-grid" aria-label="首页入口">
+              <a class="command" href="#articles"><span class="code">GET /articles</span><strong>文章栏目与文件夹入口</strong></a>
+              <a class="command" href="#images"><span class="code">GET /images</span><strong>图片栏目与相册入口</strong></a>
+              <a class="command" href="#article-detail"><span class="code">GET /articles/notes/...</span><strong>文章详情示例</strong></a>
+              <a class="command" href="#photo-detail"><span class="code">GET /images/city-walk/...</span><strong>图片详情示例</strong></a>
+            </div>
+          </div>
+
+          <div class="instrument" aria-label="观测站几何插画">
+            <span class="scope-sphere" aria-hidden="true"></span>
+            <span class="scope-monolith" aria-hidden="true"></span>
+            <span class="scope-pyramid" aria-hidden="true"></span>
+            <span class="axis-label one">Azimuth 18:42</span>
+            <span class="axis-label two">Shanghai / city</span>
+            <span class="axis-label three">Monolith record</span>
+          </div>
+        </section>
+
+        <section class="module" id="articles" aria-labelledby="articles-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Article records</p>
+              <h2 id="articles-title">文章栏目</h2>
+            </div>
+            <p>高密度列表保留标题、副标题、摘要、发布时间、文件夹和封面图位置。</p>
+          </div>
+          <div class="record-list">
+            <article class="record-card">
+              <div class="micro-visual" aria-hidden="true"></div>
+              <div>
+                <h3>黄昏中的方碑</h3>
+                <div class="data-line">
+                  <span class="data">notes</span>
+                  <span class="data">2026-05-31</span>
+                  <span class="data">monolith-at-sunset</span>
+                </div>
+                <p>一次关于城市边缘与几何记忆的记录。建筑像沉默的仪器一样排列在远处。</p>
+              </div>
+            </article>
+            <article class="record-card">
+              <div class="micro-visual" aria-hidden="true"></div>
+              <div>
+                <h3>像世博会海报一样散步</h3>
+                <div class="data-line">
+                  <span class="data">travel</span>
+                  <span class="data">2026-05-31</span>
+                  <span class="data">world-expo-dream</span>
+                </div>
+                <p>在粉色天空下经过球体、金字塔和长阴影，一条路线被拆成入口、中央轴线和夜色之前。</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="folder-table" aria-label="文章文件夹入口">
+            <a class="folder-row" href="#article-detail"><span class="code">/articles/notes</span><strong>Notes</strong><span>2 records</span></a>
+            <a class="folder-row" href="#article-detail"><span class="code">/articles/travel</span><strong>Travel</strong><span>1 record</span></a>
+            <a class="folder-row" href="#article-detail"><span class="code">/articles/archive-2026</span><strong>Archive 2026</strong><span>reserved</span></a>
+          </div>
+        </section>
+
+        <section class="module" id="images" aria-labelledby="images-title">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Photo records</p>
+              <h2 id="images-title">图片栏目</h2>
+            </div>
+            <p>图片列表优先显示拍摄时间、地点和文件夹，让元数据成为界面秩序的一部分。</p>
+          </div>
+          <div class="record-list">
+            <article class="record-card">
+              <div class="micro-visual" aria-hidden="true"></div>
+              <div>
+                <h3>粉色天空下的球体</h3>
+                <div class="data-line">
+                  <span class="data">city-walk</span>
+                  <span class="data">18:42</span>
+                  <span class="data">Shanghai</span>
+                </div>
+                <p>广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+              </div>
+            </article>
+            <article class="record-card">
+              <div class="micro-visual" aria-hidden="true"></div>
+              <div>
+                <h3>金字塔入口</h3>
+                <div class="data-line">
+                  <span class="data">archive</span>
+                  <span class="data">19:10</span>
+                  <span class="data">Shanghai</span>
+                </div>
+                <p>入口被长阴影压低，行人显得像比例尺。</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="folder-table" aria-label="图片文件夹入口">
+            <a class="folder-row" href="#photo-detail"><span class="code">/images/city-walk</span><strong>City Walk</strong><span>time sorted</span></a>
+            <a class="folder-row" href="#photo-detail"><span class="code">/images/archive</span><strong>Archive</strong><span>2 photos</span></a>
+            <a class="folder-row" href="#photo-detail"><span class="code">/indexes/images/city-walk.json</span><strong>R2 Index Sidecar</strong><span>metadata</span></a>
+          </div>
+        </section>
+
+        <section class="article-record" id="article-detail" aria-labelledby="article-detail-title">
+          <article class="article-body">
+            <p class="eyebrow">Record / articles/notes/monolith-at-sunset</p>
+            <h2 id="article-detail-title">黄昏中的方碑</h2>
+            <p class="subtitle">一次关于城市边缘与几何记忆的记录</p>
+
+            <h3>第一段路</h3>
+            <p>路面被分割成一格一格的阴影，像观测站的校准纸。远处方碑把天空压低，行人的移动反而成为最精确的刻度。</p>
+
+            <figure class="article-figure">
+              <div class="figure-visual" role="img" aria-label="文章中的黄昏几何建筑插图"></div>
+              <figcaption>插图：长阴影、球体与方碑构成正文中的空间证据。</figcaption>
+            </figure>
+
+            <h3>广场尽头</h3>
+            <p>所有建筑都像已经被编号。球体收集光，金字塔收集入口，方碑收集站立的时间。</p>
+
+            <h3>折返</h3>
+            <p>折返时，文件夹名开始变得有用：notes 用来存放判断，travel 用来存放路线，city-walk 用来存放时间。</p>
+          </article>
+          <aside class="record-sidebar" aria-label="文章元数据">
+            <p class="eyebrow">Article metadata</p>
+            <h3>Storage Trace</h3>
+            <div class="record-grid">
+              <div class="record-cell"><span class="cell-label">Folder</span><strong>notes</strong></div>
+              <div class="record-cell"><span class="cell-label">Slug</span><strong>monolith-at-sunset</strong></div>
+              <div class="record-cell"><span class="cell-label">Published</span><strong>2026-05-31T18:42:00+08:00</strong></div>
+              <div class="record-cell"><span class="cell-label">Cover</span><strong>./images/sunset-monolith.jpg</strong></div>
+              <div class="record-cell"><span class="cell-label">Asset key</span><strong>articles/notes/monolith-at-sunset/assets/sunset-monolith.jpg</strong></div>
+            </div>
+          </aside>
+        </section>
+
+        <section class="photo-record" id="photo-detail" aria-labelledby="photo-detail-title">
+          <div class="photo-large" role="img" aria-label="粉色天空下的球体大图"></div>
+          <aside class="photo-meta" aria-label="图片拍摄元数据">
+            <p class="eyebrow">Photo metadata sidecar</p>
+            <h3 id="photo-detail-title">粉色天空下的球体</h3>
+            <div class="record-grid">
+              <div class="record-cell"><span class="cell-label">Captured at</span><strong>2026-05-31 18:42</strong></div>
+              <div class="record-cell"><span class="cell-label">Location</span><strong>Shanghai</strong></div>
+              <div class="record-cell"><span class="cell-label">Folder</span><strong>city-walk</strong></div>
+              <div class="record-cell"><span class="cell-label">Camera</span><strong>Apple iPhone, 26mm, ISO 64, f/1.8</strong></div>
+              <div class="record-cell"><span class="cell-label">Object key</span><strong>images/city-walk/20260531-184200-a1b2/original.jpg</strong></div>
+            </div>
+          </aside>
+          <p class="photo-description">广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+        </section>
+      </main>
+    </div>
+  </div>
+</body>
+</html>

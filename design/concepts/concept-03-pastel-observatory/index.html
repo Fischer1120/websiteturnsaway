@@ -1,0 +1,1024 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pastel Observatory - Website Turns Away</title>
+  <style>
+    :root {
+      --night: #17304c;
+      --night-soft: #254665;
+      --coral: #f17d65;
+      --rose: #f3a7a0;
+      --apricot: #f7c982;
+      --pearl: #fff1df;
+      --peach: #ffd8bf;
+      --mint: #9fc4ae;
+      --clay: #a76c5b;
+      --ink: #27303a;
+      --line: rgba(23, 48, 76, 0.22);
+      --line-strong: rgba(23, 48, 76, 0.58);
+      --shadow: rgba(23, 48, 76, 0.16);
+      --radius: 8px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(23, 48, 76, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 48, 76, 0.045) 1px, transparent 1px),
+        linear-gradient(155deg, #ffd2bf 0%, #f7c982 28%, #fff1df 58%, #bad1bd 100%);
+      background-size: 32px 32px, 32px 32px, auto;
+      font-family: "Gill Sans", "Trebuchet MS", "Segoe UI", sans-serif;
+      line-height: 1.58;
+      text-wrap: pretty;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+      pointer-events: none;
+      opacity: 0.13;
+      mix-blend-mode: multiply;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(23, 48, 76, 0.08) 0 1px, transparent 1px 7px),
+        repeating-linear-gradient(90deg, rgba(241, 125, 101, 0.06) 0 1px, transparent 1px 9px);
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .page {
+      width: min(1220px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 18px 0 64px;
+    }
+
+    .nav-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: grid;
+      grid-template-columns: minmax(190px, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+      padding: 12px 0;
+      background: linear-gradient(180deg, rgba(255, 216, 191, 0.95), rgba(255, 216, 191, 0.78));
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid rgba(23, 48, 76, 0.2);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-symbol {
+      position: relative;
+      width: 48px;
+      height: 48px;
+      flex: 0 0 auto;
+      border: 2px solid var(--night);
+      background: linear-gradient(160deg, var(--apricot), var(--rose));
+      box-shadow: 5px 5px 0 rgba(23, 48, 76, 0.15);
+    }
+
+    .brand-symbol::before {
+      content: "";
+      position: absolute;
+      left: 8px;
+      top: 10px;
+      width: 27px;
+      height: 27px;
+      border-radius: 50%;
+      background: var(--pearl);
+      border: 2px solid var(--night);
+    }
+
+    .brand-symbol::after {
+      content: "";
+      position: absolute;
+      right: 7px;
+      bottom: 6px;
+      width: 14px;
+      height: 30px;
+      background: var(--night);
+    }
+
+    .brand small,
+    .tag,
+    .chip,
+    .path,
+    .meta-label,
+    .nav a {
+      font-family: "Courier New", Courier, monospace;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .brand small {
+      display: block;
+      color: var(--clay);
+      font-size: 0.68rem;
+      font-weight: 700;
+    }
+
+    .brand strong {
+      display: block;
+      overflow-wrap: anywhere;
+      color: var(--night);
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 1.14rem;
+      line-height: 1.05;
+    }
+
+    .nav {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      min-height: 40px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 12px;
+      border: 1px solid rgba(23, 48, 76, 0.34);
+      background: rgba(255, 241, 223, 0.66);
+      color: var(--night);
+      font-size: 0.7rem;
+      font-weight: 700;
+      transition: background 170ms ease, color 170ms ease, transform 170ms ease;
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      outline: none;
+      background: var(--night);
+      color: var(--pearl);
+      transform: translateY(-2px);
+    }
+
+    .hero {
+      min-height: 640px;
+      display: grid;
+      grid-template-columns: minmax(0, 0.82fr) minmax(420px, 1.18fr);
+      gap: 18px;
+      align-items: stretch;
+      margin-top: 16px;
+    }
+
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(22px, 4vw, 42px);
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 241, 223, 0.68);
+      box-shadow: 0 24px 60px var(--shadow);
+    }
+
+    .tag {
+      margin: 0 0 14px;
+      color: var(--clay);
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin: 0;
+      color: var(--night);
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      letter-spacing: 0;
+      line-height: 1;
+    }
+
+    h1 {
+      max-width: 780px;
+      font-size: clamp(3.1rem, 7.5vw, 6.8rem);
+    }
+
+    .welcome p {
+      max-width: 58ch;
+      margin: 22px 0 0;
+      color: rgba(39, 48, 58, 0.76);
+      font-size: clamp(1rem, 1.9vw, 1.18rem);
+    }
+
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .quick-link {
+      min-height: 100px;
+      padding: 14px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 216, 191, 0.52);
+      transition: transform 170ms ease, background 170ms ease;
+    }
+
+    .quick-link:hover {
+      transform: translateY(-3px);
+      background: rgba(159, 196, 174, 0.38);
+    }
+
+    .path {
+      display: block;
+      color: var(--clay);
+      font-size: 0.68rem;
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .quick-link strong {
+      display: block;
+      margin-top: 12px;
+      color: var(--night);
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 1.35rem;
+      line-height: 1.08;
+    }
+
+    .observatory {
+      position: relative;
+      overflow: hidden;
+      min-height: 640px;
+      border: 1px solid var(--line-strong);
+      background:
+        linear-gradient(180deg, #f2a8a1 0%, #f7c982 36%, #ffe4c8 61%, #bad1bd 100%);
+      box-shadow: 0 24px 60px var(--shadow);
+    }
+
+    .observatory::before {
+      content: "";
+      position: absolute;
+      left: -8%;
+      right: -8%;
+      bottom: 21%;
+      height: 28%;
+      background:
+        linear-gradient(112deg, transparent 0 28%, rgba(23, 48, 76, 0.16) 29% 34%, transparent 35%),
+        linear-gradient(68deg, transparent 0 60%, rgba(23, 48, 76, 0.13) 61% 66%, transparent 67%);
+      transform: skewY(-5deg);
+    }
+
+    .observatory::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 22%;
+      background:
+        linear-gradient(90deg, rgba(23, 48, 76, 0.08), transparent 26%),
+        linear-gradient(180deg, rgba(255, 241, 223, 0.32), rgba(23, 48, 76, 0.1));
+    }
+
+    .sun-sphere {
+      position: absolute;
+      left: 12%;
+      top: 15%;
+      width: min(350px, 38vw);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--night);
+      background:
+        radial-gradient(circle at 35% 30%, #fff8df 0 11%, transparent 12%),
+        radial-gradient(circle at 40% 32%, #ffe4a9 0 32%, var(--coral) 33% 63%, var(--mint) 64% 100%);
+      box-shadow: 88px 98px 0 rgba(23, 48, 76, 0.16);
+    }
+
+    .soft-monolith {
+      position: absolute;
+      left: 56%;
+      bottom: 16%;
+      width: 70px;
+      height: 360px;
+      border: 2px solid var(--night);
+      background: linear-gradient(90deg, var(--night) 0 50%, var(--night-soft) 51% 74%, #f0c48b 75% 100%);
+      box-shadow: 70px 72px 0 rgba(23, 48, 76, 0.15);
+    }
+
+    .soft-pyramid {
+      position: absolute;
+      right: 9%;
+      bottom: 15%;
+      width: 210px;
+      height: 210px;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: linear-gradient(145deg, #fff1df 0 45%, var(--coral) 46% 62%, var(--night) 63% 100%);
+      filter: drop-shadow(52px 58px 0 rgba(23, 48, 76, 0.15));
+    }
+
+    .scene-note {
+      position: absolute;
+      left: 22px;
+      bottom: 22px;
+      max-width: 260px;
+      padding: 12px;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 241, 223, 0.74);
+      color: rgba(39, 48, 58, 0.82);
+      font-size: 0.9rem;
+    }
+
+    section {
+      margin-top: 22px;
+    }
+
+    .section-title {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 18px;
+      align-items: end;
+      margin-bottom: 12px;
+      padding: 18px 0 12px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+
+    .section-title h2 {
+      font-size: clamp(2.1rem, 5vw, 4.4rem);
+    }
+
+    .section-title p {
+      max-width: 38ch;
+      margin: 0;
+      color: rgba(39, 48, 58, 0.7);
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 14px;
+    }
+
+    .story-card,
+    .photo-card,
+    .folder-card,
+    .article-detail,
+    .photo-detail {
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 241, 223, 0.7);
+      box-shadow: 0 18px 48px rgba(23, 48, 76, 0.12);
+    }
+
+    .story-card,
+    .photo-card {
+      display: grid;
+      grid-template-columns: minmax(150px, 0.42fr) minmax(0, 0.58fr);
+      gap: 0;
+      min-height: 240px;
+      transition: transform 170ms ease;
+    }
+
+    .story-card:hover,
+    .photo-card:hover,
+    .folder-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .thumb {
+      position: relative;
+      min-height: 240px;
+      overflow: hidden;
+      border-right: 1px solid var(--line-strong);
+      background: linear-gradient(180deg, #f3a7a0 0%, #f7c982 45%, #bdd1bc 46% 100%);
+    }
+
+    .thumb::before {
+      content: "";
+      position: absolute;
+      left: 18%;
+      top: 23%;
+      width: 54%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--night);
+      background: radial-gradient(circle at 35% 30%, #fff8df 0 12%, #ffe4a9 13% 48%, var(--coral) 49% 100%);
+      box-shadow: 38px 46px 0 rgba(23, 48, 76, 0.15);
+    }
+
+    .thumb::after {
+      content: "";
+      position: absolute;
+      right: 8%;
+      bottom: 0;
+      width: 39%;
+      height: 64%;
+      clip-path: polygon(50% 0, 100% 100%, 0 100%);
+      background: linear-gradient(145deg, var(--pearl), var(--night));
+    }
+
+    .card-body {
+      padding: 18px;
+    }
+
+    .card-body h3 {
+      font-size: clamp(1.48rem, 3vw, 2.25rem);
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 12px 0;
+    }
+
+    .chip {
+      min-height: 26px;
+      padding: 3px 7px;
+      border: 1px solid rgba(23, 48, 76, 0.3);
+      background: rgba(255, 216, 191, 0.48);
+      color: var(--night);
+      font-size: 0.66rem;
+      font-weight: 700;
+    }
+
+    .card-body p {
+      margin: 0;
+      color: rgba(39, 48, 58, 0.74);
+    }
+
+    .folder-strip {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .folder-card {
+      min-height: 132px;
+      padding: 14px;
+      transition: transform 170ms ease, background 170ms ease;
+    }
+
+    .folder-card:hover {
+      background: rgba(159, 196, 174, 0.34);
+    }
+
+    .folder-card strong {
+      display: block;
+      margin-top: 14px;
+      color: var(--night);
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: 1.25rem;
+      line-height: 1.08;
+    }
+
+    .folder-card span:last-child {
+      display: block;
+      margin-top: 8px;
+      color: rgba(39, 48, 58, 0.68);
+      font-size: 0.9rem;
+    }
+
+    .article-detail {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+    }
+
+    .article-main {
+      padding: clamp(22px, 4vw, 44px);
+      border-right: 1px solid var(--line-strong);
+    }
+
+    .article-main h2 {
+      font-size: clamp(2.5rem, 5.5vw, 5rem);
+    }
+
+    .subtitle {
+      margin: 12px 0 28px;
+      color: rgba(39, 48, 58, 0.68);
+      font-size: clamp(1rem, 2vw, 1.22rem);
+    }
+
+    .article-main h3 {
+      margin-top: 28px;
+      font-size: clamp(1.35rem, 3vw, 2rem);
+    }
+
+    .article-main p {
+      max-width: 70ch;
+      margin: 12px 0 0;
+      color: rgba(39, 48, 58, 0.8);
+    }
+
+    .article-image {
+      margin: 28px 0;
+      border: 1px solid var(--line-strong);
+      background: rgba(255, 241, 223, 0.72);
+    }
+
+    .inline-scene {
+      position: relative;
+      min-height: 340px;
+      overflow: hidden;
+      background: linear-gradient(180deg, #f3a7a0 0%, #f7c982 46%, #bad1bd 47% 100%);
+    }
+
+    .inline-scene::before {
+      content: "";
+      position: absolute;
+      left: 14%;
+      top: 20%;
+      width: 32%;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 2px solid var(--night);
+      background: radial-gradient(circle at 35% 30%, #fff8df 0 12%, #ffe4a9 13% 48%, var(--coral) 49% 100%);
+      box-shadow: 66px 62px 0 rgba(23, 48, 76, 0.15);
+    }
+
+    .inline-scene::after {
+      content: "";
+      position: absolute;
+      left: 58%;
+      bottom: 0;
+      width: 62px;
+      height: 72%;
+      background: var(--night);
+      box-shadow: 60px 64px 0 rgba(23, 48, 76, 0.14);
+    }
+
+    figcaption {
+      padding: 10px 14px;
+      border-top: 1px solid var(--line-strong);
+      color: rgba(39, 48, 58, 0.68);
+      font-size: 0.9rem;
+    }
+
+    .article-aside {
+      padding: 20px;
+      background: rgba(23, 48, 76, 0.96);
+      color: var(--pearl);
+    }
+
+    .article-aside h3,
+    .photo-meta h3 {
+      color: var(--pearl);
+      font-size: 1.85rem;
+    }
+
+    .aside-stack {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .aside-item {
+      padding: 12px;
+      border: 1px solid rgba(255, 241, 223, 0.22);
+      background: rgba(255, 241, 223, 0.05);
+      color: rgba(255, 241, 223, 0.86);
+      word-break: break-word;
+    }
+
+    .meta-label {
+      display: block;
+      margin-bottom: 4px;
+      color: var(--apricot);
+      font-size: 0.66rem;
+      font-weight: 700;
+    }
+
+    .photo-detail {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+      grid-template-areas:
+        "photo meta"
+        "desc meta";
+    }
+
+    .photo-stage {
+      grid-area: photo;
+      position: relative;
+      min-height: 620px;
+      overflow: hidden;
+      border-right: 1px solid var(--line-strong);
+      border-bottom: 1px solid var(--line-strong);
+      background:
+        linear-gradient(180deg, #f2a8a1 0%, #f7c982 38%, #ffe4c8 62%, #bad1bd 100%);
+    }
+
+    .photo-stage::before {
+      content: "";
+      position: absolute;
+      left: 14%;
+      top: 15%;
+      width: min(430px, 46%);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      border: 3px solid var(--night);
+      background:
+        radial-gradient(circle at 35% 30%, #fff8df 0 12%, transparent 13%),
+        radial-gradient(circle at 40% 32%, #ffe4a9 0 35%, var(--coral) 36% 66%, var(--mint) 67% 100%);
+      box-shadow: 100px 110px 0 rgba(23, 48, 76, 0.15);
+    }
+
+    .photo-stage::after {
+      content: "";
+      position: absolute;
+      right: 15%;
+      bottom: 0;
+      width: 76px;
+      height: 68%;
+      background: var(--night);
+      box-shadow: -84px 82px 0 rgba(23, 48, 76, 0.14);
+    }
+
+    .photo-meta {
+      grid-area: meta;
+      padding: 22px;
+      background: var(--night);
+      color: var(--pearl);
+    }
+
+    .metadata {
+      display: grid;
+      gap: 0;
+      margin-top: 18px;
+      border-top: 1px solid rgba(255, 241, 223, 0.26);
+    }
+
+    .metadata-row {
+      display: grid;
+      grid-template-columns: 116px minmax(0, 1fr);
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255, 241, 223, 0.2);
+    }
+
+    .metadata-row strong {
+      color: rgba(255, 241, 223, 0.9);
+      word-break: break-word;
+    }
+
+    .photo-description {
+      grid-area: desc;
+      margin: 0;
+      padding: 22px 24px;
+      background: rgba(255, 241, 223, 0.76);
+      color: rgba(39, 48, 58, 0.82);
+      font-family: "Palatino Linotype", Palatino, Georgia, serif;
+      font-size: clamp(1.22rem, 2.6vw, 1.85rem);
+      line-height: 1.34;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .sun-sphere {
+        animation: warm-pulse 7s ease-in-out infinite;
+      }
+
+      @keyframes warm-pulse {
+        0%, 100% {
+          transform: translateY(0);
+        }
+
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+    }
+
+    @media (max-width: 980px) {
+      .nav-wrap,
+      .hero,
+      .content-grid,
+      .article-detail,
+      .photo-detail {
+        grid-template-columns: 1fr;
+      }
+
+      .nav-wrap {
+        position: relative;
+      }
+
+      .nav {
+        justify-content: flex-start;
+      }
+
+      .observatory {
+        min-height: 520px;
+      }
+
+      .folder-strip {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .article-main {
+        border-right: 0;
+        border-bottom: 1px solid var(--line-strong);
+      }
+
+      .photo-detail {
+        grid-template-areas:
+          "photo"
+          "meta"
+          "desc";
+      }
+
+      .photo-stage {
+        min-height: 500px;
+        border-right: 0;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .page {
+        width: min(100% - 16px, 440px);
+        padding-top: 8px;
+      }
+
+      .nav a {
+        flex: 1 1 calc(50% - 8px);
+        text-align: center;
+      }
+
+      .hero {
+        min-height: 0;
+      }
+
+      .welcome {
+        padding: 18px;
+      }
+
+      .quick-links,
+      .folder-strip,
+      .story-card,
+      .photo-card {
+        grid-template-columns: 1fr;
+      }
+
+      .thumb {
+        min-height: 210px;
+        border-right: 0;
+        border-bottom: 1px solid var(--line-strong);
+      }
+
+      .observatory {
+        min-height: 390px;
+      }
+
+      .soft-monolith {
+        height: 230px;
+        width: 54px;
+      }
+
+      .soft-pyramid {
+        width: 120px;
+        height: 120px;
+      }
+
+      .section-title {
+        grid-template-columns: 1fr;
+      }
+
+      .inline-scene,
+      .photo-stage {
+        min-height: 340px;
+      }
+
+      .metadata-row {
+        grid-template-columns: 1fr;
+        gap: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="nav-wrap" aria-label="主导航">
+      <a class="brand" href="#home" aria-label="Website Turns Away 首页">
+        <span class="brand-symbol" aria-hidden="true"></span>
+        <span><small>Pastel Observatory</small><strong>Website Turns Away</strong></span>
+      </a>
+      <nav class="nav">
+        <a href="#home">首页</a>
+        <a href="#articles">文章</a>
+        <a href="#images">图片</a>
+        <a href="#article-detail">文章详情</a>
+        <a href="#photo-detail">图片详情</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" id="home" aria-labelledby="home-title">
+        <div class="welcome">
+          <div>
+            <p class="tag">Warm observatory / sunset memory</p>
+            <h1 id="home-title">欢迎来到一间面向黄昏的观测室。</h1>
+            <p>我把文章放进文件夹，把照片放进相册，把拍摄时间、地点和描述留在旁边。这样每一次路过球体、金字塔和方碑，都会有一个安静的位置。</p>
+          </div>
+
+          <div class="quick-links" aria-label="首页入口">
+            <a class="quick-link" href="#articles">
+              <span class="path">/articles</span>
+              <strong>读文章</strong>
+            </a>
+            <a class="quick-link" href="#images">
+              <span class="path">/images</span>
+              <strong>看图片</strong>
+            </a>
+            <a class="quick-link" href="#article-detail">
+              <span class="path">/articles/notes</span>
+              <strong>黄昏中的方碑</strong>
+            </a>
+            <a class="quick-link" href="#photo-detail">
+              <span class="path">/images/city-walk</span>
+              <strong>粉色天空下的球体</strong>
+            </a>
+          </div>
+        </div>
+
+        <div class="observatory" aria-label="粉彩日落几何建筑插画">
+          <span class="sun-sphere" aria-hidden="true"></span>
+          <span class="soft-monolith" aria-hidden="true"></span>
+          <span class="soft-pyramid" aria-hidden="true"></span>
+          <p class="scene-note">在这个方案里，几何建筑不是冷硬地展示，而像被日落空气包住的私人馆藏。</p>
+        </div>
+      </section>
+
+      <section id="articles" aria-labelledby="articles-title">
+        <div class="section-title">
+          <div>
+            <p class="tag">Article shelf</p>
+            <h2 id="articles-title">文章栏目</h2>
+          </div>
+          <p>文章列表更像一张温暖的阅读架，但仍清楚显示文件夹和发布时间。</p>
+        </div>
+
+        <div class="content-grid">
+          <article class="story-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="card-body">
+              <h3>黄昏中的方碑</h3>
+              <div class="chips">
+                <span class="chip">notes</span>
+                <span class="chip">2026-05-31</span>
+                <span class="chip">geometry</span>
+              </div>
+              <p>一次关于城市边缘与几何记忆的记录。道路尽头的方碑像一支沉默的天文仪器。</p>
+            </div>
+          </article>
+
+          <article class="story-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="card-body">
+              <h3>像世博会海报一样散步</h3>
+              <div class="chips">
+                <span class="chip">travel</span>
+                <span class="chip">2026-05-31</span>
+                <span class="chip">sunset</span>
+              </div>
+              <p>在粉色天空下经过球体、金字塔和长阴影，把一条散步路线看成临时展馆。</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="folder-strip" aria-label="文章文件夹入口">
+          <a class="folder-card" href="#article-detail"><span class="path">/articles/notes</span><strong>Notes</strong><span>几何记忆与短札</span></a>
+          <a class="folder-card" href="#article-detail"><span class="path">/articles/travel</span><strong>Travel</strong><span>路线、散步和城市边缘</span></a>
+          <a class="folder-card" href="#article-detail"><span class="path">/articles/archive-2026</span><strong>Archive 2026</strong><span>年度归档入口</span></a>
+          <a class="folder-card" href="#article-detail"><span class="path">/admin/articles</span><strong>Upload</strong><span>未来管理入口预留</span></a>
+        </div>
+      </section>
+
+      <section id="images" aria-labelledby="images-title">
+        <div class="section-title">
+          <div>
+            <p class="tag">Image shelf</p>
+            <h2 id="images-title">图片栏目</h2>
+          </div>
+          <p>图片卡片保留拍摄时间和地点，整体更偏沉浸式观看入口。</p>
+        </div>
+
+        <div class="content-grid">
+          <article class="photo-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="card-body">
+              <h3>粉色天空下的球体</h3>
+              <div class="chips">
+                <span class="chip">city-walk</span>
+                <span class="chip">2026-05-31 18:42</span>
+                <span class="chip">Shanghai</span>
+              </div>
+              <p>广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+            </div>
+          </article>
+
+          <article class="photo-card">
+            <div class="thumb" aria-hidden="true"></div>
+            <div class="card-body">
+              <h3>金字塔入口</h3>
+              <div class="chips">
+                <span class="chip">archive</span>
+                <span class="chip">2026-05-31 19:10</span>
+                <span class="chip">Shanghai</span>
+              </div>
+              <p>入口被长阴影压低，行人显得像比例尺。</p>
+            </div>
+          </article>
+        </div>
+
+        <div class="folder-strip" aria-label="图片文件夹入口">
+          <a class="folder-card" href="#photo-detail"><span class="path">/images/city-walk</span><strong>City Walk</strong><span>按拍摄时间排序</span></a>
+          <a class="folder-card" href="#photo-detail"><span class="path">/images/archive</span><strong>Archive</strong><span>较安静的旧照片</span></a>
+          <a class="folder-card" href="#photo-detail"><span class="path">/indexes/images.json</span><strong>Image Index</strong><span>R2 元数据入口</span></a>
+          <a class="folder-card" href="#photo-detail"><span class="path">/admin/images</span><strong>Upload</strong><span>未来图片上传预留</span></a>
+        </div>
+      </section>
+
+      <section id="article-detail" aria-labelledby="article-detail-title">
+        <div class="section-title">
+          <div>
+            <p class="tag">Reading room</p>
+            <h2 id="article-detail-title">文章详情示例</h2>
+          </div>
+          <p>正文视图保留大标题、副标题、二级标题和可插入图片的段落节奏。</p>
+        </div>
+
+        <article class="article-detail">
+          <div class="article-main">
+            <p class="path">/articles/notes/monolith-at-sunset</p>
+            <h2>黄昏中的方碑</h2>
+            <p class="subtitle">一次关于城市边缘与几何记忆的记录</p>
+
+            <h3>第一段路</h3>
+            <p>黄昏把道路变得很长，像一条被轻轻拉开的胶片。远处的方碑没有说明文字，却把人引向广场的中心。</p>
+
+            <figure class="article-image">
+              <div class="inline-scene" role="img" aria-label="文章插图：黄昏中的几何建筑"></div>
+              <figcaption>正文插图：球体、方碑和长阴影在粉彩天空下形成一条安静轴线。</figcaption>
+            </figure>
+
+            <h3>广场尽头</h3>
+            <p>球体反射的不是建筑本身，而是一种旧未来的愿望。金字塔入口被阴影压低，行人只剩比例尺一样的轮廓。</p>
+
+            <h3>折返</h3>
+            <p>折返的时候，我把它们放进 notes 文件夹。不是为了完成叙事，而是为了下次还能找到这条光线。</p>
+          </div>
+          <aside class="article-aside" aria-label="文章存储信息">
+            <p class="tag">Storage note</p>
+            <h3>Article side data</h3>
+            <div class="aside-stack">
+              <div class="aside-item"><span class="meta-label">Folder</span>notes</div>
+              <div class="aside-item"><span class="meta-label">Slug</span>monolith-at-sunset</div>
+              <div class="aside-item"><span class="meta-label">Published</span>2026-05-31T18:42:00+08:00</div>
+              <div class="aside-item"><span class="meta-label">Cover image</span>./images/sunset-monolith.jpg</div>
+              <div class="aside-item"><span class="meta-label">Asset key</span>articles/notes/monolith-at-sunset/assets/sunset-monolith.jpg</div>
+            </div>
+          </aside>
+        </article>
+      </section>
+
+      <section id="photo-detail" aria-labelledby="photo-detail-title">
+        <div class="section-title">
+          <div>
+            <p class="tag">Image room</p>
+            <h2 id="photo-detail-title">图片详情示例</h2>
+          </div>
+          <p>大图占据主要视线，拍摄时间和地点保持在右侧；移动端在图片下方显示。</p>
+        </div>
+
+        <article class="photo-detail">
+          <div class="photo-stage" role="img" aria-label="粉色天空下的球体大图"></div>
+          <aside class="photo-meta" aria-label="拍摄元数据">
+            <p class="tag">city-walk / 20260531-184200-a1b2</p>
+            <h3>粉色天空下的球体</h3>
+            <div class="metadata">
+              <div class="metadata-row"><span class="meta-label">Captured</span><strong>2026-05-31 18:42</strong></div>
+              <div class="metadata-row"><span class="meta-label">Location</span><strong>Shanghai</strong></div>
+              <div class="metadata-row"><span class="meta-label">Folder</span><strong>city-walk</strong></div>
+              <div class="metadata-row"><span class="meta-label">Camera</span><strong>Apple iPhone / 26mm / ISO 64</strong></div>
+              <div class="metadata-row"><span class="meta-label">Object key</span><strong>images/city-walk/20260531-184200-a1b2/original.jpg</strong></div>
+            </div>
+          </aside>
+          <p class="photo-description">广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+        </article>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{
+  "name": "website-turns-away",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
+    "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
+    "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "pages:dev": "wrangler pages dev dist --compatibility-date=2026-06-08",
+    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=website-turns-away"
+  },
+  "dependencies": {
+    "astro": "^6.4.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@cloudflare/workers-types": "^4.20260608.1",
+    "typescript": "^6.0.3",
+    "wrangler": "^4.98.0"
+  }
+}

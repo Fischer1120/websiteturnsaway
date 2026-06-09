@@ -1,0 +1,49 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RouteMatrix from "@/components/RouteMatrix.astro";
+import MetadataSidecar from "@/components/MetadataSidecar.astro";
+import { formatDate, getFolderLabel, getPhotos } from "@/lib/content";
+
+export function getStaticPaths() {
+  return getPhotos().map((photo) => ({
+    params: { folder: photo.folder, photoId: photo.id },
+    props: { photo },
+  }));
+}
+
+const { photo } = Astro.props;
+const camera = photo.camera
+  ? [photo.camera.make, photo.camera.model, photo.camera.lens].filter(Boolean).join(" / ")
+  : "";
+---
+
+<BaseLayout title={`${photo.title} - Website Turns Away`} description={photo.description}>
+  <div class="layout-grid">
+    <RouteMatrix />
+    <main class="content-stack">
+      <section class="panel photo-detail" aria-labelledby="photo-title">
+        <div class="photo-main">
+          <p class="eyebrow">Photo Record / {photo.folder}/{photo.id}</p>
+          <h1 id="photo-title">{photo.title}</h1>
+          <div class="photo-image">
+            <img src={photo.imageUrl} alt={photo.alt} />
+          </div>
+          <p class="photo-description">{photo.description}</p>
+        </div>
+        <MetadataSidecar
+          title="Photo metadata sidecar"
+          rows={[
+            { label: "Captured", value: formatDate(photo.capturedAt, true) },
+            { label: "Location", value: photo.location.label },
+            { label: "Precision", value: photo.location.precision },
+            { label: "Folder", value: getFolderLabel(photo.folder) },
+            { label: "Camera", value: camera },
+            { label: "ISO", value: photo.camera?.iso },
+            { label: "Exposure", value: photo.camera ? `${photo.camera.aperture} / ${photo.camera.shutter}` : "" },
+            { label: "Object Key", value: photo.objectKey },
+          ]}
+        />
+      </section>
+    </main>
+  </div>
+</BaseLayout>

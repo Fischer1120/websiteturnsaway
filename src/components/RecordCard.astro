@@ -1,0 +1,32 @@
+---
+import { formatDate, getFolderLabel } from "@/lib/content";
+
+type Props = {
+  href: string;
+  title: string;
+  subtitle?: string;
+  summary: string;
+  image: string;
+  date: string;
+  folder: string;
+  kind: "article" | "photo";
+};
+
+const { href, title, subtitle, summary, image, date, folder, kind } = Astro.props;
+---
+
+<a class="record-card" href={href}>
+  <div class="record-thumb">
+    <img src={image} alt="" loading="lazy" />
+  </div>
+  <div class="record-body">
+    <div class="chips">
+      <span class="chip">{kind === "article" ? "article" : "photo"}</span>
+      <span class="chip">{getFolderLabel(folder)}</span>
+      <span class="chip">{formatDate(date, kind === "photo")}</span>
+    </div>
+    <h3>{title}</h3>
+    {subtitle && <p class="subtitle">{subtitle}</p>}
+    <p>{summary}</p>
+  </div>
+</a>

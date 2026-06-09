@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
+  <title id="title">Sphere under pink sky</title>
+  <desc id="desc">A giant sphere reflects coral light over an archive plaza.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#d96f57"/>
+      <stop offset=".44" stop-color="#e4a38e"/>
+      <stop offset="1" stop-color="#e9deca"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="34%" cy="28%" r="70%">
+      <stop offset="0" stop-color="#fff4c6"/>
+      <stop offset=".34" stop-color="#d6ad54"/>
+      <stop offset=".78" stop-color="#d96f57"/>
+      <stop offset="1" stop-color="#182434"/>
+    </radialGradient>
+  </defs>
+  <rect width="1000" height="700" fill="url(#bg)"/>
+  <ellipse cx="520" cy="594" rx="364" ry="46" fill="#182434" opacity=".18"/>
+  <path d="M214 604 508 174 626 604Z" fill="#182434" opacity=".13"/>
+  <circle cx="458" cy="268" r="198" fill="#182434" opacity=".18"/>
+  <circle cx="424" cy="236" r="198" fill="url(#orb)" stroke="#182434" stroke-width="8"/>
+  <circle cx="344" cy="158" r="46" fill="#fff6ca"/>
+  <rect x="664" y="224" width="72" height="354" fill="#182434"/>
+  <g fill="#182434" font-family="Courier New, monospace" font-size="20">
+    <text x="62" y="72">CITY-WALK / 20260531-184200-A1B2</text>
+    <text x="682" y="122">SHANGHAI 18:42</text>
+  </g>
+</svg>

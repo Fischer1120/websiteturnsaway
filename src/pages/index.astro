@@ -1,0 +1,102 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import RouteMatrix from "@/components/RouteMatrix.astro";
+import RecordCard from "@/components/RecordCard.astro";
+import FolderRows from "@/components/FolderRows.astro";
+import {
+  getArticleFolders,
+  getArticles,
+  getPhotoFolders,
+  getPhotos,
+  formatDate,
+} from "@/lib/content";
+
+const articles = getArticles();
+const photos = getPhotos();
+const articleFolders = getArticleFolders();
+const photoFolders = getPhotoFolders();
+---
+
+<BaseLayout title="Website Turns Away - Orbital Monolith Index">
+  <div class="layout-grid">
+    <RouteMatrix />
+    <main class="content-stack">
+      <section class="hero" aria-labelledby="home-title">
+        <div class="panel hero-copy">
+          <p class="eyebrow">Welcome / Archive Station</p>
+          <h1 id="home-title">一座观测站，用来存放转身后的证据。</h1>
+          <p>
+            这里不急着讲故事。文章、图片、文件夹和元数据先被精确归档，再慢慢显出黄昏、
+            球体、方碑和金字塔的轮廓。
+          </p>
+          <div class="hero-actions">
+            <a class="button primary" href="/articles">文章栏目与文件夹入口</a>
+            <a class="button secondary" href="/images">图片栏目与相册入口</a>
+          </div>
+          <div class="quick-grid" aria-label="快速入口">
+            <a class="quick-link" href="/articles/notes/monolith-at-sunset">
+              <span class="path">GET /articles/notes/...</span>
+              <strong>文章详情示例</strong>
+            </a>
+            <a class="quick-link" href="/images/city-walk/20260531-184200-a1b2">
+              <span class="path">GET /images/city-walk/...</span>
+              <strong>图片详情示例</strong>
+            </a>
+          </div>
+        </div>
+        <div class="panel hero-visual" aria-label="Orbital Monolith visual">
+          <img src="/assets/media/orbital-monolith-cover.svg" alt="复古未来主义球体、方碑和金字塔构成的观测站图像" />
+        </div>
+      </section>
+
+      <section class="panel dark" id="articles" aria-labelledby="articles-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Article Records</p>
+            <h2 id="articles-title">文章栏目</h2>
+          </div>
+          <p>高度索引保留标题、副标题、摘要、发布时间、文件夹和封面图。</p>
+        </div>
+        <div class="record-grid">
+          {articles.map((article) => (
+            <RecordCard
+              href={article.url}
+              title={article.title}
+              subtitle={article.subtitle}
+              summary={article.summary}
+              image={article.coverImage}
+              date={article.publishedAt}
+              folder={article.folder}
+              kind="article"
+            />
+          ))}
+        </div>
+        <FolderRows folders={articleFolders} basePath="/articles" />
+      </section>
+
+      <section class="panel dark" id="images" aria-labelledby="images-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Photo Records</p>
+            <h2 id="images-title">图片栏目</h2>
+          </div>
+          <p>图片列表优先显示拍摄时间、地点和文件夹，让元数据成为界面秩序的一部分。</p>
+        </div>
+        <div class="record-grid">
+          {photos.map((photo) => (
+            <RecordCard
+              href={`/images/${photo.folder}/${photo.id}`}
+              title={photo.title}
+              summary={`${formatDate(photo.capturedAt, true)} / ${photo.location.label} / ${photo.description}`}
+              image={photo.thumbUrl}
+              date={photo.capturedAt}
+              folder={photo.folder}
+              kind="photo"
+            />
+          ))}
+        </div>
+        <FolderRows folders={photoFolders} basePath="/images" />
+      </section>
+    </main>
+  </div>
+</BaseLayout>

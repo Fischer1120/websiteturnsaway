@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title desc">
+  <title id="title">Orbital monolith cover</title>
+  <desc id="desc">A retro future sphere, monolith, and pyramid under a pastel sunset sky.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#e4a38e"/>
+      <stop offset="0.48" stop-color="#ead7b2"/>
+      <stop offset="1" stop-color="#96aaa4"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="32%" cy="26%" r="68%">
+      <stop offset="0" stop-color="#fff5c8"/>
+      <stop offset="0.35" stop-color="#d6ad54"/>
+      <stop offset="0.75" stop-color="#d96f57"/>
+      <stop offset="1" stop-color="#182434"/>
+    </radialGradient>
+    <filter id="grain">
+      <feTurbulence baseFrequency="0.9" numOctaves="2" seed="7" type="fractalNoise"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA slope="0.12" type="linear"/>
+      </feComponentTransfer>
+      <feBlend in2="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="800" fill="url(#sky)"/>
+  <path d="M210 694 640 250 980 694Z" fill="#d8c7a4" opacity=".4"/>
+  <path d="M324 708 650 307 760 708Z" fill="#182434" opacity=".14"/>
+  <ellipse cx="560" cy="548" rx="290" ry="42" fill="#182434" opacity=".22"/>
+  <circle cx="474" cy="266" r="190" fill="#182434" opacity=".18"/>
+  <circle cx="444" cy="236" r="190" fill="url(#orb)" stroke="#182434" stroke-width="8"/>
+  <circle cx="376" cy="160" r="42" fill="#fff4c6" opacity=".92"/>
+  <rect x="670" y="178" width="88" height="450" fill="#182434"/>
+  <rect x="758" y="188" width="42" height="438" fill="#d8c7a4"/>
+  <path d="M810 624 1045 624 932 310Z" fill="#182434"/>
+  <path d="M932 310 1045 624 902 526Z" fill="#f0dfc0"/>
+  <path d="M902 526 1045 624 823 624Z" fill="#d96f57"/>
+  <path d="M248 660 364 316" stroke="#182434" stroke-linecap="square" stroke-width="22" opacity=".12"/>
+  <g fill="#182434" font-family="Courier New, monospace" font-size="23" letter-spacing="2">
+    <text x="80" y="84">ORBITAL MONOLITH INDEX / 1976</text>
+    <text x="880" y="130">SHANGHAI / CITY</text>
+    <text x="78" y="732">AZIMUTH 18:42</text>
+  </g>
+  <rect width="1200" height="800" filter="url(#grain)" opacity=".65"/>
+</svg>

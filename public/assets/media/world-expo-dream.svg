@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 640" role="img" aria-labelledby="title desc">
+  <title id="title">World expo dream</title>
+  <desc id="desc">A route through a retro exposition axis with a sphere, pyramid, and monolith.</desc>
+  <defs>
+    <linearGradient id="dusk" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#d96f57"/>
+      <stop offset=".54" stop-color="#ead7b2"/>
+      <stop offset="1" stop-color="#f4ecd9"/>
+    </linearGradient>
+  </defs>
+  <rect width="900" height="640" fill="url(#dusk)"/>
+  <path d="M102 540H820" stroke="#182434" stroke-width="10" opacity=".18"/>
+  <path d="M450 88V584" stroke="#182434" stroke-width="4" opacity=".28"/>
+  <path d="M130 560 450 144 770 560Z" fill="none" stroke="#182434" stroke-width="7" opacity=".34"/>
+  <circle cx="450" cy="210" r="142" fill="#d6ad54" stroke="#182434" stroke-width="7"/>
+  <circle cx="396" cy="160" r="34" fill="#fff4c6"/>
+  <rect x="332" y="286" width="72" height="232" fill="#182434"/>
+  <path d="M520 520 730 520 632 284Z" fill="#182434"/>
+  <path d="M632 284 730 520 604 448Z" fill="#f0dfc0"/>
+  <path d="M604 448 730 520 534 520Z" fill="#d96f57"/>
+  <g fill="#182434" font-family="Courier New, monospace" font-size="18">
+    <text x="54" y="58">TRAVEL / WORLD-EXPO-DREAM</text>
+    <text x="602" y="90">CENTRAL AXIS</text>
+  </g>
+</svg>

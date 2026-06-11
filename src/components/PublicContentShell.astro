@@ -1,0 +1,26 @@
+---
+type Props = {
+  kind: "articles" | "images";
+  eyebrow: string;
+  title: string;
+  description: string;
+};
+
+const { kind, eyebrow, title, description } = Astro.props;
+---
+
+<main class="content-stack" data-public-shell data-kind={kind}>
+  <section class="panel dark">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">{eyebrow}</p>
+        <h1>{title}</h1>
+      </div>
+      <p>{description}</p>
+    </div>
+    <div class="empty-state public-loading">
+      <p class="system-text">LOADING / FETCHING CONTENT INDEX</p>
+    </div>
+  </section>
+</main>
+<script is:inline src="/assets/public-content.js" defer></script>

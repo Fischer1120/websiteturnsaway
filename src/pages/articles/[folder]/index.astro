@@ -1,7 +1,7 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import RouteMatrix from "@/components/RouteMatrix.astro";
-import RecordCard from "@/components/RecordCard.astro";
+import PublicContentShell from "@/components/PublicContentShell.astro";
 import { getArticleFolders } from "@/lib/content";
 
 export function getStaticPaths() {
@@ -17,30 +17,11 @@ const { folder } = Astro.props;
 <BaseLayout title={`${folder.label} - 文章文件夹`}>
   <div class="layout-grid">
     <RouteMatrix />
-    <main class="content-stack">
-      <section class="panel dark">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">/articles/{folder.slug}</p>
-            <h1>{folder.label}</h1>
-          </div>
-          <p>{folder.description}</p>
-        </div>
-        <div class="record-grid">
-          {folder.items.map((article) => (
-            <RecordCard
-              href={article.url}
-              title={article.title}
-              subtitle={article.subtitle}
-              summary={article.summary}
-              image={article.coverImage}
-              date={article.publishedAt}
-              folder={article.folder}
-              kind="article"
-            />
-          ))}
-        </div>
-      </section>
-    </main>
+    <PublicContentShell
+      kind="articles"
+      eyebrow={`/articles/${folder.slug}`}
+      title={folder.label}
+      description={folder.description}
+    />
   </div>
 </BaseLayout>

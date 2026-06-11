@@ -1,33 +1,31 @@
 import { requireAdmin } from "../../_shared/auth";
+import { listArticles, saveArticle } from "../../_shared/content";
 import { fail, ok, options, type FunctionContext } from "../../_shared/responses";
-import { articleKey } from "../../_shared/r2";
-import { isSlug } from "../../_shared/validators";
 
 export const onRequestOptions = async (context: FunctionContext) => {
   return options(context.request, context.env);
 };
 
-export const onRequestPost = async (context: FunctionContext) => {
-  const authError = requireAdmin(context);
+export const onRequestGet = async (context: FunctionContext) => {
+  const authError = await requireAdmin(context);
   if (authError) return authError;
 
-  if (!context.env.MEDIA_BUCKET) {
-    return fail(context.request, context.env, "storage_error", "MEDIA_BUCKET binding is not configured.", 503);
-  }
+  return ok(context.request, context.env, await listArticles(context.env, { includePrivate: true }));
+};
+
+export const onRequestPost = async (context: FunctionContext) => {
+  const authError = await requireAdmin(context);
+  if (authError) return authError;
 
   const body = await context.request.json<Record<string, unknown>>().catch(() => undefined);
-  if (!body || typeof body.folder !== "string" || typeof body.slug !== "string" || typeof body.markdown !== "string") {
-    return fail(context.request, context.env, "invalid_request", "Expected folder, slug and markdown.", 400);
+  if (!body) {
+    return fail(context.request, context.env, "invalid_request", "Expected article JSON payload.", 400);
   }
 
-  if (!isSlug(body.folder) || !isSlug(body.slug)) {
-    return fail(context.request, context.env, "invalid_request", "Invalid folder or slug.", 400);
+  try {
+    const article = await saveArticle(context.env, body);
+    return ok(context.request, context.env, article, 201);
+  } catch (error) {
+    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not save article.", 400);
   }
-
-  const key = articleKey(body.folder, body.slug);
-  await context.env.MEDIA_BUCKET.put(key, body.markdown, {
-    httpMetadata: { contentType: "text/markdown; charset=utf-8" },
-  });
-
-  return ok(context.request, context.env, { key, folder: body.folder, slug: body.slug }, 201);
 };

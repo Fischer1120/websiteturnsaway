@@ -567,6 +567,228 @@ code,
   background: rgba(244, 236, 217, 0.74);
 }
 
+.public-loading {
+  margin: 18px;
+}
+
+.admin-console {
+  min-height: 640px;
+}
+
+.admin-login,
+.admin-form,
+.admin-editor,
+.admin-list,
+.admin-toolbar,
+.admin-preview,
+.admin-message {
+  color: var(--paper);
+}
+
+.admin-login {
+  display: grid;
+  gap: 14px;
+  max-width: 520px;
+  padding: 18px;
+}
+
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(244, 236, 217, 0.18);
+}
+
+.admin-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-tab,
+.admin-list-item {
+  border: 1px solid rgba(244, 236, 217, 0.24);
+  background: rgba(244, 236, 217, 0.08);
+  color: var(--paper);
+  cursor: pointer;
+  font: inherit;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.admin-tab {
+  min-height: 36px;
+  padding: 0 14px;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-tab:hover,
+.admin-tab.active,
+.admin-list-item:hover {
+  border-color: var(--paper);
+  background: rgba(217, 111, 87, 0.22);
+  transform: translateY(-1px);
+}
+
+.admin-workbench {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.38fr) minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px;
+}
+
+.admin-list,
+.admin-editor {
+  min-width: 0;
+  border: 1px solid rgba(244, 236, 217, 0.2);
+  background: rgba(244, 236, 217, 0.06);
+}
+
+.admin-list {
+  align-self: start;
+  max-height: 78vh;
+  overflow: auto;
+  padding: 10px;
+}
+
+.admin-list-heading {
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 10px 8px;
+  color: rgba(244, 236, 217, 0.72);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+}
+
+.admin-list-item {
+  display: grid;
+  width: 100%;
+  gap: 4px;
+  margin-bottom: 8px;
+  padding: 12px;
+  text-align: left;
+}
+
+.admin-list-item strong {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 1.05rem;
+}
+
+.admin-list-item span {
+  color: rgba(244, 236, 217, 0.64);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.72rem;
+  overflow-wrap: anywhere;
+}
+
+.admin-form {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.admin-form label,
+.admin-login label {
+  display: grid;
+  gap: 6px;
+}
+
+.admin-form label span,
+.admin-login label span {
+  color: var(--coral);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin-form input,
+.admin-form select,
+.admin-form textarea,
+.admin-login input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(244, 236, 217, 0.24);
+  border-radius: 0;
+  background: rgba(244, 236, 217, 0.92);
+  color: var(--ink);
+  font: inherit;
+  padding: 9px 10px;
+}
+
+.admin-form textarea {
+  resize: vertical;
+}
+
+.code-editor {
+  min-height: 340px;
+  font-family: "Courier New", Courier, monospace;
+  line-height: 1.55;
+}
+
+.form-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.form-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.form-actions,
+.asset-uploader {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.asset-uploader input {
+  flex: 1 1 220px;
+}
+
+.button.danger {
+  border-color: rgba(217, 111, 87, 0.8);
+  background: rgba(217, 111, 87, 0.18);
+  color: var(--paper);
+}
+
+.admin-message {
+  margin: 14px 18px 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(244, 236, 217, 0.2);
+  font-family: "Courier New", Courier, monospace;
+  font-size: 0.82rem;
+}
+
+.admin-message.success {
+  background: rgba(150, 170, 164, 0.2);
+}
+
+.admin-message.error {
+  background: rgba(217, 111, 87, 0.22);
+}
+
+.admin-preview {
+  border: 1px solid rgba(244, 236, 217, 0.2);
+  background: rgba(244, 236, 217, 0.92);
+  color: var(--ink);
+  padding: 18px;
+}
+
+.admin-photo-preview img {
+  width: min(360px, 100%);
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid rgba(244, 236, 217, 0.24);
+}
+
 .footer {
   margin-top: 18px;
   padding: 18px;
@@ -587,7 +809,8 @@ code,
   .layout-grid,
   .hero,
   .article-detail,
-  .photo-detail {
+  .photo-detail,
+  .admin-workbench {
     grid-template-columns: 1fr;
   }
 
@@ -650,6 +873,10 @@ code,
 
   .folder-row .count {
     text-align: left;
+  }
+
+  .form-grid.two {
+    grid-template-columns: 1fr;
   }
 
   .hero-copy h1,

@@ -1,0 +1,4 @@
+/articles/:folder /articles 200
+/articles/:folder/:slug /articles 200
+/images/:folder /images 200
+/images/:folder/:photoId /images 200

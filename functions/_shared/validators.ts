@@ -2,12 +2,16 @@ export function isSlug(value: string) {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(value);
 }
 
+export function isPublicId(value: string) {
+  return /^[a-zA-Z0-9][a-zA-Z0-9._-]{0,127}$/.test(value);
+}
+
 export function sanitizeFilename(value: string) {
   return value.replaceAll(/[^a-zA-Z0-9._-]/g, "-");
 }
 
 export function isSafeImageType(type: string) {
-  return ["image/jpeg", "image/png", "image/webp", "image/svg+xml"].includes(type);
+  return ["image/jpeg", "image/png", "image/webp"].includes(type);
 }
 
 export function extensionForContentType(type: string) {

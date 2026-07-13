@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../../../_shared/auth";
 import { deletePhoto, getPhoto, patchPhoto } from "../../../../_shared/content";
-import { fail, ok, options, param, type FunctionContext } from "../../../../_shared/responses";
+import { fail, failFromError, ok, options, param, type FunctionContext } from "../../../../_shared/responses";
 import { isPublicId, isSlug } from "../../../../_shared/validators";
 
 export const onRequestOptions = async (context: FunctionContext) => {
@@ -47,7 +47,7 @@ export const onRequestPatch = async (context: FunctionContext) => {
     }
     return ok(context.request, context.env, photo);
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not update image.", 400);
+    return failFromError(context.request, context.env, error, "Could not update image.");
   }
 };
 
@@ -65,6 +65,6 @@ export const onRequestDelete = async (context: FunctionContext) => {
     await deletePhoto(context.env, folder, photoId);
     return ok(context.request, context.env, { folder, photoId });
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not delete image.", 400);
+    return failFromError(context.request, context.env, error, "Could not delete image.");
   }
 };

@@ -44,6 +44,8 @@ http://localhost:4321
 ```bash
 npm run check
 npm run build
+npx tsc --noEmit --ignoreDeprecations 6.0
+npm test
 ```
 
 Cloudflare Pages Functions 本地预览：
@@ -52,6 +54,15 @@ Cloudflare Pages Functions 本地预览：
 npm run build
 npm run pages:dev
 ```
+
+本地运行时验收：
+
+```bash
+BASE_URL=http://127.0.0.1:8791 node tests/route-matrix.mjs
+E2E_ADMIN_TOKEN=<local-test-token> BASE_URL=http://127.0.0.1:8791 ./tests/e2e-admin.smoke.sh
+```
+
+测试只使用 Wrangler 的 local R2 和 `codex-fix-*` 临时标识；验收结束后必须确认这些临时对象已清理。不要把真实 `ADMIN_TOKEN_SECRET` 写入命令、测试文件或仓库，也不要用测试脚本连接正式 R2。
 
 ## 2. 目录说明
 
@@ -189,6 +200,12 @@ PATCH /api/admin/images/:folder/:photoId/metadata
 ```text
 Authorization: Bearer <ADMIN_TOKEN_SECRET>
 ```
+
+公共页面由 Pages Functions 在运行时读取公开内容；Astro 静态 fallback 也必须输出可读的种子内容，不依赖 `LOADING` 壳或公共端 JavaScript。公共 API 只返回白名单字段：不能返回 R2 object key、JSON key、source、精确经纬度、嵌套 GPS 或 EXIF。`/media/*` 只允许公开文章图片资产和公开图片的 `original/thumb`，索引、metadata、Markdown 和草稿对象必须返回 404。
+
+文章 JSON 是 CMS 的内容源，Markdown 文件是不可直接公开的投影；更新时两者都使用 R2 条件写，发生并发冲突应返回 409/503，不得静默返回成功。图片上传必须在 original、thumb、metadata 任一步失败时清理该 photoId 前缀。
+
+分组删除的非空语义仍需产品确认后再改变。实施前请明确选择“仅允许空分组删除”或“允许级联删除内容”等方案，并为选择增加 API、后台和回归测试。
 
 统一响应格式：
 

@@ -1,4 +1,17 @@
 ---
+import FolderRows from "@/components/FolderRows.astro";
+import MetadataSidecar from "@/components/MetadataSidecar.astro";
+import RecordCard from "@/components/RecordCard.astro";
+import {
+  formatDate,
+  getArticleFolders,
+  getArticles,
+  getFolderLabel,
+  getPhoto,
+  getPhotoFolders,
+  getPhotos,
+} from "@/lib/content";
+
 type Props = {
   kind: "articles" | "images";
   eyebrow: string;
@@ -7,20 +20,110 @@ type Props = {
 };
 
 const { kind, eyebrow, title, description } = Astro.props;
+const pathname = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const segments = pathname.split("/").filter(Boolean);
+const articleItems = kind === "articles"
+  ? getArticles().filter((article) => segments.length < 2 || article.folder === segments[1])
+  : [];
+const articleFolders = kind === "articles" ? getArticleFolders() : [];
+const articleDetail = kind === "articles" && segments.length === 3
+  ? getArticles().find((article) => article.folder === segments[1] && article.slug === segments[2])
+  : undefined;
+const photoItems = kind === "images"
+  ? getPhotos().filter((photo) => segments.length < 2 || photo.folder === segments[1])
+  : [];
+const photoFolders = kind === "images" ? getPhotoFolders() : [];
+const photoDetail = kind === "images" && segments.length === 3 ? getPhoto(segments[1], segments[2]) : undefined;
+const cameraSummary = photoDetail?.camera
+  ? [photoDetail.camera.make, photoDetail.camera.model, photoDetail.camera.lens].filter(Boolean).join(" / ")
+  : "";
 ---
 
 <main class="content-stack" data-public-shell data-kind={kind}>
-  <section class="panel dark">
-    <div class="section-heading">
-      <div>
-        <p class="eyebrow">{eyebrow}</p>
-        <h1>{title}</h1>
+  {articleDetail ? (
+    <article class="panel article-detail">
+      <div class="article-prose">
+        <p class="eyebrow">Article Record / {articleDetail.folder}/{articleDetail.slug}</p>
+        <h1>{articleDetail.title}</h1>
+        {articleDetail.subtitle && <p class="subtitle">{articleDetail.subtitle}</p>}
+        {articleDetail.summary && <p class="article-summary">{articleDetail.summary}</p>}
+        {articleDetail.coverImage && <figure class="article-cover immersive-cover"><img src={articleDetail.coverImage} alt={articleDetail.title} loading="eager" /></figure>}
+        <div class="article-body" set:html={articleDetail.html} />
       </div>
-      <p>{description}</p>
-    </div>
-    <div class="empty-state public-loading">
-      <p class="system-text">LOADING / FETCHING CONTENT INDEX</p>
-    </div>
-  </section>
+      <MetadataSidecar
+        title="Reading sidecar"
+        rows={[
+          { label: "Folder", value: articleDetail.folder },
+          { label: "Slug", value: articleDetail.slug },
+          { label: "Published", value: formatDate(articleDetail.publishedAt, true) },
+          { label: "Updated", value: formatDate(articleDetail.updatedAt, true) },
+        ]}
+      />
+    </article>
+  ) : photoDetail ? (
+    <section class="panel photo-detail" aria-labelledby="photo-title">
+      <div class="photo-main">
+        <p class="eyebrow">Photo Record / {photoDetail.folder}/{photoDetail.id}</p>
+        <h1 id="photo-title">{photoDetail.title}</h1>
+        <div class="photo-image"><img src={photoDetail.imageUrl} alt={photoDetail.alt || photoDetail.title} loading="eager" /></div>
+        {photoDetail.description && <p class="photo-description">{photoDetail.description}</p>}
+      </div>
+      <MetadataSidecar
+        title="Photo metadata sidecar"
+        rows={[
+          { label: "Captured", value: formatDate(photoDetail.capturedAt, true) },
+          { label: "Location", value: photoDetail.location.label },
+          { label: "Precision", value: photoDetail.location.precision },
+          { label: "Folder", value: getFolderLabel(photoDetail.folder) },
+          { label: "Camera", value: cameraSummary },
+          { label: "ISO", value: photoDetail.camera?.iso },
+          { label: "Exposure", value: photoDetail.camera ? `${photoDetail.camera.aperture || ""} / ${photoDetail.camera.shutter || ""}` : "" },
+        ]}
+      />
+    </section>
+  ) : (
+    <section class="panel dark">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">{eyebrow}</p>
+          <h1>{title}</h1>
+        </div>
+        <p>{description}</p>
+      </div>
+      {kind === "articles" ? (
+        articleItems.length ? (
+          <div class="record-grid">
+            {articleItems.map((article) => (
+              <RecordCard
+                href={`/articles/${article.folder}/${article.slug}`}
+                title={article.title}
+                subtitle={article.subtitle}
+                summary={article.summary}
+                image={article.coverImage}
+                date={article.publishedAt}
+                folder={article.folder}
+                kind="article"
+              />
+            ))}
+          </div>
+        ) : <div class="empty-state"><p>暂时没有公开文章。</p></div>
+      ) : photoItems.length ? (
+        <div class="record-grid">
+          {photoItems.map((photo) => (
+            <RecordCard
+              href={`/images/${photo.folder}/${photo.id}`}
+              title={photo.title}
+              summary={`${formatDate(photo.capturedAt, true)} / ${photo.location.label} / ${photo.description}`}
+              image={photo.thumbUrl || photo.imageUrl}
+              date={photo.capturedAt}
+              folder={photo.folder}
+              kind="photo"
+            />
+          ))}
+        </div>
+      ) : <div class="empty-state"><p>暂时没有公开图片。</p></div>}
+      {kind === "articles" && segments.length < 2 && <FolderRows folders={articleFolders} basePath="/articles" />}
+      {kind === "images" && segments.length < 2 && <FolderRows folders={photoFolders} basePath="/images" />}
+    </section>
+  )}
 </main>
-<script is:inline src="/assets/public-content.js" defer></script>

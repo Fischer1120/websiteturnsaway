@@ -1,8 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import RouteMatrix from "@/components/RouteMatrix.astro";
-import PublicContentShell from "@/components/PublicContentShell.astro";
-import { getArticles } from "@/lib/content";
+import MetadataSidecar from "@/components/MetadataSidecar.astro";
+import { formatDate, getArticles } from "@/lib/content";
 
 export function getStaticPaths() {
   return getArticles().map((article) => ({
@@ -17,11 +17,36 @@ const { article } = Astro.props;
 <BaseLayout title={`${article.title} - Website Turns Away`} description={article.summary}>
   <div class="layout-grid">
     <RouteMatrix />
-    <PublicContentShell
-      kind="articles"
-      eyebrow={`Article Record / ${article.folder}/${article.slug}`}
-      title={article.title}
-      description={article.summary}
-    />
+    <main class="content-stack">
+      <article class="panel article-detail">
+        <div class="article-prose">
+          <p class="eyebrow">Article Record / {article.folder}/{article.slug}</p>
+          <h1>{article.title}</h1>
+          {article.subtitle && <p class="subtitle">{article.subtitle}</p>}
+          {article.summary && <p class="article-summary">{article.summary}</p>}
+          {article.coverImage && (
+            <figure class="article-cover immersive-cover">
+              <img src={article.coverImage} alt={article.title} loading="eager" />
+            </figure>
+          )}
+          {article.tags.length > 0 && (
+            <div class="chips article-tags" aria-label="文章标签">
+              {article.tags.map((tag) => <span class="chip">{tag}</span>)}
+            </div>
+          )}
+          <div class="article-body" set:html={article.html} />
+        </div>
+        <MetadataSidecar
+          title="Reading sidecar"
+          rows={[
+            { label: "Folder", value: article.folder },
+            { label: "Slug", value: article.slug },
+            { label: "Published", value: formatDate(article.publishedAt, true) },
+            { label: "Updated", value: formatDate(article.updatedAt, true) },
+            { label: "Status", value: article.status },
+          ]}
+        />
+      </article>
+    </main>
   </div>
 </BaseLayout>

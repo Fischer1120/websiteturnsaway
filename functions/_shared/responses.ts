@@ -1,10 +1,3 @@
-export type Env = {
-  MEDIA_BUCKET?: R2Bucket;
-  PUBLIC_MEDIA_BASE_URL?: string;
-  ADMIN_TOKEN_SECRET?: string;
-  ALLOWED_ORIGINS?: string;
-};
-
 export type FunctionContext = EventContext<Env, string, Record<string, unknown>>;
 
 type ErrorCode =
@@ -12,11 +5,26 @@ type ErrorCode =
   | "unauthorized"
   | "forbidden"
   | "not_found"
+  | "conflict"
   | "payload_too_large"
   | "unsupported_media_type"
   | "storage_error"
   | "metadata_error"
   | "not_implemented";
+
+export class ApiError extends Error {
+  code: ErrorCode;
+  status: number;
+  details: Record<string, unknown>;
+
+  constructor(code: ErrorCode, message: string, status = 400, details: Record<string, unknown> = {}) {
+    super(message);
+    this.name = "ApiError";
+    this.code = code;
+    this.status = status;
+    this.details = details;
+  }
+}
 
 function corsHeaders(request: Request, env: Env) {
   const origin = request.headers.get("Origin") || "";
@@ -27,6 +35,8 @@ function corsHeaders(request: Request, env: Env) {
 
   const headers = new Headers({
     "Content-Type": "application/json; charset=utf-8",
+    "Cache-Control": "no-store",
+    "X-Content-Type-Options": "nosniff",
   });
 
   if (origin && allowed.includes(origin)) {
@@ -57,6 +67,13 @@ export function fail(
     status,
     headers: corsHeaders(request, env),
   });
+}
+
+export function failFromError(request: Request, env: Env, error: unknown, fallback = "Request failed.") {
+  if (error instanceof ApiError) {
+    return fail(request, env, error.code, error.message, error.status, error.details);
+  }
+  return fail(request, env, "storage_error", fallback, 503);
 }
 
 export function options(request: Request, env: Env) {

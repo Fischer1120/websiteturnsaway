@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../_shared/auth";
 import { deleteFolderRecord, listFolderRecords, saveFolderRecord, type FolderKind } from "../../_shared/content";
-import { fail, ok, options, type FunctionContext } from "../../_shared/responses";
+import { fail, failFromError, ok, options, type FunctionContext } from "../../_shared/responses";
 import { isSlug } from "../../_shared/validators";
 
 function parseKind(value: unknown): FolderKind | undefined {
@@ -38,10 +38,10 @@ export const onRequestPost = async (context: FunctionContext) => {
       label: String(body.label || slug),
       description: String(body.description || "未命名归档"),
       order: Number(body.order || 999),
-    });
+    }, { createOnly: true });
     return ok(context.request, context.env, folder, 201);
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not save folder.", 400);
+    return failFromError(context.request, context.env, error, "Could not save folder.");
   }
 };
 
@@ -65,7 +65,7 @@ export const onRequestPatch = async (context: FunctionContext) => {
     });
     return ok(context.request, context.env, folder);
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not update folder.", 400);
+    return failFromError(context.request, context.env, error, "Could not update folder.");
   }
 };
 
@@ -84,6 +84,6 @@ export const onRequestDelete = async (context: FunctionContext) => {
     await deleteFolderRecord(context.env, kind, slug);
     return ok(context.request, context.env, { kind, slug });
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not delete folder.", 400);
+    return failFromError(context.request, context.env, error, "Could not delete folder.");
   }
 };

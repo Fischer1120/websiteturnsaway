@@ -1,8 +1,9 @@
-import { fail, ok, param, type FunctionContext } from "../../../_shared/responses";
-import { getPhoto } from "../../../_shared/content";
+import { fail, failFromError, ok, param, type FunctionContext } from "../../../_shared/responses";
+import { getPhoto, toPublicPhoto } from "../../../_shared/content";
 import { isPublicId, isSlug } from "../../../_shared/validators";
 
 export const onRequestGet = async (context: FunctionContext) => {
+  try {
   const folder = param(context.params.folder);
   const photoId = param(context.params.photoId);
   if (!isSlug(folder) || !isPublicId(photoId)) {
@@ -17,5 +18,8 @@ export const onRequestGet = async (context: FunctionContext) => {
     return fail(context.request, context.env, "not_found", "Photo not found.", 404, { folder, photoId });
   }
 
-  return ok(context.request, context.env, photo);
+    return ok(context.request, context.env, toPublicPhoto(photo));
+  } catch (error) {
+    return failFromError(context.request, context.env, error, "Could not read image.");
+  }
 };

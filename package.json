@@ -8,6 +8,9 @@
     "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "bash tests/e2e-admin.smoke.sh",
     "pages:dev": "wrangler pages dev dist --compatibility-date=2026-06-08",
     "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=website-turns-away"
   },
@@ -16,8 +19,9 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
-    "@cloudflare/workers-types": "^4.20260608.1",
+    "@cloudflare/vitest-pool-workers": "^0.18.4",
     "typescript": "^6.0.3",
+    "vitest": "^4.1.10",
     "wrangler": "^4.98.0"
   }
 }

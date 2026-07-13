@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../_shared/auth";
-import { listArticles, saveArticle } from "../../_shared/content";
-import { fail, ok, options, type FunctionContext } from "../../_shared/responses";
+import { createArticle, listArticles } from "../../_shared/content";
+import { fail, failFromError, ok, options, type FunctionContext } from "../../_shared/responses";
 
 export const onRequestOptions = async (context: FunctionContext) => {
   return options(context.request, context.env);
@@ -23,9 +23,9 @@ export const onRequestPost = async (context: FunctionContext) => {
   }
 
   try {
-    const article = await saveArticle(context.env, body);
+    const article = await createArticle(context.env, body);
     return ok(context.request, context.env, article, 201);
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not save article.", 400);
+    return failFromError(context.request, context.env, error, "Could not create article.");
   }
 };

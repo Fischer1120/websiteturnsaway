@@ -1,0 +1,11 @@
+/admin
+  Cache-Control: no-store
+
+/admin/*
+  Cache-Control: no-store
+
+/assets/admin.js
+  Cache-Control: no-store
+
+/assets/public-content.js
+  Cache-Control: no-store

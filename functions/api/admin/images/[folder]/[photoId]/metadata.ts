@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../../../../_shared/auth";
 import { patchPhoto } from "../../../../../_shared/content";
-import { fail, ok, options, param, type FunctionContext } from "../../../../../_shared/responses";
+import { fail, failFromError, ok, options, param, type FunctionContext } from "../../../../../_shared/responses";
 import { isPublicId, isSlug } from "../../../../../_shared/validators";
 
 export const onRequestOptions = async (context: FunctionContext) => {
@@ -22,9 +22,13 @@ export const onRequestPatch = async (context: FunctionContext) => {
     return fail(context.request, context.env, "invalid_request", "Expected JSON metadata patch.", 400);
   }
 
-  const photo = await patchPhoto(context.env, folder, photoId, patch);
-  if (!photo) {
-    return fail(context.request, context.env, "not_found", "Photo metadata not found.", 404, { folder, photoId });
+  try {
+    const photo = await patchPhoto(context.env, folder, photoId, patch);
+    if (!photo) {
+      return fail(context.request, context.env, "not_found", "Photo metadata not found.", 404, { folder, photoId });
+    }
+    return ok(context.request, context.env, photo);
+  } catch (error) {
+    return failFromError(context.request, context.env, error, "Could not update image metadata.");
   }
-  return ok(context.request, context.env, photo);
 };

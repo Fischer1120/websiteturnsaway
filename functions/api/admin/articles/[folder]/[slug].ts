@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../../../_shared/auth";
 import { deleteArticle, getArticle, patchArticle } from "../../../../_shared/content";
-import { fail, ok, options, param, type FunctionContext } from "../../../../_shared/responses";
+import { fail, failFromError, ok, options, param, type FunctionContext } from "../../../../_shared/responses";
 import { isSlug } from "../../../../_shared/validators";
 
 export const onRequestOptions = async (context: FunctionContext) => {
@@ -47,7 +47,7 @@ export const onRequestPatch = async (context: FunctionContext) => {
     }
     return ok(context.request, context.env, article);
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not update article.", 400);
+    return failFromError(context.request, context.env, error, "Could not update article.");
   }
 };
 
@@ -65,6 +65,6 @@ export const onRequestDelete = async (context: FunctionContext) => {
     await deleteArticle(context.env, folder, slug);
     return ok(context.request, context.env, { folder, slug });
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not delete article.", 400);
+    return failFromError(context.request, context.env, error, "Could not delete article.");
   }
 };

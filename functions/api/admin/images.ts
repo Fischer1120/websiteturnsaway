@@ -1,6 +1,6 @@
 import { requireAdmin } from "../../_shared/auth";
 import { listPhotos, savePhotoUpload } from "../../_shared/content";
-import { fail, ok, options, type FunctionContext } from "../../_shared/responses";
+import { fail, failFromError, ok, options, type FunctionContext } from "../../_shared/responses";
 import { extensionForContentType, isSafeImageType, isSlug } from "../../_shared/validators";
 
 const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
@@ -51,12 +51,15 @@ export const onRequestPost = async (context: FunctionContext) => {
     return fail(context.request, context.env, "payload_too_large", "Thumbnail must be 2 MB or smaller.", 413);
   }
 
-  const metadata = JSON.parse(metadataText) as Record<string, unknown>;
-  const ext = extensionForContentType(file.type);
   try {
+    const metadata = JSON.parse(metadataText) as Record<string, unknown>;
+    const ext = extensionForContentType(file.type);
     const photo = await savePhotoUpload(context.env, folder, file, thumb instanceof File ? thumb : undefined, metadata, ext);
     return ok(context.request, context.env, photo, 201);
   } catch (error) {
-    return fail(context.request, context.env, "invalid_request", error instanceof Error ? error.message : "Could not upload image.", 400);
+    if (error instanceof SyntaxError) {
+      return fail(context.request, context.env, "invalid_request", "metadata must be valid JSON.", 400, { field: "metadata" });
+    }
+    return failFromError(context.request, context.env, error, "Could not upload image.");
   }
 };

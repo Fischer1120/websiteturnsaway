@@ -1,7 +1,8 @@
 import { requireAdmin } from "../../../../../_shared/auth";
+import { getArticle } from "../../../../../_shared/content";
 import { fail, ok, options, param, type FunctionContext } from "../../../../../_shared/responses";
 import { articleAssetKey, mediaUrl } from "../../../../../_shared/r2";
-import { isSafeImageType, isSlug } from "../../../../../_shared/validators";
+import { isSafeAssetFilename, isSafeImageType, isSlug, sanitizeFilename } from "../../../../../_shared/validators";
 
 const MAX_ASSET_BYTES = 8 * 1024 * 1024;
 
@@ -23,6 +24,11 @@ export const onRequestPost = async (context: FunctionContext) => {
     return fail(context.request, context.env, "invalid_request", "Invalid article path.", 400, { folder, slug });
   }
 
+  const article = await getArticle(context.env, folder, slug, { includePrivate: true });
+  if (!article) {
+    return fail(context.request, context.env, "not_found", "Article not found.", 404, { folder, slug });
+  }
+
   const form = await context.request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) {
@@ -35,6 +41,10 @@ export const onRequestPost = async (context: FunctionContext) => {
 
   if (file.size > MAX_ASSET_BYTES) {
     return fail(context.request, context.env, "payload_too_large", "Article asset must be 8 MB or smaller.", 413);
+  }
+
+  if (!isSafeAssetFilename(sanitizeFilename(file.name))) {
+    return fail(context.request, context.env, "invalid_request", "This asset filename is reserved.", 400, { field: "file" });
   }
 
   const key = articleAssetKey(folder, slug, file.name);

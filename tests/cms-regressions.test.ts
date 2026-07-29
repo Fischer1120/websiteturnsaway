@@ -6,6 +6,7 @@ import { onRequestGet as getPublicImages } from "../functions/api/images/index";
 import { onRequestPost as createAdminArticle } from "../functions/api/admin/articles";
 import { onRequestPost as uploadAdminImage } from "../functions/api/admin/images";
 import { onRequestGet as getMedia } from "../functions/media/[[path]]";
+import { onRequestGet as getArticleDetailPage } from "../functions/articles/[folder]/[slug]";
 import { onRequestGet as getImagesPage } from "../functions/images/index";
 import { onRequestGet as getImageDetailPage } from "../functions/images/[folder]/[photoId]";
 import { onRequestGet as getPublicArticleDetail } from "../functions/api/articles/[folder]/[slug]";
@@ -371,6 +372,35 @@ describe("CMS security and API contracts", () => {
     expect((await getMedia(requestContext(new Request("https://test.local/media"), { path: nextAssetKey.split("/") }))).status).toBe(200);
     expect((await env.MEDIA_BUCKET.get(nextAssetKey))?.size).toBe(6);
     void article;
+  });
+
+  it("renders a newly published article and hides it after it becomes a draft", async () => {
+    const folder = `codex-fix-${crypto.randomUUID().slice(0, 8)}`;
+    const slug = `published-${crypto.randomUUID().slice(0, 8)}`;
+    trackArticleFixture(folder);
+    await createArticle(env, {
+      folder,
+      slug,
+      title: "Published route regression",
+      status: "published",
+      markdown: "## Browser body\n\nThe public route must render this content.",
+    });
+
+    const published = await getArticleDetailPage(
+      requestContext(new Request(`https://test.local/articles/${folder}/${slug}`), { folder, slug }),
+    );
+    const publishedHtml = await published.text();
+    expect(published.status).toBe(200);
+    expect(published.headers.get("cache-control")).toBe("no-store");
+    expect(publishedHtml).toContain("Published route regression");
+    expect(publishedHtml).toContain("Browser body");
+    expect(publishedHtml).not.toContain("LOADING / FETCHING CONTENT INDEX");
+
+    await patchArticle(env, folder, slug, { status: "draft" });
+    const draft = await getArticleDetailPage(
+      requestContext(new Request(`https://test.local/articles/${folder}/${slug}`), { folder, slug }),
+    );
+    expect(draft.status).toBe(404);
   });
 
   it("does not serve draft article assets and renders public image pages without JavaScript", async () => {

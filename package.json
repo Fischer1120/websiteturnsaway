@@ -12,7 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "bash tests/e2e-admin.smoke.sh",
     "pages:dev": "wrangler pages dev dist --compatibility-date=2026-06-08",
-    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=website-turns-away"
+    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=website-turns-away --branch=main"
   },
   "dependencies": {
     "astro": "^6.4.4"

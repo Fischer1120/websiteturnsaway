@@ -37,6 +37,21 @@ const consoleErrors = [];
     created = true;
     await page.waitForTimeout(250);
 
+    const articlePage = await page.context().newPage();
+    articlePage.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text());
+    });
+    try {
+      const detailUrl = `${baseUrl}/articles/${folder}/${slug}`;
+      const response = await articlePage.goto(detailUrl);
+      if (!response || response.status() !== 200) throw new Error(`published article returned ${response?.status() ?? "no response"}`);
+      if (articlePage.url() !== detailUrl) throw new Error(`published article redirected to ${articlePage.url()}`);
+      if (!(await articlePage.getByRole("heading", { name: "浏览器草稿保留", exact: true }).isVisible())) throw new Error("published article title is not visible");
+      if (!(await articlePage.getByRole("heading", { name: "浏览器正文", exact: true }).isVisible())) throw new Error("published article body is not visible");
+    } finally {
+      await articlePage.close();
+    }
+
     await page.locator('input[type="file"]#article-asset-file').setInputFiles(imagePath);
     let assetRequests = 0;
     const requestListener = (request) => {

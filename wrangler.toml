@@ -11,6 +11,3 @@ preview_bucket_name = "website-turns-away-media-preview"
 [vars]
 PUBLIC_MEDIA_BASE_URL = ""
 ALLOWED_ORIGINS = "http://localhost:4321,http://127.0.0.1:4321"
-
-[secrets]
-required = ["ADMIN_TOKEN_SECRET"]

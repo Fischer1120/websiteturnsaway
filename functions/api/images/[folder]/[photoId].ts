@@ -1,5 +1,5 @@
 import { fail, failFromError, ok, param, type FunctionContext } from "../../../_shared/responses";
-import { getPhoto, toPublicPhoto } from "../../../_shared/content";
+import { getPublicPhoto } from "../../../_shared/content";
 import { isPublicId, isSlug } from "../../../_shared/validators";
 
 export const onRequestGet = async (context: FunctionContext) => {
@@ -13,12 +13,12 @@ export const onRequestGet = async (context: FunctionContext) => {
     });
   }
 
-  const photo = await getPhoto(context.env, folder, photoId);
+  const photo = await getPublicPhoto(context.env, folder, photoId);
   if (!photo) {
     return fail(context.request, context.env, "not_found", "Photo not found.", 404, { folder, photoId });
   }
 
-    return ok(context.request, context.env, toPublicPhoto(photo));
+    return ok(context.request, context.env, photo);
   } catch (error) {
     return failFromError(context.request, context.env, error, "Could not read image.");
   }

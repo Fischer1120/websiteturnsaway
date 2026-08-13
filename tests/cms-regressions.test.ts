@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import { onRequestGet as getPublicArticles } from "../functions/api/articles/index";
 import { onRequestGet as getPublicImages } from "../functions/api/images/index";
+import { onRequestGet as getPublicImageMap } from "../functions/api/images/map";
 import { onRequestPost as createAdminArticle } from "../functions/api/admin/articles";
 import { onRequestPost as uploadAdminImage } from "../functions/api/admin/images";
 import { onRequestGet as getMedia } from "../functions/media/[[path]]";
@@ -38,6 +39,26 @@ function adminRequest(url: string, init: RequestInit = {}) {
   const headers = new Headers(init.headers);
   headers.set("Authorization", `Bearer ${token}`);
   return new Request(url, { ...init, headers });
+}
+
+function webpFixture(width = 320, height = 240) {
+  const chunk = (type: string, payload: number[]) => {
+    const bytes = new Uint8Array(8 + payload.length + (payload.length % 2));
+    bytes.set([...type].map((value) => value.charCodeAt(0)), 0);
+    new DataView(bytes.buffer).setUint32(4, payload.length, true);
+    bytes.set(payload, 8);
+    return bytes;
+  };
+  const body = new Uint8Array([
+    ...chunk("VP8X", [0, 0, 0, 0, (width - 1) & 0xff, ((width - 1) >> 8) & 0xff, (width - 1) >> 16, (height - 1) & 0xff, ((height - 1) >> 8) & 0xff, (height - 1) >> 16]),
+    ...chunk("VP8 ", [0, 0, 0, 0x9d, 0x01, 0x2a, width & 0xff, (width >> 8) & 0xff, height & 0xff, (height >> 8) & 0xff]),
+  ]);
+  const result = new Uint8Array(12 + body.length);
+  result.set([..."RIFF"].map((value) => value.charCodeAt(0)), 0);
+  new DataView(result.buffer).setUint32(4, result.length - 8, true);
+  result.set([..."WEBP"].map((value) => value.charCodeAt(0)), 8);
+  result.set(body, 12);
+  return result;
 }
 
 async function readPayload(response: Response) {
@@ -293,7 +314,9 @@ describe("CMS security and API contracts", () => {
     const form = new FormData();
     form.set("folder", "city-walk");
     form.set("metadata", "{");
-    form.set("file", new File(["fake"], "photo.png", { type: "image/png" }));
+    form.set("file", new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])], "photo.png", { type: "image/png" }));
+    form.set("display", new File([webpFixture()], "display.webp", { type: "image/webp" }));
+    form.set("thumb", new File([webpFixture(180, 120)], "thumb.webp", { type: "image/webp" }));
     const response = await uploadAdminImage(
       requestContext(
         adminRequest("https://test.local/api/admin/images", {
@@ -308,25 +331,44 @@ describe("CMS security and API contracts", () => {
     expect(payload.error?.code).toBe("invalid_request");
   });
 
-  it("only serves public original/thumb media and immediately revokes private media", async () => {
+  it("serves only safe public display/thumb aliases and immediately revokes private media", async () => {
     const folder = `codex-fix-${crypto.randomUUID().slice(0, 8)}`;
     trackImageFixture(folder);
     const id = `photo-${crypto.randomUUID().slice(0, 8)}`;
     const objectKey = `images/${folder}/${id}/original.png`;
+    const displayKey = `images/${folder}/${id}/display.webp`;
     const thumbKey = `images/${folder}/${id}/thumb.webp`;
     createdKeys.push(objectKey, thumbKey);
     await env.MEDIA_BUCKET.put(objectKey, "original");
-    await env.MEDIA_BUCKET.put(thumbKey, "thumb");
-    await savePhotoMetadata(env, { id, folder, title: "Public photo", objectKey, thumbKey, visibility: "public", location: { label: "Shanghai", precision: "city" } });
+    await env.MEDIA_BUCKET.put(displayKey, webpFixture(640, 480), { httpMetadata: { contentType: "image/webp" } });
+    await env.MEDIA_BUCKET.put(thumbKey, webpFixture(180, 120), { httpMetadata: { contentType: "image/webp" } });
+    await savePhotoMetadata(env, { id, folder, title: "Public photo", objectKey, displayKey, thumbKey, visibility: "public", location: { label: "Shanghai", precision: "city" } });
 
-    const publicResponse = await getMedia(requestContext(new Request("https://test.local/media"), { path: objectKey.split("/") }));
-    expect(publicResponse.status).toBe(200);
-    expect(publicResponse.headers.get("x-content-type-options")).toBe("nosniff");
-    expect(publicResponse.headers.get("cache-control")).toBe("no-store");
+    const originalResponse = await getMedia(requestContext(new Request("https://test.local/media"), { path: objectKey.split("/") }));
+    expect(originalResponse.status).toBe(404);
+    const displayResponse = await getMedia(requestContext(new Request("https://test.local/media"), { path: ["images", folder, id, "display.webp"] }));
+    expect(displayResponse.status).toBe(200);
+    expect(displayResponse.headers.get("content-type")).toBe("image/webp");
+    expect(displayResponse.headers.get("x-content-type-options")).toBe("nosniff");
+    expect(displayResponse.headers.get("cache-control")).toBe("no-store");
+    const thumbResponse = await getMedia(requestContext(new Request("https://test.local/media"), { path: ["images", folder, id, "thumb.webp"] }));
+    expect(thumbResponse.status).toBe(200);
 
     await patchPhoto(env, folder, id, { visibility: "private" });
-    const privateResponse = await getMedia(requestContext(new Request("https://test.local/media"), { path: objectKey.split("/") }));
-    expect(privateResponse.status).toBe(404);
+    expect((await getMedia(requestContext(new Request("https://test.local/media"), { path: ["images", folder, id, "display.webp"] }))).status).toBe(404);
+    expect((await getMedia(requestContext(new Request("https://test.local/media"), { path: ["images", folder, id, "thumb.webp"] }))).status).toBe(404);
+  });
+
+  it("returns only quantized public photo map points", async () => {
+    const response = await getPublicImageMap(requestContext(new Request("https://test.local/api/images/map")));
+    const payload = await readPayload(response);
+    expect(response.status).toBe(200);
+    const points = payload.data as unknown as Array<Record<string, unknown>>;
+    expect(points.length).toBeGreaterThan(0);
+    expect(JSON.stringify(points)).not.toContain("31.2304");
+    expect(JSON.stringify(points)).not.toContain("121.4737");
+    expect(points[0].location).toMatchObject({ precision: "city", accuracyMeters: 10000 });
+    expect((points[0].location as Record<string, unknown>).latitude).toBe(31.2);
   });
 
   it("rejects reserved asset names, unsupported image extensions, and serves HEAD safely", async () => {

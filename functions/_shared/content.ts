@@ -3,6 +3,7 @@ import {
   articleJsonKey,
   articleKey,
   deletePrefix,
+  imageDisplayKey,
   imageMetadataKey,
   imageOriginalKey,
   imageThumbKey,
@@ -17,6 +18,7 @@ import {
 } from "./r2";
 import { ApiError } from "./responses";
 import { isFiniteNumber, isIsoDate, isPublicId, isRecord, isSlug } from "./validators";
+import { hasImageMagic, isSafePublicWebP, validatePublicWebP } from "./webp";
 
 export type ArticleStatus = "published" | "draft";
 export type Visibility = "public" | "private";
@@ -69,6 +71,7 @@ export type PhotoRecord = {
   title: string;
   description: string;
   objectKey: string;
+  displayKey?: string;
   thumbKey: string;
   imageUrl: string;
   thumbUrl: string;
@@ -84,8 +87,24 @@ export type PhotoRecord = {
 export type PublicArticleRecord = Omit<ArticleRecord, "objectKey" | "jsonKey" | "source" | "markdown"> & {
   markdown?: string;
 };
-export type PublicPhotoRecord = Omit<PhotoRecord, "objectKey" | "thumbKey" | "source" | "location" | "updatedAt"> & {
+export type PublicPhotoRecord = Omit<PhotoRecord, "objectKey" | "displayKey" | "thumbKey" | "source" | "location" | "updatedAt"> & {
   location: Omit<PhotoLocation, "latitude" | "longitude">;
+};
+
+export type PublicPhotoMapPoint = {
+  id: string;
+  folder: string;
+  title: string;
+  capturedAt: string;
+  thumbUrl: string;
+  href: string;
+  location: {
+    label: string;
+    precision: PhotoLocation["precision"];
+    latitude: number;
+    longitude: number;
+    accuracyMeters: 10000 | 1000 | 1;
+  };
 };
 
 export type PhotoPatch = Partial<Omit<PhotoRecord, "location" | "camera">> & {
@@ -121,6 +140,26 @@ type MigrationRecord = {
 const TOMBSTONE_KEY = "indexes/tombstones.json";
 const TOMBSTONE_PREFIX = "indexes/tombstones/";
 const MIGRATION_PREFIX = "indexes/migrations/";
+export const PHOTO_PLACEHOLDER_URL = "/assets/media/photo-placeholder.svg";
+
+const LOCATION_PRECISION = {
+  city: { digits: 1, accuracyMeters: 10000 as const, label: "城市级 · 约 10 km" },
+  approximate: { digits: 2, accuracyMeters: 1000 as const, label: "附近 · 约 1 km" },
+  exact: { digits: 5, accuracyMeters: 1 as const, label: "精确 · 约 1 m" },
+} as const;
+
+function normalizePrecision(value: unknown): PhotoLocation["precision"] {
+  return value === "approximate" || value === "exact" || value === "city" ? value : "city";
+}
+
+function quantizeCoordinate(value: number, digits: number) {
+  const result = Math.round(value * 10 ** digits) / 10 ** digits;
+  return Object.is(result, -0) ? 0 : result;
+}
+
+function publicVariantUrl(photo: Pick<PhotoRecord, "folder" | "id">, variant: "display" | "thumb") {
+  return `/media/images/${photo.folder}/${photo.id}/${variant}.webp`;
+}
 
 const DEFAULT_ARTICLE_FOLDERS: FolderRecord[] = [
   { slug: "notes", label: "Notes", description: "几何记忆、短札和观察记录", order: 10 },
@@ -255,9 +294,6 @@ function validatePhotoMetadata(input: Partial<PhotoRecord>) {
     if (input.location.longitude !== undefined && (!isFiniteNumber(input.location.longitude) || input.location.longitude < -180 || input.location.longitude > 180)) {
       throw new ApiError("invalid_request", "location.longitude must be between -180 and 180.", 400, { field: "location.longitude" });
     }
-    if (input.location.precision !== undefined && !["city", "approximate", "exact"].includes(String(input.location.precision))) {
-      throw new ApiError("invalid_request", "location.precision is invalid.", 400, { field: "location.precision" });
-    }
   }
   if (input.camera !== undefined && !isRecord(input.camera)) {
     throw new ApiError("invalid_request", "camera must be an object.", 400, { field: "camera" });
@@ -282,7 +318,7 @@ function normalizePhoto(env: Env, input: Partial<PhotoRecord>, source: "seed" | 
   const rawLocation: Record<string, unknown> = isRecord(input.location) ? input.location : {};
   const location: PhotoLocation = {
     label: String(rawLocation.label || ""),
-    precision: (rawLocation.precision || "city") as "city" | "approximate" | "exact",
+    precision: normalizePrecision(rawLocation.precision),
     ...(isFiniteNumber(rawLocation.latitude) ? { latitude: rawLocation.latitude } : {}),
     ...(isFiniteNumber(rawLocation.longitude) ? { longitude: rawLocation.longitude } : {}),
   };
@@ -303,6 +339,7 @@ function normalizePhoto(env: Env, input: Partial<PhotoRecord>, source: "seed" | 
     title: String(input.title || ""),
     description: String(input.description || ""),
     objectKey,
+    ...(typeof input.displayKey === "string" && input.displayKey ? { displayKey: input.displayKey } : {}),
     thumbKey,
     imageUrl: input.imageUrl || (objectKey ? mediaUrl(env, objectKey) : ""),
     thumbUrl: input.thumbUrl || (thumbKey ? mediaUrl(env, thumbKey) : objectKey ? mediaUrl(env, objectKey) : ""),
@@ -590,9 +627,9 @@ export function toPublicArticle(article: ArticleRecord, options: { includeMarkdo
   return options.includeMarkdown ? { ...publicArticle, markdown } : publicArticle;
 }
 
-export function toPublicPhoto(photo: PhotoRecord): PublicPhotoRecord {
-  const { objectKey, thumbKey, source, location, camera, ...publicPhoto } = photo;
-  const publicLocation = { label: location.label, precision: location.precision };
+function publicPhotoWithUrls(photo: PhotoRecord, imageUrl: string, thumbUrl: string): PublicPhotoRecord {
+  const { objectKey, displayKey, thumbKey, source, location, camera, imageUrl: legacyImageUrl, thumbUrl: legacyThumbUrl, ...publicPhoto } = photo;
+  const publicLocation = { label: location.label, precision: normalizePrecision(location.precision) };
   const publicCamera = camera
     ? {
         ...(camera.make ? { make: camera.make } : {}),
@@ -604,9 +641,54 @@ export function toPublicPhoto(photo: PhotoRecord): PublicPhotoRecord {
       }
     : undefined;
   void objectKey;
+  void displayKey;
   void thumbKey;
   void source;
-  return { ...publicPhoto, location: publicLocation, ...(publicCamera ? { camera: publicCamera } : {}) };
+  void legacyImageUrl;
+  void legacyThumbUrl;
+  return { ...publicPhoto, imageUrl, thumbUrl, location: publicLocation, ...(publicCamera ? { camera: publicCamera } : {}) };
+}
+
+export function toPublicPhoto(photo: PhotoRecord): PublicPhotoRecord {
+  if (photo.source === "seed") return publicPhotoWithUrls(photo, photo.imageUrl, photo.thumbUrl);
+  return publicPhotoWithUrls(photo, PHOTO_PLACEHOLDER_URL, PHOTO_PLACEHOLDER_URL);
+}
+
+export function toAdminPhoto(photo: PhotoRecord): PhotoRecord {
+  if (photo.source === "seed") return photo;
+  return {
+    ...photo,
+    imageUrl: `/api/admin/images/${photo.folder}/${photo.id}/media/original`,
+    thumbUrl: `/api/admin/images/${photo.folder}/${photo.id}/media/thumb`,
+  };
+}
+
+export async function readSafePublicVariant(env: Env, photo: PhotoRecord, variant: "display" | "thumb") {
+  if (photo.source === "seed" || !env.MEDIA_BUCKET) return undefined;
+  const useDisplay = variant === "display" && Boolean(photo.displayKey);
+  const key = useDisplay ? photo.displayKey : photo.thumbKey;
+  const expectedKey = useDisplay ? imageDisplayKey(photo.folder, photo.id) : imageThumbKey(photo.folder, photo.id, "webp");
+  const maxBytes = useDisplay ? 10 * 1024 * 1024 : 2 * 1024 * 1024;
+  const maxEdge = useDisplay ? 2560 : 900;
+  const thumbPrefix = `images/${photo.folder}/${photo.id}/`;
+  const isLegacyThumb = typeof key === "string" && key.startsWith(thumbPrefix) && /^thumb\.[a-z0-9]+$/iu.test(key.slice(thumbPrefix.length));
+  if (!key || (useDisplay ? key !== expectedKey : !isLegacyThumb) || key === photo.objectKey) return undefined;
+  const object = await env.MEDIA_BUCKET.get(key);
+  if (!object || object.size > maxBytes) return undefined;
+  const bytes = await object.arrayBuffer();
+  if (!isSafePublicWebP(bytes, maxBytes, maxEdge)) return undefined;
+  return { key, bytes, etag: object.httpEtag };
+}
+
+export async function toPublicPhotoForPublic(env: Env, photo: PhotoRecord): Promise<PublicPhotoRecord> {
+  if (photo.source === "seed") return toPublicPhoto(photo);
+  const thumbSafe = await readSafePublicVariant(env, photo, "thumb");
+  const displaySafe = photo.displayKey ? await readSafePublicVariant(env, photo, "display") : thumbSafe;
+  return publicPhotoWithUrls(
+    photo,
+    displaySafe ? publicVariantUrl(photo, "display") : PHOTO_PLACEHOLDER_URL,
+    thumbSafe ? publicVariantUrl(photo, "thumb") : PHOTO_PLACEHOLDER_URL,
+  );
 }
 
 export function toPublicArticleFolders(folders: Array<FolderRecord & { count?: number; items?: ArticleRecord[]; articles?: ArticleRecord[] }>) {
@@ -632,7 +714,50 @@ export async function listPublicArticles(env: Env) {
 
 export async function listPublicPhotos(env: Env) {
   const data = await listPhotos(env);
-  return { folders: toPublicImageFolders(data.folders), photos: data.photos.map(toPublicPhoto) };
+  const publicPhotos = await Promise.all(data.photos.map((photo) => toPublicPhotoForPublic(env, photo)));
+  const publicById = new Map(data.photos.map((photo, index) => [photoId(photo), publicPhotos[index]]));
+  const folders = data.folders.map(({ items, photos, ...folder }) => ({
+    ...folder,
+    count: folder.count || 0,
+    items: (items || photos || []).map((photo) => publicById.get(photoId(photo)) || toPublicPhoto(photo)),
+  }));
+  return { folders, photos: publicPhotos };
+}
+
+export async function getPublicPhoto(env: Env, folder: string, id: string) {
+  const photo = await getPhoto(env, folder, id);
+  return photo ? toPublicPhotoForPublic(env, photo) : undefined;
+}
+
+export async function listPublicPhotoMap(env: Env, photoFilter?: { folder: string; id: string }) {
+  const data = await listPhotos(env);
+  const selected = photoFilter
+    ? data.photos.filter((photo) => photo.folder === photoFilter.folder && photo.id === photoFilter.id)
+    : data.photos;
+  const safePhotos = await Promise.all(selected.map((photo) => toPublicPhotoForPublic(env, photo)));
+  const points: PublicPhotoMapPoint[] = [];
+  selected.forEach((photo, index) => {
+    const latitude = photo.location.latitude;
+    const longitude = photo.location.longitude;
+    if (!isFiniteNumber(latitude) || !isFiniteNumber(longitude)) return;
+    const precision = LOCATION_PRECISION[normalizePrecision(photo.location.precision)];
+    points.push({
+      id: photo.id,
+      folder: photo.folder,
+      title: photo.title || photo.id,
+      capturedAt: photo.capturedAt,
+      thumbUrl: safePhotos[index].thumbUrl,
+      href: `/images/${photo.folder}/${photo.id}`,
+      location: {
+        label: photo.location.label,
+        precision: normalizePrecision(photo.location.precision),
+        latitude: quantizeCoordinate(latitude, precision.digits),
+        longitude: quantizeCoordinate(longitude, precision.digits),
+        accuracyMeters: precision.accuracyMeters,
+      },
+    });
+  });
+  return points;
 }
 
 export async function listArticles(env: Env, options: { includePrivate?: boolean } = {}) {
@@ -954,7 +1079,8 @@ export async function savePhotoUpload(
   env: Env,
   folder: string,
   file: File,
-  thumb: File | undefined,
+  display: File,
+  thumb: File,
   metadata: Partial<PhotoRecord>,
   ext: string,
 ) {
@@ -962,33 +1088,47 @@ export async function savePhotoUpload(
   const id = String(metadata.id || `${new Date().toISOString().replaceAll(/[-:.TZ]/g, "").slice(0, 14)}-${crypto.randomUUID().slice(0, 8)}`);
   validatePhotoPath(folder, id);
   const objectKey = imageOriginalKey(folder, id, ext);
-  const thumbKey = thumb ? imageThumbKey(folder, id, "webp") : objectKey;
+  const displayKey = imageDisplayKey(folder, id);
+  const thumbKey = imageThumbKey(folder, id, "webp");
   if (await getPhoto(env, folder, id, { includePrivate: true })) {
     throw new ApiError("conflict", "A photo already uses this folder and photoId.", 409, { folder, photoId: id });
   }
   const created: Array<{ key: string; etag: string }> = [];
   try {
     const originalBytes = await file.arrayBuffer();
+    if (file.size > 15 * 1024 * 1024 || !hasImageMagic(file.type, originalBytes)) {
+      throw new ApiError("unsupported_media_type", "The original image MIME type and file signature do not match.", 415, { field: "file" });
+    }
+    const displayBytes = await display.arrayBuffer();
+    const thumbBytes = await thumb.arrayBuffer();
+    if (display.type !== "image/webp") throw new ApiError("unsupported_media_type", "Display must be a WebP file.", 415, { field: "display" });
+    if (thumb.type !== "image/webp") throw new ApiError("unsupported_media_type", "Thumbnail must be a WebP file.", 415, { field: "thumb" });
+    validatePublicWebP(displayBytes, "display", 10 * 1024 * 1024, 2560);
+    validatePublicWebP(thumbBytes, "thumb", 2 * 1024 * 1024, 900);
     const original = await withR2TransientRetry(() => env.MEDIA_BUCKET.put(objectKey, originalBytes, {
       httpMetadata: { contentType: file.type },
       onlyIf: new Headers({ "If-None-Match": "*" }),
     }));
     if (!original) throw new ApiError("conflict", "A photo already uses this folder and photoId.", 409, { folder, photoId: id });
     created.push({ key: objectKey, etag: original.etag });
-    if (thumb) {
-      const thumbBytes = await thumb.arrayBuffer();
-      const thumbWrite = await withR2TransientRetry(() => env.MEDIA_BUCKET.put(thumbKey, thumbBytes, {
-        httpMetadata: { contentType: "image/webp" },
-        onlyIf: new Headers({ "If-None-Match": "*" }),
-      }));
-      if (!thumbWrite) throw new ApiError("storage_error", "Could not write image thumbnail.", 503);
-      created.push({ key: thumbKey, etag: thumbWrite.etag });
-    }
+    const displayWrite = await withR2TransientRetry(() => env.MEDIA_BUCKET.put(displayKey, displayBytes, {
+      httpMetadata: { contentType: "image/webp" },
+      onlyIf: new Headers({ "If-None-Match": "*" }),
+    }));
+    if (!displayWrite) throw new ApiError("conflict", "A public display object already exists for this photo.", 409);
+    created.push({ key: displayKey, etag: displayWrite.etag });
+    const thumbWrite = await withR2TransientRetry(() => env.MEDIA_BUCKET.put(thumbKey, thumbBytes, {
+      httpMetadata: { contentType: "image/webp" },
+      onlyIf: new Headers({ "If-None-Match": "*" }),
+    }));
+    if (!thumbWrite) throw new ApiError("conflict", "A public thumbnail object already exists for this photo.", 409);
+    created.push({ key: thumbKey, etag: thumbWrite.etag });
     return await savePhotoMetadata(env, {
       ...metadata,
       id,
       folder,
       objectKey,
+      displayKey,
       thumbKey,
       imageUrl: mediaUrl(env, objectKey),
       thumbUrl: mediaUrl(env, thumbKey),
@@ -1010,19 +1150,28 @@ export async function patchPhoto(env: Env, folder: string, id: string, patch: Ph
   const location = { ...existing.location, ...patchLocation };
   if (patchLocation.latitude === null) delete location.latitude;
   if (patchLocation.longitude === null) delete location.longitude;
-  const camera = patchCamera ? { ...(existing.camera || {}), ...patchCamera } : existing.camera;
+  const camera = patch.camera === null ? undefined : patchCamera ? { ...(existing.camera || {}), ...patchCamera } : existing.camera;
+  const expectedUpdatedAt = typeof patch.expectedUpdatedAt === "string" ? patch.expectedUpdatedAt : existing.updatedAt;
+  const mutable = {
+    ...(patch.title !== undefined ? { title: patch.title } : {}),
+    ...(patch.description !== undefined ? { description: patch.description } : {}),
+    ...(patch.capturedAt !== undefined ? { capturedAt: patch.capturedAt } : {}),
+    ...(patch.alt !== undefined ? { alt: patch.alt } : {}),
+    ...(patch.visibility !== undefined ? { visibility: patch.visibility } : {}),
+  };
   return savePhotoMetadata(env, {
     ...existing,
-    ...patch,
+    ...mutable,
     folder,
     id,
     location,
     camera,
     objectKey: existing.objectKey,
+    displayKey: existing.displayKey,
     thumbKey: existing.thumbKey,
     imageUrl: mediaUrl(env, existing.objectKey),
     thumbUrl: mediaUrl(env, existing.thumbKey),
-    expectedUpdatedAt: existing.updatedAt,
+    expectedUpdatedAt,
   });
 }
 

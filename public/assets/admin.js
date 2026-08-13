@@ -17,6 +17,13 @@
     drafts: { article: null, photo: null, folder: null },
     dirty: false,
     pending: new Set(),
+    photoExifPending: false,
+    photoExifStatus: "",
+    photoExifStatusKind: "",
+    photoSelectionToken: 0,
+    photoTouched: new Set(),
+    photoAutoFields: new Set(),
+    photoExifFields: {},
   };
 
   const API_TIMEOUT_MS = 15_000;
@@ -191,6 +198,8 @@
         delete control.dataset.pendingDisabled;
       }
     });
+    const imageSubmit = root.querySelector('[data-mutation="image-save"]');
+    if (imageSubmit && !isBusy()) imageSubmit.disabled = state.photoExifPending;
   }
 
   async function runMutation(key, action) {
@@ -450,6 +459,8 @@
           <label><span>拍摄时间</span><input name="capturedAt" type="datetime-local" value="${escapeAttr(fromIso(photo.capturedAt))}"></label>
           <label><span>可见性</span><select name="visibility"><option value="public" ${photo.visibility !== "private" ? "selected" : ""}>public</option><option value="private" ${photo.visibility === "private" ? "selected" : ""}>private</option></select></label>
           <label><span>地点</span><input name="locationLabel" value="${escapeAttr(photo.location?.label)}"></label>
+          <label><span>纬度</span><input name="latitude" type="number" inputmode="decimal" step="any" min="-90" max="90" value="${escapeAttr(photo.location?.latitude ?? "")}" placeholder="31.2304"></label>
+          <label><span>经度</span><input name="longitude" type="number" inputmode="decimal" step="any" min="-180" max="180" value="${escapeAttr(photo.location?.longitude ?? "")}" placeholder="121.4737"></label>
           <label><span>位置精度</span><select name="locationPrecision"><option value="city" ${photo.location?.precision === "city" ? "selected" : ""}>city</option><option value="approximate" ${photo.location?.precision === "approximate" ? "selected" : ""}>approximate</option><option value="exact" ${photo.location?.precision === "exact" ? "selected" : ""}>exact</option></select></label>
           <label><span>相机</span><input name="cameraMake" value="${escapeAttr(photo.camera?.make)}" placeholder="Apple"></label>
           <label><span>型号</span><input name="cameraModel" value="${escapeAttr(photo.camera?.model)}" placeholder="iPhone"></label>
@@ -460,8 +471,9 @@
         </div>
         <label><span>Alt 文本</span><input name="alt" value="${escapeAttr(photo.alt)}"></label>
         <label><span>描述</span><textarea name="description" rows="4">${escapeHtml(photo.description)}</textarea></label>
+        <div class="form-actions location-actions"><button class="button secondary" data-action="clear-location" type="button">清除位置</button><span class="system-text">精度决定公开地图显示范围；新读取的 GPS 默认 city。</span></div>
         ${editing ? `<p id="image-folder-help" class="system-text">图片移动暂未实现；保存时保留原分组。</p>` : ""}
-        ${editing ? "" : `<label><span>原图</span><input name="file" type="file" accept="image/jpeg,image/png,image/webp" required></label>`}
+        ${editing ? "" : `<label><span>原图</span><input name="file" type="file" accept="image/jpeg,image/png,image/webp" required><span id="image-exif-status" class="system-text" role="status" aria-live="polite">${escapeHtml(state.photoExifStatus)}</span></label>`}
         ${editing && photo.imageUrl ? `<div class="admin-photo-preview"><img src="${escapeAttr(photo.thumbUrl || photo.imageUrl)}" alt="${escapeAttr(photo.alt || photo.title)}"></div>` : ""}
         <div class="form-actions">
           <button class="button primary" data-mutation="image-save" type="submit">${editing ? "保存图片元数据" : "上传图片"}</button>
@@ -735,27 +747,104 @@
     });
   }
 
-  async function createThumb(file) {
-    const bitmap = await createImageBitmap(file);
-    const max = 900;
-    const ratio = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
+  function orientedDimensions(width, height, orientation) {
+    return orientation >= 5 && orientation <= 8 ? { width: height, height: width } : { width, height };
+  }
+
+  function drawWithOrientation(context, source, width, height, orientation) {
+    switch (orientation) {
+      case 2:
+        context.translate(width, 0);
+        context.scale(-1, 1);
+        break;
+      case 3:
+        context.translate(width, height);
+        context.rotate(Math.PI);
+        break;
+      case 4:
+        context.translate(0, height);
+        context.scale(1, -1);
+        break;
+      case 5:
+        context.translate(height, 0);
+        context.rotate(Math.PI / 2);
+        context.scale(1, -1);
+        break;
+      case 6:
+        context.translate(height, 0);
+        context.rotate(Math.PI / 2);
+        break;
+      case 7:
+        context.translate(height, 0);
+        context.rotate(Math.PI / 2);
+        context.scale(-1, 1);
+        break;
+      case 8:
+        context.translate(0, width);
+        context.rotate(-Math.PI / 2);
+        break;
+      default:
+        break;
+    }
+    context.drawImage(source, 0, 0, width, height);
+  }
+
+  async function loadImageSource(file, orientation) {
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+      return { source: bitmap, width: bitmap.width, height: bitmap.height, orientation: 1, cleanup: () => bitmap.close?.() };
+    } catch {
+      const url = URL.createObjectURL(file);
+      const image = new Image();
+      image.decoding = "async";
+      image.src = url;
+      if (image.decode) await image.decode();
+      else await new Promise((resolve, reject) => { image.onload = resolve; image.onerror = reject; });
+      const dimensions = orientedDimensions(image.naturalWidth, image.naturalHeight, orientation || 1);
+      return { source: image, width: dimensions.width, height: dimensions.height, rawWidth: image.naturalWidth, rawHeight: image.naturalHeight, orientation: orientation || 1, cleanup: () => URL.revokeObjectURL(url) };
+    }
+  }
+
+  async function createImageAsset(file, max, quality, name, orientation = 1) {
+    const image = await loadImageSource(file, orientation);
+    const ratio = Math.min(1, max / Math.max(image.width, image.height));
     const canvas = document.createElement("canvas");
-    canvas.width = Math.max(1, Math.round(bitmap.width * ratio));
-    canvas.height = Math.max(1, Math.round(bitmap.height * ratio));
+    canvas.width = Math.max(1, Math.round(image.width * ratio));
+    canvas.height = Math.max(1, Math.round(image.height * ratio));
     const context = canvas.getContext("2d");
     if (!context) {
-      bitmap.close?.();
-      throw new Error("无法创建缩略图画布。");
+      image.cleanup();
+      throw new Error("无法创建图片画布。");
     }
-    context.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", 0.82));
-    bitmap.close?.();
-    if (!blob) throw new Error("无法生成 WebP 缩略图。");
-    return new File([blob], "thumb.webp", { type: "image/webp" });
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    if (image.orientation === 1) context.drawImage(image.source, 0, 0, canvas.width, canvas.height);
+    else {
+      context.save();
+      const raw = { width: image.rawWidth, height: image.rawHeight };
+      const ratioX = canvas.width / image.width;
+      const ratioY = canvas.height / image.height;
+      context.scale(ratioX, ratioY);
+      drawWithOrientation(context, image.source, raw.width, raw.height, image.orientation);
+      context.restore();
+    }
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", quality));
+    image.cleanup();
+    if (!blob) throw new Error("无法生成 WebP 图片。");
+    return new File([blob], name, { type: "image/webp" });
+  }
+
+  function photoSelectionMatches(token) {
+    if (token !== state.photoSelectionToken) throw new Error("文件选择已变化，请重新选择后提交。");
   }
 
   function photoPayload(form) {
     const data = new FormData(form);
+    const latitudeText = formString(data, "latitude");
+    const longitudeText = formString(data, "longitude");
+    const latitude = latitudeText === "" ? (state.editingPhoto ? null : undefined) : Number(latitudeText);
+    const longitude = longitudeText === "" ? (state.editingPhoto ? null : undefined) : Number(longitudeText);
+    const isoText = formString(data, "cameraIso");
     return {
       title: formString(data, "title"),
       folder: formString(data, "folder", state.editingPhoto?.folder || ""),
@@ -766,17 +855,112 @@
       location: {
         label: formString(data, "locationLabel"),
         precision: formString(data, "locationPrecision", "city"),
+        ...(latitude !== undefined && Number.isFinite(latitude) ? { latitude } : {}),
+        ...(longitude !== undefined && Number.isFinite(longitude) ? { longitude } : {}),
       },
       camera: {
         make: formString(data, "cameraMake"),
         model: formString(data, "cameraModel"),
         lens: formString(data, "cameraLens"),
-        iso: data.get("cameraIso") ? Number(data.get("cameraIso")) : undefined,
+        iso: isoText === "" ? undefined : Number(isoText),
         aperture: formString(data, "cameraAperture"),
         shutter: formString(data, "cameraShutter"),
       },
       ...(state.editingPhoto?.updatedAt ? { expectedUpdatedAt: state.editingPhoto.updatedAt } : {}),
     };
+  }
+
+  function resetPhotoAutomation() {
+    state.photoSelectionToken += 1;
+    state.photoExifPending = false;
+    state.photoExifStatus = "";
+    state.photoExifStatusKind = "";
+    state.photoTouched = new Set();
+    state.photoAutoFields = new Set();
+    state.photoExifFields = {};
+  }
+
+  function setPhotoExifStatus(message, kind = "") {
+    state.photoExifStatus = message;
+    state.photoExifStatusKind = kind;
+    const status = document.getElementById("image-exif-status");
+    if (status) {
+      status.textContent = message;
+      status.dataset.status = kind;
+    }
+  }
+
+  function markPhotoTouched(name) {
+    if (!name || name === "file") return;
+    state.photoTouched.add(name);
+    state.photoAutoFields.delete(name);
+  }
+
+  function canAutofillPhotoField(input, name) {
+    if (!input || state.photoTouched.has(name)) return false;
+    const current = String(input.value || "").trim();
+    if (state.editingPhoto && current) return false;
+    return !current || state.photoAutoFields.has(name) || (!state.editingPhoto && name === "capturedAt");
+  }
+
+  function assignExifField(form, name, value) {
+    if (value === undefined || value === null || value === "") return false;
+    const input = form.elements.namedItem(name);
+    if (!(input instanceof HTMLInputElement) || !canAutofillPhotoField(input, name)) return false;
+    input.value = String(value);
+    state.photoAutoFields.add(name);
+    return true;
+  }
+
+  function applyExifFields(form, fields) {
+    let applied = 0;
+    applied += assignExifField(form, "capturedAt", fields.capturedAt ? fromIso(fields.capturedAt) : undefined) ? 1 : 0;
+    applied += assignExifField(form, "cameraMake", fields.cameraMake) ? 1 : 0;
+    applied += assignExifField(form, "cameraModel", fields.cameraModel) ? 1 : 0;
+    if (fields.lensModel) applied += assignExifField(form, "cameraLens", fields.lensModel) ? 1 : 0;
+    else if (fields.focalLength) applied += assignExifField(form, "cameraLens", fields.focalLength) ? 1 : 0;
+    applied += assignExifField(form, "cameraIso", fields.cameraIso) ? 1 : 0;
+    applied += assignExifField(form, "cameraAperture", fields.cameraAperture) ? 1 : 0;
+    applied += assignExifField(form, "cameraShutter", fields.cameraShutter) ? 1 : 0;
+    if (fields.latitude !== undefined && fields.longitude !== undefined) {
+      applied += assignExifField(form, "latitude", fields.latitude) ? 1 : 0;
+      applied += assignExifField(form, "longitude", fields.longitude) ? 1 : 0;
+    }
+    state.drafts.photo = photoPayload(form);
+    setDirty();
+    return applied;
+  }
+
+  async function readSelectedPhoto(form, file) {
+    const token = ++state.photoSelectionToken;
+    state.photoExifPending = true;
+    state.photoExifFields = {};
+    setPhotoExifStatus("正在读取 EXIF……", "reading");
+    updateBusyUi();
+    try {
+      const result = await globalThis.WTAExif?.read(file);
+      photoSelectionMatches(token);
+      const fields = result?.fields || {};
+      state.photoExifFields = fields;
+      if (result?.status === "recognized") {
+        const applied = applyExifFields(form, fields);
+        setPhotoExifStatus(`已识别 EXIF${applied ? `，自动填入 ${applied} 项` : "；已有或手填内容已保留"}。`, "recognized");
+      } else if (result?.status === "missing") {
+        setPhotoExifStatus("未找到可用 EXIF；仍可手动填写并上传。", "missing");
+      } else {
+        setPhotoExifStatus("EXIF 读取失败；仍可手动填写并上传。", "failed");
+      }
+    } catch (error) {
+      if (token === state.photoSelectionToken) {
+        state.photoExifFields = {};
+        setPhotoExifStatus(error?.message || "EXIF 读取失败；仍可手动填写并上传。", "failed");
+      }
+    } finally {
+      if (token === state.photoSelectionToken) {
+        state.photoExifPending = false;
+        updateBusyUi();
+      }
+    }
   }
 
   function bindImages() {
@@ -788,6 +972,7 @@
         state.editingPhoto = state.photos.find((photo) => photo.folder === folder && photo.id === id);
         state.drafts.photo = null;
         state.dirty = false;
+        resetPhotoAutomation();
         render();
       });
     });
@@ -798,18 +983,53 @@
       state.editingPhoto = null;
       state.drafts.photo = null;
       state.dirty = false;
+      resetPhotoAutomation();
       render();
     });
 
     const form = document.getElementById("image-form");
-    form?.addEventListener("input", () => {
+    form?.addEventListener("input", (event) => {
+      markPhotoTouched(event.target?.name);
       const currentForm = document.getElementById("image-form");
       if (!currentForm) return;
       state.drafts.photo = photoPayload(currentForm);
       setDirty();
     });
+    form?.addEventListener("change", (event) => {
+      const target = event.target;
+      if (target?.name === "file") {
+        const file = target.files?.[0];
+        if (file) readSelectedPhoto(form, file);
+        else {
+          state.photoSelectionToken += 1;
+          state.photoExifPending = false;
+          state.photoExifFields = {};
+          setPhotoExifStatus("", "");
+          updateBusyUi();
+        }
+        return;
+      }
+      markPhotoTouched(target?.name);
+      state.drafts.photo = photoPayload(form);
+      setDirty();
+    });
+    root.querySelector('[data-action="clear-location"]')?.addEventListener("click", () => {
+      const currentForm = document.getElementById("image-form");
+      if (!currentForm) return;
+      ["locationLabel", "latitude", "longitude"].forEach((name) => {
+        const input = currentForm.elements.namedItem(name);
+        if (input instanceof HTMLInputElement) input.value = "";
+        markPhotoTouched(name);
+      });
+      const precision = currentForm.elements.namedItem("locationPrecision");
+      if (precision instanceof HTMLSelectElement) precision.value = "city";
+      markPhotoTouched("locationPrecision");
+      state.drafts.photo = photoPayload(currentForm);
+      setDirty();
+    });
     form?.addEventListener("submit", async (event) => {
       event.preventDefault();
+      if (state.photoExifPending) return setStatus("EXIF 仍在读取，请稍候。", true);
       const currentForm = document.getElementById("image-form");
       if (!currentForm) return;
       const previous = state.editingPhoto;
@@ -832,7 +1052,14 @@
         body.set("folder", metadata.folder);
         body.set("metadata", JSON.stringify(metadata));
         body.set("file", file);
-        body.set("thumb", await createThumb(file));
+        const token = state.photoSelectionToken;
+        const orientation = Number(state.photoExifFields.orientation || 1);
+        const display = await createImageAsset(file, 2560, 0.88, "display.webp", orientation);
+        photoSelectionMatches(token);
+        const thumb = await createImageAsset(file, 900, 0.82, "thumb.webp", orientation);
+        photoSelectionMatches(token);
+        body.set("display", display);
+        body.set("thumb", thumb);
         const photo = await api("/api/admin/images", { method: "POST", body });
         state.editingPhoto = photo;
         await reconcileAfterMutation("photo", photo, { message: "图片已上传。" });

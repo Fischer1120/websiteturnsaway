@@ -9,3 +9,15 @@
 
 /assets/public-content.js
   Cache-Control: no-store
+
+/assets/exif-helper.js
+  Cache-Control: no-store
+
+/assets/photo-map.js
+  Cache-Control: no-store
+
+/assets/photo-map.css
+  Cache-Control: no-store
+
+/*
+  Referrer-Policy: strict-origin-when-cross-origin

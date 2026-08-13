@@ -54,6 +54,11 @@ export function imageOriginalKey(folder: string, photoId: string, ext: string) {
   return `images/${folder}/${photoId}/original.${ext}`;
 }
 
+export function imageDisplayKey(folder: string, photoId: string) {
+  assertPublicPath(folder, "folder");
+  return `images/${folder}/${photoId}/display.webp`;
+}
+
 export function imageThumbKey(folder: string, photoId: string, ext: string) {
   assertPublicPath(folder, "folder");
   return `images/${folder}/${photoId}/thumb.${ext}`;

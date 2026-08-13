@@ -1,5 +1,5 @@
 import { fail, failFromError, ok, param, type FunctionContext } from "../../../_shared/responses";
-import { listPhotos, toPublicPhoto } from "../../../_shared/content";
+import { listPublicPhotos } from "../../../_shared/content";
 import { isSlug } from "../../../_shared/validators";
 
 export const onRequestGet = async (context: FunctionContext) => {
@@ -9,12 +9,12 @@ export const onRequestGet = async (context: FunctionContext) => {
     return fail(context.request, context.env, "invalid_request", "Invalid folder.", 400, { folder });
   }
 
-  const folderPhotos = (await listPhotos(context.env)).photos.filter((photo) => photo.folder === folder);
+  const folderPhotos = (await listPublicPhotos(context.env)).photos.filter((photo) => photo.folder === folder);
   if (folderPhotos.length === 0) {
     return fail(context.request, context.env, "not_found", "Image folder not found.", 404, { folder });
   }
 
-    return ok(context.request, context.env, { folder, photos: folderPhotos.map(toPublicPhoto) });
+    return ok(context.request, context.env, { folder, photos: folderPhotos });
   } catch (error) {
     return failFromError(context.request, context.env, error, "Could not read image folder.");
   }

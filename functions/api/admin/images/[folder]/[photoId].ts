@@ -1,5 +1,5 @@
 import { requireAdmin } from "../../../../_shared/auth";
-import { deletePhoto, getPhoto, patchPhoto } from "../../../../_shared/content";
+import { deletePhoto, getPhoto, patchPhoto, toAdminPhoto } from "../../../../_shared/content";
 import { fail, failFromError, ok, options, param, type FunctionContext } from "../../../../_shared/responses";
 import { isPublicId, isSlug } from "../../../../_shared/validators";
 
@@ -22,7 +22,7 @@ export const onRequestGet = async (context: FunctionContext) => {
     return fail(context.request, context.env, "not_found", "Photo not found.", 404, { folder, photoId });
   }
 
-  return ok(context.request, context.env, photo);
+  return ok(context.request, context.env, toAdminPhoto(photo));
 };
 
 export const onRequestPatch = async (context: FunctionContext) => {
@@ -45,7 +45,7 @@ export const onRequestPatch = async (context: FunctionContext) => {
     if (!photo) {
       return fail(context.request, context.env, "not_found", "Photo not found.", 404, { folder, photoId });
     }
-    return ok(context.request, context.env, photo);
+    return ok(context.request, context.env, toAdminPhoto(photo));
   } catch (error) {
     return failFromError(context.request, context.env, error, "Could not update image.");
   }

@@ -1,3 +1,26 @@
+export type SiteSection = "home" | "articles" | "images" | "admin";
+
+export type Breadcrumb = {
+  label: string;
+  href?: string;
+};
+
+export type PublicPageOptions = {
+  title: string;
+  description: string;
+  currentSection: SiteSection;
+  breadcrumbs: Breadcrumb[];
+  body: string;
+  status?: number;
+};
+
+const siteSections: Array<{ id: SiteSection; href: string; label: string }> = [
+  { id: "home", href: "/", label: "首页" },
+  { id: "articles", href: "/articles", label: "文章" },
+  { id: "images", href: "/images", label: "图片" },
+  { id: "admin", href: "/admin", label: "管理入口" },
+];
+
 export function escapeHtml(value: unknown) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -20,24 +43,83 @@ export function formatDate(value: string, withTime = false) {
   }).format(new Date(value));
 }
 
-export const publicPageCss = `
-:root{--ink:#182434;--paper:#f4ecd9;--coral:#d96f57;--amber:#d6ad54;--mist:#96aaa4;--line:rgba(244,236,217,.22);font-family:"Avenir Next","Segoe UI",Arial,sans-serif;color:var(--paper);background:var(--ink)}
-*{box-sizing:border-box}body{min-width:320px;margin:0;background:linear-gradient(rgba(244,236,217,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(244,236,217,.03) 1px,transparent 1px),radial-gradient(circle at 78% 0%,rgba(217,111,87,.22),transparent 34rem),var(--ink);background-size:22px 22px,22px 22px,auto,auto}a{color:inherit;text-decoration:none}img{display:block;max-width:100%}.site-frame{width:min(1280px,100%);margin:0 auto;padding:14px}.topbar{position:sticky;top:0;z-index:20;display:grid;grid-template-columns:minmax(180px,1fr) auto;gap:10px;align-items:stretch;padding:10px;border:1px solid var(--line);background:rgba(24,36,52,.9);backdrop-filter:blur(14px)}.brand{display:flex;align-items:center;gap:10px;font-family:Georgia,"Times New Roman",serif;font-weight:700}.brand-mark{display:grid;width:34px;height:34px;place-items:center;border:2px solid var(--paper);background:var(--paper)}.brand-mark:before{width:18px;height:18px;content:"";border:2px solid var(--ink);border-radius:50%;background:linear-gradient(135deg,var(--amber),var(--coral) 58%,var(--mist))}.system-strip{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}.system-strip a{display:inline-flex;min-height:34px;align-items:center;justify-content:center;padding:0 12px;border:1px solid var(--line);background:rgba(244,236,217,.08);font-size:.78rem;font-weight:700}.panel{margin-top:14px;border:1px solid var(--line);background:rgba(244,236,217,.06)}.section-heading{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:end;padding:18px;border-bottom:1px solid var(--line)}.section-heading p{max-width:34rem;margin:0;color:rgba(244,236,217,.72);line-height:1.65}.eyebrow,.system-text{font-family:"Courier New",Courier,monospace}.eyebrow{margin:0 0 10px;color:var(--coral);font-size:.76rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}h1{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(2.8rem,8vw,7rem);line-height:.9}.record-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;padding:18px}.record-card{display:grid;grid-template-columns:150px minmax(0,1fr);min-height:170px;border:1px solid var(--line);background:rgba(244,236,217,.9);color:var(--ink)}.record-thumb{min-height:170px;background:rgba(24,36,52,.14)}.record-thumb img{width:100%;height:100%;object-fit:cover}.record-body{padding:16px}.record-body h2{margin:10px 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.45rem,2.8vw,2.2rem);line-height:1.02}.record-body p{margin:0 0 10px;color:rgba(24,36,52,.72);line-height:1.65}.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{display:inline-flex;min-height:24px;align-items:center;padding:0 8px;border:1px solid rgba(24,36,52,.28);background:rgba(244,236,217,.74);font-family:"Courier New",Courier,monospace;font-size:.72rem;font-weight:700;text-transform:uppercase}.sidecar{padding:18px;border-left:1px solid var(--line);background:rgba(244,236,217,.9);color:var(--ink)}.photo-detail{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;padding:18px}.photo-main{padding:18px;background:rgba(244,236,217,.9);color:var(--ink)}.photo-main h1{font-size:clamp(2.4rem,7vw,6rem)}.photo-image{margin-top:24px}.photo-image img{width:100%;max-height:72vh;object-fit:contain;background:rgba(24,36,52,.12)}.photo-description{color:rgba(24,36,52,.72);line-height:1.75}.meta-list{display:grid;gap:8px}.meta-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:10px 0;border-top:1px solid rgba(24,36,52,.24)}.meta-label{color:var(--coral);font-family:"Courier New",Courier,monospace;font-size:.72rem;font-weight:700;text-transform:uppercase}.meta-value{overflow-wrap:anywhere;color:rgba(24,36,52,.74);line-height:1.55}.folder-grid{display:grid;gap:8px;padding:18px}.folder-row{display:grid;grid-template-columns:minmax(140px,.35fr) minmax(0,1fr) auto;gap:12px;align-items:center;padding:14px;border:1px solid var(--line);background:rgba(244,236,217,.08)}.folder-row p{margin:4px 0 0;color:rgba(244,236,217,.7)}.folder-row .path,.count{font-family:"Courier New",Courier,monospace;font-size:.76rem}.footer{margin-top:14px;padding:18px;border:1px solid var(--line);color:rgba(244,236,217,.64)}@media(max-width:860px){.topbar,.section-heading,.photo-detail{grid-template-columns:1fr}.record-grid{grid-template-columns:1fr}.sidecar{border-left:0;border-top:1px solid var(--line)}}@media(max-width:560px){.site-frame{padding:8px}.record-card,.folder-row{grid-template-columns:1fr}.record-thumb{min-height:180px}}
- .photo-view-switch{display:flex;flex-wrap:wrap;gap:8px;padding:18px;border-bottom:1px solid var(--line)}.photo-view-switch button{min-width:110px;min-height:44px;border:1px solid var(--line);background:rgba(244,236,217,.08);color:var(--paper);cursor:pointer;font:inherit;font-weight:700}.photo-view-switch button[aria-selected="true"]{background:var(--coral);color:var(--ink)}.photo-list-panel[hidden],.photo-map-panel[hidden]{display:none}.photo-map-panel{padding:18px}.photo-map-shell{display:grid;gap:12px}.photo-map-shell .photo-map-canvas{height:520px;min-height:320px;border:1px solid var(--line);background:#d8d0bd}.photo-map-shell.detail .photo-map-canvas{height:360px}.photo-map-note,.photo-map-status{margin:0;color:rgba(244,236,217,.72);line-height:1.6}.photo-map-status.is-error{color:var(--coral)}.photo-map-reset{justify-self:start;min-width:44px;min-height:44px}.photo-map-marker-wrap{background:transparent;border:0}.photo-map-marker{display:grid;width:48px;height:48px;place-items:center;border:2px solid var(--paper);border-radius:50%;background:var(--coral);box-shadow:0 4px 0 rgba(24,36,52,.32);color:var(--ink);font-weight:800}.photo-map-marker span{display:grid;width:30px;height:30px;place-items:center;border-radius:50%;background:var(--paper)}.photo-map-popup{display:grid;grid-template-columns:72px minmax(0,1fr);gap:10px;color:var(--ink)}.photo-map-popup img{width:72px;height:72px;object-fit:cover}.photo-map-popup div{display:grid;gap:4px}.photo-map-popup span{font-size:.78rem;color:rgba(24,36,52,.68)}.photo-map-popup a{color:var(--coral);font-weight:700}.marker-cluster-small,.marker-cluster-medium,.marker-cluster-large{width:48px!important;height:48px!important;margin-left:-24px!important;margin-top:-24px!important}.marker-cluster-small div,.marker-cluster-medium div,.marker-cluster-large div{width:42px!important;height:42px!important;margin-left:3px!important;margin-top:3px!important;background:var(--amber);color:var(--ink);font-weight:800}.leaflet-control-zoom a{min-width:44px;min-height:44px;line-height:44px}.leaflet-control-attribution{font-size:10px}@media(prefers-reduced-motion:reduce){.photo-map-shell *{scroll-behavior:auto!important}.leaflet-pane *{transition:none!important}}@media(max-width:560px){.photo-map-shell .photo-map-canvas{height:min(60vh,480px)}.photo-map-shell.detail .photo-map-canvas{height:min(50vh,360px)}}
-`;
-
-export function siteHeader() {
-  return `<header class="topbar" aria-label="主导航"><a class="brand" href="/" aria-label="Website Turns Away 首页"><span class="brand-mark" aria-hidden="true"></span><span>Website Turns Away</span></a><nav class="system-strip"><a href="/">首页</a><a href="/articles">文章</a><a href="/images">图片</a><a href="/admin">管理入口</a></nav></header>`;
+export function siteHeader(currentSection: SiteSection) {
+  const links = siteSections
+    .map((item) => {
+      const current = item.id === currentSection ? ' aria-current="page"' : "";
+      return `<a class="nav-link" href="${item.href}"${current}>${item.label}</a>`;
+    })
+    .join("");
+  return `<header class="topbar"><a class="brand" href="/" aria-label="Website Turns Away 首页"><span class="brand-mark" aria-hidden="true"><span></span></span><span class="brand-copy"><strong>Website Turns Away</strong><small>Orbital Archive v2</small></span></a><nav class="primary-nav" aria-label="主导航">${links}</nav></header>`;
 }
 
-export function mapLoaderScript() {
-  return `<script>(function(){function loadAssets(root){var promise=window.__wtaMapPromise;if(!promise){promise=new Promise(function(resolve,reject){var link=document.createElement("link");link.rel="stylesheet";link.href="/assets/photo-map.css?v=20260813-1";document.head.appendChild(link);var script=document.createElement("script");script.src="/assets/photo-map.js?v=20260813-1";script.async=true;script.onload=function(){resolve(window.WTAPhotoMap)};script.onerror=function(){reject(new Error("map_asset"))};document.head.appendChild(script)});window.__wtaMapPromise=promise.catch(function(error){window.__wtaMapPromise=null;throw error})}return window.__wtaMapPromise.then(function(api){return api.mount(root)})}function setupPage(page){var list=page.querySelector("[data-photo-list-panel]"),map=page.querySelector("[data-photo-map-panel]"),root=page.querySelector("[data-photo-map-root]"),buttons=page.querySelectorAll("[data-photo-view]");if(!list||!map||!root)return;function setView(view){var active=view==="map";list.hidden=active;map.hidden=!active;buttons.forEach(function(button){button.setAttribute("aria-selected",String(button.dataset.photoView===view))});if(active)loadAssets(root).catch(function(){})}buttons.forEach(function(button){button.addEventListener("click",function(){setView(button.dataset.photoView)})});setView(new URL(location.href).searchParams.get("view")==="map"?"map":"photos")}function setupDetail(root){var button=root.querySelector("[data-map-load]");if(!button)return;button.addEventListener("click",function(){button.disabled=true;button.textContent="正在加载地图……";loadAssets(root).then(function(){button.remove()}).catch(function(){button.disabled=false;button.textContent="重试加载地图"})})}function boot(){document.querySelectorAll("[data-photo-map-page]").forEach(setupPage);document.querySelectorAll("[data-photo-detail-map]").forEach(setupDetail)}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",boot);else boot()})();</script>`;
+function breadcrumbItems(breadcrumbs: Breadcrumb[]) {
+  return breadcrumbs
+    .map((item, index) => {
+      const current = index === breadcrumbs.length - 1;
+      const label = escapeHtml(item.label);
+      const content = !current && item.href
+        ? `<a href="${escapeAttr(item.href)}">${label}</a>`
+        : `<span${current ? ' aria-current="page"' : ""}>${label}</span>`;
+      return `<li>${content}</li>`;
+    })
+    .join("");
 }
 
-export function htmlPage(title: string, body: string, status = 200, extra = "") {
-  return new Response(`<!doctype html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="description" content="${escapeAttr(title)}"><meta name="referrer" content="strict-origin-when-cross-origin"><title>${escapeHtml(title)} - Website Turns Away</title><style>${publicPageCss}</style></head><body><div class="site-frame">${siteHeader()}${body}<footer class="footer system-text">ORBITAL MONOLITH INDEX / CLOUDFLARE PAGES FUNCTIONS + R2 LIVE CONTENT</footer></div>${extra}</body></html>`, {
+function contextNavigation(section: SiteSection, breadcrumbs: Breadcrumb[]) {
+  const sectionInfo = siteSections.find((item) => item.id === section) || siteSections[0];
+  const items = breadcrumbItems(breadcrumbs.length ? breadcrumbs : [{ label: sectionInfo.label }]);
+  const trail = `<nav class="context-trail" aria-label="当前位置"><p class="context-kicker">Archive context</p><ol>${items}</ol></nav>`;
+  return `<aside class="context-rail" aria-label="当前栏目"><span class="context-index" aria-hidden="true">${String(siteSections.indexOf(sectionInfo)).padStart(2, "0")}</span><span class="context-section">${escapeHtml(sectionInfo.label)}</span>${trail}</aside><details class="context-disclosure"><summary><span>当前位置</span><strong>${escapeHtml(breadcrumbs.at(-1)?.label || sectionInfo.label)}</strong></summary>${trail}</details>`;
+}
+
+export function htmlPage(options: PublicPageOptions) {
+  const {
+    title,
+    description,
+    currentSection,
+    breadcrumbs,
+    body,
+    status = 200,
+  } = options;
+  const documentTitle = title === "Website Turns Away"
+    ? "Website Turns Away — Orbital Archive v2"
+    : `${title} — Website Turns Away`;
+
+  return new Response(`<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="${escapeAttr(description)}">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta name="theme-color" content="#080A0D">
+    <title>${escapeHtml(documentTitle)}</title>
+    <link rel="stylesheet" href="/assets/site.css">
+    <script src="/assets/site-ui.js" defer></script>
+  </head>
+  <body data-site-section="${currentSection}">
+    <a class="skip-link" href="#main-content">跳到正文</a>
+    <div class="site-frame">
+      ${siteHeader(currentSection)}
+      <div class="layout-grid">
+        ${contextNavigation(currentSection, breadcrumbs)}
+        ${body}
+      </div>
+      <footer class="footer"><span class="system-text">ORBITAL ARCHIVE v2</span><span>Cloudflare Pages Functions + R2 live content</span></footer>
+    </div>
+  </body>
+</html>`, {
     status,
-    headers: { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Referrer-Policy": "strict-origin-when-cross-origin", "X-Content-Type-Options": "nosniff" },
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self' https://*.tile.openstreetmap.org; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests",
+      "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+      "Referrer-Policy": "strict-origin-when-cross-origin",
+      "X-Content-Type-Options": "nosniff",
+      "X-Frame-Options": "DENY",
+    },
   });
 }
 
@@ -51,5 +133,8 @@ export function canonicalRedirect(request: Request) {
 }
 
 export function metaRows(rows: Array<[string, unknown]>) {
-  return `<div class="meta-list">${rows.filter(([, value]) => value !== undefined && value !== null && String(value) !== "").map(([label, value]) => `<div class="meta-row"><span class="meta-label">${escapeHtml(label)}</span><span class="meta-value">${escapeHtml(value)}</span></div>`).join("")}</div>`;
+  return `<dl class="meta-list">${rows
+    .filter(([, value]) => value !== undefined && value !== null && String(value) !== "")
+    .map(([label, value]) => `<div class="meta-row"><dt class="meta-label">${escapeHtml(label)}</dt><dd class="meta-value">${escapeHtml(value)}</dd></div>`)
+    .join("")}</dl>`;
 }

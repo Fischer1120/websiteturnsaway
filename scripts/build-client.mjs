@@ -17,6 +17,24 @@ const common = {
 };
 
 await build({
+  bundle: true,
+  minify: true,
+  target: ["es2020"],
+  sourcemap: false,
+  legalComments: "none",
+  logLevel: "warning",
+  entryPoints: [fileURLToPath(new URL("../src/styles/global.css", import.meta.url))],
+  outfile: fileURLToPath(new URL("../public/assets/site.css", import.meta.url)),
+});
+
+await build({
+  ...common,
+  entryPoints: [fileURLToPath(new URL("../src/client/site-ui.js", import.meta.url))],
+  format: "iife",
+  outfile: fileURLToPath(new URL("../public/assets/site-ui.js", import.meta.url)),
+});
+
+await build({
   ...common,
   entryPoints: [fileURLToPath(new URL("../src/client/exif-helper.js", import.meta.url))],
   format: "iife",

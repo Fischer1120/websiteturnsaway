@@ -2,23 +2,14 @@ import { fail, type FunctionContext } from "./responses";
 
 async function timingSafeEqual(left: string, right: string) {
   const encoder = new TextEncoder();
-  const leftBytes = encoder.encode(left);
-  const rightBytes = encoder.encode(right);
-  const length = Math.max(leftBytes.length, rightBytes.length);
-  const paddedLeft = new Uint8Array(length);
-  const paddedRight = new Uint8Array(length);
-  paddedLeft.set(leftBytes);
-  paddedRight.set(rightBytes);
-
-  const leftDigest = await crypto.subtle.digest("SHA-256", paddedLeft);
-  const rightDigest = await crypto.subtle.digest("SHA-256", paddedRight);
-  const leftHash = new Uint8Array(leftDigest);
-  const rightHash = new Uint8Array(rightDigest);
-  let diff = 0;
-  for (let index = 0; index < leftHash.length; index += 1) {
-    diff |= leftHash[index] ^ rightHash[index];
-  }
-  return diff === 0 && leftBytes.length === rightBytes.length;
+  const subtle = crypto.subtle as SubtleCrypto & {
+    timingSafeEqual(left: ArrayBuffer, right: ArrayBuffer): boolean;
+  };
+  const [leftDigest, rightDigest] = await Promise.all([
+    subtle.digest("SHA-256", encoder.encode(left)),
+    subtle.digest("SHA-256", encoder.encode(right)),
+  ]);
+  return subtle.timingSafeEqual(leftDigest, rightDigest);
 }
 
 export async function requireAdmin(context: FunctionContext) {

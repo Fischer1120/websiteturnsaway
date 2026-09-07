@@ -17,36 +17,35 @@ const articleFolders = getArticleFolders();
 const photoFolders = getPhotoFolders();
 ---
 
-<BaseLayout title="Website Turns Away - Orbital Monolith Index">
+<BaseLayout
+  title="Website Turns Away — Orbital Archive v2"
+  description="Orbital Archive v2：文章、图片、文件夹与元数据构成的个人档案站。"
+  currentSection="home"
+>
   <div class="layout-grid">
-    <RouteMatrix />
-    <main class="content-stack">
-      <section class="hero" aria-labelledby="home-title">
+    <RouteMatrix section="home" breadcrumbs={[{ label: "首页" }]} />
+    <main id="main-content" class="content-stack" tabindex="-1">
+      <section class="hero" aria-labelledby="home-title" data-orbital-hero>
         <div class="panel hero-copy">
           <p class="eyebrow">Welcome / Archive Station</p>
           <h1 id="home-title">一座观测站，用来存放转身后的证据。</h1>
-          <p>
-            这里不急着讲故事。文章、图片、文件夹和元数据先被精确归档，再慢慢显出黄昏、
-            球体、方碑和金字塔的轮廓。
+          <p class="hero-dek">
+            文章、图片、文件夹与元数据在这里被精确归档。真实内容保持原貌，界面只留下冷白表面、石墨轨道与克制的信号色。
           </p>
           <div class="hero-actions">
-            <a class="button primary" href="/articles">文章栏目与文件夹入口</a>
-            <a class="button secondary" href="/images">图片栏目与相册入口</a>
+            <a class="button primary" href="/articles">浏览文章</a>
+            <a class="button secondary" href="/images">浏览图片与地图</a>
           </div>
-          <div class="quick-grid" aria-label="快速入口">
-            <a class="quick-link" href="/articles/notes/monolith-at-sunset">
-              <span class="path">GET /articles/notes/...</span>
-              <strong>文章详情示例</strong>
-            </a>
-            <a class="quick-link" href="/images/city-walk/20260531-184200-a1b2">
-              <span class="path">GET /images/city-walk/...</span>
-              <strong>图片详情示例</strong>
-            </a>
+          <div class="archive-readout" aria-label="公开档案统计">
+            <span><strong>{articles.length}</strong> articles</span>
+            <span><strong>{photos.length}</strong> photos</span>
+            <span><strong>{articleFolders.length + photoFolders.length}</strong> folders</span>
           </div>
         </div>
-        <div class="panel hero-visual" aria-label="Orbital Monolith visual">
-          <img src="/assets/media/orbital-monolith-cover.svg" alt="复古未来主义球体、方碑和金字塔构成的观测站图像" />
-        </div>
+        <figure class="panel hero-visual" data-orbital-stage>
+          <img src="/assets/media/orbital-monolith-cover.svg" alt="球体、轨道、方碑和金字塔组成的观测站图像" fetchpriority="high" data-orbital-art />
+          <figcaption class="system-text">ORBITAL MONOLITH / ARCHIVE SIGNAL 02</figcaption>
+        </figure>
       </section>
 
       <section class="panel dark" id="articles" aria-labelledby="articles-title">

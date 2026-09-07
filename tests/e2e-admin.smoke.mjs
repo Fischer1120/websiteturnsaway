@@ -67,12 +67,17 @@ const consoleErrors = [];
     if (assetRequests !== 1) throw new Error(`expected one asset mutation, got ${assetRequests}`);
     if (!(await markdown.inputValue()).includes("screenshot-mobile.png")) throw new Error("successful asset upload removed Markdown");
 
-    await page.evaluate(() => { window.confirm = () => true; });
-    await page.getByRole("button", { name: "新建文章" }).click();
+    const startNew = page.getByRole("button", { name: "新建文章" }).click();
+    const discardDialog = page.getByRole("dialog", { name: "放弃未保存的修改？" });
+    await discardDialog.waitFor({ state: "visible" });
+    await discardDialog.getByRole("button", { name: "放弃修改" }).click();
+    await startNew;
+    await page.getByRole("button", { name: "创建文章" }).waitFor();
     await title.fill("冲突草稿标题");
     await slugInput.fill(slug);
     await markdown.fill("冲突正文");
     await page.getByRole("button", { name: "创建文章" }).click();
+    await page.locator("#admin-error-region").waitFor({ state: "visible" });
     if (!(await title.inputValue()).includes("冲突草稿标题") || await markdown.inputValue() !== "冲突正文") throw new Error("409 conflict cleared the draft");
     if (!(await page.getByRole("alert").textContent()).includes("冲突")) throw new Error("409 conflict was not readable");
 

@@ -14,9 +14,12 @@ export function getStaticPaths() {
 const { folder } = Astro.props;
 ---
 
-<BaseLayout title={`${folder.label} - 文章文件夹`}>
+<BaseLayout title={`${folder.label} — 文章文件夹`} description={folder.description} currentSection="articles">
   <div class="layout-grid">
-    <RouteMatrix />
+    <RouteMatrix
+      section="articles"
+      breadcrumbs={[{ label: "首页", href: "/" }, { label: "文章", href: "/articles" }, { label: folder.label }]}
+    />
     <PublicContentShell
       kind="articles"
       eyebrow={`/articles/${folder.slug}`}

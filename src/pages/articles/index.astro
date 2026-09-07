@@ -4,9 +4,13 @@ import RouteMatrix from "@/components/RouteMatrix.astro";
 import PublicContentShell from "@/components/PublicContentShell.astro";
 ---
 
-<BaseLayout title="文章栏目 - Website Turns Away">
+<BaseLayout
+  title="文章栏目 — Website Turns Away"
+  description="按文件夹浏览 Website Turns Away 的公开文章。"
+  currentSection="articles"
+>
   <div class="layout-grid">
-    <RouteMatrix />
+    <RouteMatrix section="articles" breadcrumbs={[{ label: "首页", href: "/" }, { label: "文章" }]} />
     <PublicContentShell
       kind="articles"
       eyebrow="Articles / Live Index"

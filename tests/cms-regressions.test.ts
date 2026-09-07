@@ -465,6 +465,12 @@ describe("CMS security and API contracts", () => {
     expect(page.status).toBe(200);
     expect(html).toContain("图片栏目");
     expect(html).not.toContain("LOADING / FETCHING CONTENT INDEX");
+    expect(html).toContain('role="tablist"');
+    expect(html).toContain('aria-controls="photo-panel-map"');
+    expect(html).toContain('<script src="/assets/site-ui.js" defer></script>');
+    expect(html).not.toContain('/assets/photo-map.js');
+    expect(html).not.toContain("tile.openstreetmap.org");
+    expect(html).toMatch(/data-map-canvas[^>]*hidden/u);
 
     const detail = await getImageDetailPage(requestContext(new Request("https://test.local/images/city-walk/20260531-184200-a1b2"), { folder: "city-walk", photoId: "20260531-184200-a1b2" }));
     const detailHtml = await detail.text();
@@ -472,5 +478,8 @@ describe("CMS security and API contracts", () => {
     expect(detailHtml).toContain("粉色天空下的球体");
     expect(detailHtml).not.toContain("31.2304");
     expect(detailHtml).not.toContain("objectKey");
+    expect(detailHtml).toContain("data-map-load");
+    expect(detailHtml).not.toContain('/assets/photo-map.js');
+    expect(detailHtml).not.toContain("tile.openstreetmap.org");
   });
 });

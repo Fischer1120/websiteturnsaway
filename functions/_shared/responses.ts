@@ -36,7 +36,10 @@ function corsHeaders(request: Request, env: Env) {
   const headers = new Headers({
     "Content-Type": "application/json; charset=utf-8",
     "Cache-Control": "no-store",
+    "Permissions-Policy": "camera=(), microphone=(), geolocation=()",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "DENY",
   });
 
   if (origin && allowed.includes(origin)) {

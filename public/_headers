@@ -19,5 +19,15 @@
 /assets/photo-map.css
   Cache-Control: no-store
 
+/assets/site.css
+  Cache-Control: no-store
+
+/assets/site-ui.js
+  Cache-Control: no-store
+
 /*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self' https://*.tile.openstreetmap.org; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests
   Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY

@@ -1,22 +1,59 @@
 ---
-const items = [
-  { href: "/", code: "00", label: "Home station" },
-  { href: "/articles", code: "01", label: "Article folders" },
-  { href: "/images", code: "02", label: "Image albums" },
-  { href: "/articles/notes/monolith-at-sunset", code: "03", label: "Article record" },
-  { href: "/images/city-walk/20260531-184200-a1b2", code: "04", label: "Photo sidecar" },
-  { href: "/admin", code: "05", label: "Admin console" },
-];
+type SiteSection = "home" | "articles" | "images" | "admin";
+type Breadcrumb = { label: string; href?: string };
+type Props = { section?: SiteSection; breadcrumbs?: Breadcrumb[] };
+
+const sectionInfo: Record<SiteSection, { index: string; label: string }> = {
+  home: { index: "00", label: "首页" },
+  articles: { index: "01", label: "文章" },
+  images: { index: "02", label: "图片" },
+  admin: { index: "03", label: "管理入口" },
+};
+const pathname = Astro.url.pathname;
+const inferredSection: SiteSection = pathname.startsWith("/articles")
+  ? "articles"
+  : pathname.startsWith("/images")
+    ? "images"
+    : pathname.startsWith("/admin")
+      ? "admin"
+      : "home";
+const { section = inferredSection, breadcrumbs } = Astro.props;
+const fallbackTrail: Breadcrumb[] = section === "home"
+  ? [{ label: "首页" }]
+  : [{ label: "首页", href: "/" }, { label: sectionInfo[section].label }];
+const trail = breadcrumbs?.length ? breadcrumbs : fallbackTrail;
+const currentLabel = trail.at(-1)?.label || sectionInfo[section].label;
 ---
 
-<aside class="route-matrix" aria-label="Route Matrix">
-  <h2>Route Matrix</h2>
-  <nav>
-    {items.map((item) => (
-      <a href={item.href}>
-        <span class="code">{item.code}</span>
-        <span>{item.label}</span>
-      </a>
-    ))}
+<aside class="context-rail" aria-label="当前栏目">
+  <span class="context-index" aria-hidden="true">{sectionInfo[section].index}</span>
+  <span class="context-section">{sectionInfo[section].label}</span>
+  <nav class="context-trail" aria-label="当前位置">
+    <p class="context-kicker">Archive context</p>
+    <ol>
+      {trail.map((item, index) => (
+        <li>
+          {index < trail.length - 1 && item.href
+            ? <a href={item.href}>{item.label}</a>
+            : <span aria-current={index === trail.length - 1 ? "page" : undefined}>{item.label}</span>}
+        </li>
+      ))}
+    </ol>
   </nav>
 </aside>
+
+<details class="context-disclosure">
+  <summary><span>当前位置</span><strong>{currentLabel}</strong></summary>
+  <nav class="context-trail" aria-label="当前位置">
+    <p class="context-kicker">Archive context</p>
+    <ol>
+      {trail.map((item, index) => (
+        <li>
+          {index < trail.length - 1 && item.href
+            ? <a href={item.href}>{item.label}</a>
+            : <span aria-current={index === trail.length - 1 ? "page" : undefined}>{item.label}</span>}
+        </li>
+      ))}
+    </ol>
+  </nav>
+</details>

@@ -5,8 +5,8 @@ import RouteMatrix from "@/components/RouteMatrix.astro";
 
 <BaseLayout title="后台管理 - Website Turns Away">
   <div class="layout-grid">
-    <RouteMatrix />
-    <main class="content-stack">
+    <RouteMatrix section="admin" breadcrumbs={[{ label: "首页", href: "/" }, { label: "管理入口" }]} />
+    <main id="main-content" class="content-stack" tabindex="-1">
       <section class="panel dark admin-console" id="admin-root">
         <div class="section-heading">
           <div>
@@ -21,6 +21,6 @@ import RouteMatrix from "@/components/RouteMatrix.astro";
       </section>
     </main>
   </div>
-  <script is:inline src="/assets/exif-helper.js?v=20260813-1" defer></script>
-  <script is:inline src="/assets/admin.js?v=20260813-1" defer></script>
+  <script is:inline src="/assets/exif-helper.js?v=20260905-1" defer></script>
+  <script is:inline src="/assets/admin.js?v=20260905-1" defer></script>
 </BaseLayout>

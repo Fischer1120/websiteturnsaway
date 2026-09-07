@@ -4,9 +4,13 @@ import RouteMatrix from "@/components/RouteMatrix.astro";
 import PublicContentShell from "@/components/PublicContentShell.astro";
 ---
 
-<BaseLayout title="图片栏目 - Website Turns Away">
+<BaseLayout
+  title="图片栏目 — Website Turns Away"
+  description="按文件夹或隐私友好的位置地图浏览 Website Turns Away 的公开图片。"
+  currentSection="images"
+>
   <div class="layout-grid">
-    <RouteMatrix />
+    <RouteMatrix section="images" breadcrumbs={[{ label: "首页", href: "/" }, { label: "图片" }]} />
     <PublicContentShell
       kind="images"
       eyebrow="Images / Live Metadata Index"

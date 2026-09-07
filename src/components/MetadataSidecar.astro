@@ -14,12 +14,12 @@ const { title, rows } = Astro.props;
 
 <aside class="sidecar">
   <h2>{title}</h2>
-  <div class="meta-list">
+  <dl class="meta-list">
     {rows.filter((row) => row.value !== undefined && row.value !== "").map((row) => (
       <div class="meta-row">
-        <span class="meta-label">{row.label}</span>
-        <strong class="meta-value">{row.value}</strong>
+        <dt class="meta-label">{row.label}</dt>
+        <dd class="meta-value">{row.value}</dd>
       </div>
     ))}
-  </div>
+  </dl>
 </aside>

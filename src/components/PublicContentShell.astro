@@ -1,0 +1,227 @@
+---
+import FolderRows from "@/components/FolderRows.astro";
+import MetadataSidecar from "@/components/MetadataSidecar.astro";
+import RecordCard from "@/components/RecordCard.astro";
+import {
+  formatDate,
+  getArticleFolders,
+  getArticles,
+  getFolderLabel,
+  getPhoto,
+  getPhotoFolders,
+  getPhotos,
+} from "@/lib/content";
+
+type Props = {
+  kind: "articles" | "images";
+  eyebrow: string;
+  title: string;
+  description: string;
+};
+
+const { kind, eyebrow, title, description } = Astro.props;
+const pathname = Astro.url.pathname.replace(/\/+$/, "") || "/";
+const segments = pathname.split("/").filter(Boolean);
+const isIndex = segments.length < 2;
+const articleItems = kind === "articles"
+  ? getArticles().filter((article) => isIndex || article.folder === segments[1])
+  : [];
+const articleFolders = kind === "articles" ? getArticleFolders() : [];
+const articleDetail = kind === "articles" && segments.length === 3
+  ? getArticles().find((article) => article.folder === segments[1] && article.slug === segments[2])
+  : undefined;
+const allPhotos = kind === "images" ? getPhotos() : [];
+const photoItems = kind === "images"
+  ? allPhotos.filter((photo) => isIndex || photo.folder === segments[1])
+  : [];
+const photoFolders = kind === "images" ? getPhotoFolders() : [];
+const photoDetail = kind === "images" && segments.length === 3 ? getPhoto(segments[1], segments[2]) : undefined;
+const cameraSummary = photoDetail?.camera
+  ? [photoDetail.camera.make, photoDetail.camera.model, photoDetail.camera.lens].filter(Boolean).join(" / ")
+  : "";
+const photosWithLocation = allPhotos.filter((photo) => Number.isFinite(photo.location.latitude) && Number.isFinite(photo.location.longitude)).length;
+const detailHasLocation = Boolean(photoDetail && Number.isFinite(photoDetail.location.latitude) && Number.isFinite(photoDetail.location.longitude));
+const detailPrecision = photoDetail?.location.precision === "exact"
+  ? "精确 · 约 1 m"
+  : photoDetail?.location.precision === "approximate"
+    ? "附近 · 约 1 km"
+    : "城市级 · 约 10 km";
+const detailFocus = photoDetail ? `${photoDetail.folder}/${photoDetail.id}` : "";
+---
+
+{articleDetail ? (
+  <main id="main-content" class="reading-shell" tabindex="-1">
+    <article class="article-prose">
+      <p class="eyebrow">Article Record / {articleDetail.folder}/{articleDetail.slug}</p>
+      <h1>{articleDetail.title}</h1>
+      {articleDetail.subtitle && <p class="dek">{articleDetail.subtitle}</p>}
+      {articleDetail.summary && articleDetail.summary !== articleDetail.subtitle && <p class="article-summary">{articleDetail.summary}</p>}
+      {articleDetail.coverImage && (
+        <figure class="article-cover immersive-cover">
+          <img src={articleDetail.coverImage} alt={articleDetail.title} loading="eager" data-fallback-src="/assets/media/photo-placeholder.svg" />
+        </figure>
+      )}
+      {articleDetail.tags.length > 0 && (
+        <div class="chips article-tags" aria-label="文章标签">
+          {articleDetail.tags.map((tag) => <span class="chip">{tag}</span>)}
+        </div>
+      )}
+      <div class="article-body" set:html={articleDetail.html} />
+    </article>
+    <MetadataSidecar
+      title="阅读信息"
+      rows={[
+        { label: "Folder", value: articleDetail.folder },
+        { label: "Slug", value: articleDetail.slug },
+        { label: "Published", value: formatDate(articleDetail.publishedAt, true) },
+        { label: "Updated", value: formatDate(articleDetail.updatedAt, true) },
+        { label: "Status", value: articleDetail.status },
+      ]}
+    />
+  </main>
+) : photoDetail ? (
+  <main id="main-content" class="photo-detail" tabindex="-1">
+    <section class="photo-main" aria-labelledby="photo-title">
+      <p class="eyebrow">Photo Record / {photoDetail.folder}/{photoDetail.id}</p>
+      <h1 id="photo-title">{photoDetail.title}</h1>
+      <figure class="photo-image">
+        <img src={photoDetail.imageUrl} alt={photoDetail.alt || photoDetail.title} loading="eager" data-fallback-src="/assets/media/photo-placeholder.svg" />
+      </figure>
+      {photoDetail.description && <p class="photo-description">{photoDetail.description}</p>}
+      {detailHasLocation && (
+        <section
+          class="photo-map-shell detail"
+          aria-labelledby="photo-location-title"
+          data-photo-detail-map
+          data-photo-map-root
+          data-endpoint={`/api/images/map?photo=${encodeURIComponent(detailFocus)}`}
+          data-focus={detailFocus}
+        >
+          <div class="photo-map-intro">
+            <p class="eyebrow" id="photo-location-title">Public location</p>
+            <p class="photo-map-note">{photoDetail.location.label || "公开位置"} / {detailPrecision}。点击后才会从 OpenStreetMap 加载第三方地图数据。</p>
+          </div>
+          <button class="button secondary" type="button" data-map-load>加载地图</button>
+          <div class="photo-map-feedback">
+            <p class="photo-map-status" data-map-status role="status" aria-live="polite" hidden></p>
+            <div class="photo-map-error-actions">
+              <button class="button secondary" type="button" data-map-retry hidden>重试加载</button>
+              <a class="button quiet" href="/images" data-map-return hidden>返回照片列表</a>
+            </div>
+          </div>
+          <button class="photo-map-reset button quiet" type="button" data-map-reset hidden disabled>复位视野</button>
+          <div class="photo-map-canvas" data-map-canvas role="region" aria-label="照片位置地图" hidden></div>
+          <a class="text-link" href={`/images?view=map&photo=${encodeURIComponent(detailFocus)}`}>在全部照片地图中查看</a>
+        </section>
+      )}
+    </section>
+    <MetadataSidecar
+      title="图片信息"
+      rows={[
+        { label: "Captured", value: formatDate(photoDetail.capturedAt, true) },
+        { label: "Location", value: photoDetail.location.label },
+        { label: "Precision", value: photoDetail.location.precision },
+        { label: "Folder", value: getFolderLabel(photoDetail.folder) },
+        { label: "Camera", value: cameraSummary },
+        { label: "ISO", value: photoDetail.camera?.iso },
+        { label: "Exposure", value: photoDetail.camera ? `${photoDetail.camera.aperture || ""} / ${photoDetail.camera.shutter || ""}` : "" },
+      ]}
+    />
+  </main>
+) : (
+  <main id="main-content" class="content-stack" tabindex="-1" data-photo-map-page={kind === "images" && isIndex ? "" : undefined}>
+    <section class="panel dark" aria-labelledby="public-index-title">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">{eyebrow}</p>
+          <h1 id="public-index-title">{title}</h1>
+        </div>
+        <p>{description}</p>
+      </div>
+      {kind === "images" && isIndex && (
+        <div class="photo-view-switch" role="tablist" aria-label="图片浏览方式">
+          <button id="photo-tab-photos" type="button" role="tab" aria-selected="true" aria-controls="photo-panel-photos" tabindex="0" data-photo-view="photos">照片</button>
+          <button id="photo-tab-map" type="button" role="tab" aria-selected="false" aria-controls="photo-panel-map" tabindex="-1" data-photo-view="map">地图</button>
+        </div>
+      )}
+      <section
+        id={kind === "images" && isIndex ? "photo-panel-photos" : undefined}
+        class={kind === "images" && isIndex ? "photo-list-panel" : undefined}
+        role={kind === "images" && isIndex ? "tabpanel" : undefined}
+        aria-labelledby={kind === "images" && isIndex ? "photo-tab-photos" : undefined}
+        tabindex={kind === "images" && isIndex ? "-1" : undefined}
+        data-photo-list-panel={kind === "images" && isIndex ? "" : undefined}
+      >
+        {kind === "articles" ? (
+          articleItems.length ? (
+            <div class="record-grid">
+              {articleItems.map((article) => (
+                <RecordCard
+                  href={`/articles/${article.folder}/${article.slug}`}
+                  title={article.title}
+                  subtitle={article.subtitle}
+                  summary={article.summary}
+                  image={article.coverImage}
+                  date={article.publishedAt}
+                  folder={article.folder}
+                  kind="article"
+                />
+              ))}
+            </div>
+          ) : <div class="empty-state"><p>暂时没有公开文章。</p></div>
+        ) : photoItems.length ? (
+          <div class="record-grid">
+            {photoItems.map((photo) => (
+              <RecordCard
+                href={`/images/${photo.folder}/${photo.id}`}
+                title={photo.title}
+                summary={photo.description}
+                image={photo.thumbUrl || photo.imageUrl}
+                date={photo.capturedAt}
+                folder={photo.folder}
+                kind="photo"
+              />
+            ))}
+          </div>
+        ) : <div class="empty-state"><p>暂时没有公开图片。</p></div>}
+        {kind === "articles" && isIndex && <FolderRows folders={articleFolders} basePath="/articles" />}
+        {kind === "images" && isIndex && <FolderRows folders={photoFolders} basePath="/images" />}
+      </section>
+      {kind === "images" && isIndex && (
+        <section id="photo-panel-map" class="photo-map-panel" role="tabpanel" aria-labelledby="photo-tab-map" tabindex="-1" data-photo-map-panel hidden>
+          <div class="photo-map-shell" data-photo-map-root data-endpoint="/api/images/map" data-focus="">
+            <div class="photo-map-intro">
+              <p class="photo-map-note">打开地图会从 OpenStreetMap 加载第三方地图数据；地图只接收按所选精度量化后的位置。</p>
+              <p class="system-text">{photosWithLocation} 有位置 / {allPhotos.length - photosWithLocation} 无位置 · 每张照片单独标注公开精度</p>
+            </div>
+            <div class="photo-map-feedback">
+              <p class="photo-map-status" data-map-status role="status" aria-live="polite" hidden></p>
+              <div class="photo-map-error-actions">
+                <button class="button secondary" type="button" data-map-retry hidden>重试加载</button>
+                <button class="button quiet" type="button" data-map-return hidden>返回照片列表</button>
+              </div>
+            </div>
+            <button class="photo-map-reset button quiet" type="button" data-map-reset hidden disabled>复位视野</button>
+            <div class="photo-map-canvas" data-map-canvas role="region" aria-label="公开照片地图" hidden></div>
+          </div>
+          <details class="photo-map-list">
+            <summary>使用键盘或列表浏览照片</summary>
+            <div class="record-grid">
+              {photoItems.map((photo) => (
+                <RecordCard
+                  href={`/images/${photo.folder}/${photo.id}`}
+                  title={photo.title}
+                  summary={photo.description}
+                  image={photo.thumbUrl || photo.imageUrl}
+                  date={photo.capturedAt}
+                  folder={photo.folder}
+                  kind="photo"
+                />
+              ))}
+            </div>
+          </details>
+        </section>
+      )}
+    </section>
+  </main>
+)}

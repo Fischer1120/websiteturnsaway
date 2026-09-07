@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-CN" data-density="balanced" data-motion="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Orbital Archive v2 · Website Turns Away</title>
+  <meta name="description" content="Website Turns Away 的 Orbital Archive v2 响应式视觉与交互原型。">
+  <link rel="stylesheet" href="./base.css">
+  <link rel="stylesheet" href="./public.css">
+  <link rel="stylesheet" href="./admin.css">
+  <link rel="stylesheet" href="./responsive.css">
+  <script src="./prototype.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#prototype-main">跳到正文</a>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="brand" href="#home" data-screen-link="home" aria-label="Website Turns Away 首页">
+        <svg class="brand-orbit" viewBox="0 0 44 44" aria-hidden="true">
+          <circle cx="22" cy="22" r="13"></circle>
+          <ellipse cx="22" cy="22" rx="19" ry="8" transform="rotate(-25 22 22)"></ellipse>
+          <rect x="29" y="8" width="4" height="28"></rect>
+        </svg>
+        <span>
+          <strong>Website Turns Away</strong>
+          <small>Orbital Archive / v2 prototype</small>
+        </span>
+      </a>
+
+      <nav class="primary-nav" aria-label="主导航">
+        <a href="#home" data-screen-link="home" aria-current="page">首页</a>
+        <a href="#article" data-screen-link="article">文章</a>
+        <a href="#images" data-screen-link="images">图片与地图</a>
+        <a href="#admin" data-screen-link="admin">后台</a>
+      </nav>
+
+      <button class="tweaks-trigger" type="button" data-tweaks-open aria-haspopup="dialog" aria-controls="tweaks-panel">
+        调整预览
+      </button>
+    </div>
+  </header>
+
+  <main id="prototype-main" tabindex="-1">
+    <section class="screen is-active" data-screen="home" aria-labelledby="home-title">
+      <div class="public-layout">
+        <aside class="context-rail" aria-label="首页情境导航">
+          <p class="rail-index">Index 00</p>
+          <strong>首页</strong>
+          <span class="rail-rule" aria-hidden="true"></span>
+          <a href="#home-title">观测站</a>
+          <a href="#home-records">最新记录</a>
+          <a href="#home-folders">文件夹</a>
+          <p class="rail-foot">31.2304 N<br>121.4737 E</p>
+        </aside>
+
+        <div class="screen-content">
+          <details class="context-disclosure">
+            <summary>当前位置：首页 / 展开页内导航</summary>
+            <nav aria-label="首页页内导航">
+              <a href="#home-title">观测站</a>
+              <a href="#home-records">最新记录</a>
+              <a href="#home-folders">文件夹</a>
+            </nav>
+          </details>
+
+          <section class="hero">
+            <div class="hero-copy">
+              <p class="eyebrow">Welcome / Public Archive Station</p>
+              <h1 id="home-title">一座观测站，<br>存放转身后的证据。</h1>
+              <p class="hero-lede">文章、图片、文件夹和元数据先被精确归档，再慢慢显出黄昏、球体、方碑和金字塔的轮廓。</p>
+              <div class="hero-actions">
+                <a class="button button-primary" href="#article" data-screen-link="article">
+                  浏览文章
+                  <span aria-hidden="true">↗</span>
+                </a>
+                <a class="button button-secondary" href="#images" data-screen-link="images">
+                  查看图片与地图
+                  <span aria-hidden="true">↗</span>
+                </a>
+              </div>
+              <dl class="hero-readout" aria-label="公开档案摘要">
+                <div><dt>文章</dt><dd>02 records</dd></div>
+                <div><dt>图片</dt><dd>02 records</dd></div>
+                <div><dt>状态</dt><dd><span class="status-dot"></span>Public</dd></div>
+              </dl>
+            </div>
+
+            <div class="hero-stage" data-orbital-stage>
+              <span class="stage-corner corner-one" aria-hidden="true"></span>
+              <span class="stage-corner corner-two" aria-hidden="true"></span>
+              <div class="hero-art-wrap">
+                <img class="hero-art" src="./assets/orbital-archive-hero.svg" alt="球体、方碑与金字塔组成的冷色轨道档案站">
+              </div>
+              <p class="stage-label">Node 04 / calibrated</p>
+            </div>
+          </section>
+
+          <section class="archive-section" id="home-records" aria-labelledby="records-title">
+            <div class="section-heading">
+              <div>
+                <p class="eyebrow">Latest records / 2026.05.31</p>
+                <h2 id="records-title">最近归档</h2>
+              </div>
+              <p>内容本身保持安静，焦点和操作才使用冰蓝。</p>
+            </div>
+            <div class="record-grid">
+              <a class="record-card record-card-featured" href="#article" data-screen-link="article">
+                <figure>
+                  <img src="./assets/orbital-archive-hero.svg" alt="黄昏中的几何建筑档案插图">
+                </figure>
+                <div class="record-body">
+                  <div class="chip-row"><span class="chip">article</span><span class="chip">notes</span></div>
+                  <h3>黄昏中的方碑</h3>
+                  <p>一次关于城市边缘与几何记忆的记录。</p>
+                  <span class="record-meta">2026.05.31 / 18:42</span>
+                </div>
+              </a>
+              <a class="record-card" href="#images" data-screen-link="images">
+                <figure>
+                  <img src="./assets/sphere-photo-v2.svg" alt="粉色天空下的球体配色预览">
+                </figure>
+                <div class="record-body">
+                  <div class="chip-row"><span class="chip">photo</span><span class="chip">city-walk</span></div>
+                  <h3>粉色天空下的球体</h3>
+                  <p>广场尽头的球体反射着晚霞。</p>
+                  <span class="record-meta">Shanghai / 18:42</span>
+                </div>
+              </a>
+              <a class="record-card" href="#images" data-screen-link="images">
+                <figure>
+                  <img src="./assets/pyramid-photo-v2.svg" alt="金字塔入口配色预览">
+                </figure>
+                <div class="record-body">
+                  <div class="chip-row"><span class="chip">photo</span><span class="chip">archive</span></div>
+                  <h3>金字塔入口</h3>
+                  <p>入口被长阴影压低，行人显得像比例尺。</p>
+                  <span class="record-meta">Shanghai / 19:10</span>
+                </div>
+              </a>
+            </div>
+          </section>
+
+          <section class="folder-section" id="home-folders" aria-labelledby="folders-title">
+            <div class="section-heading compact-heading">
+              <div>
+                <p class="eyebrow">Directory index</p>
+                <h2 id="folders-title">文件夹</h2>
+              </div>
+            </div>
+            <div class="folder-list">
+              <a href="#article" data-screen-link="article"><span>/articles/notes</span><strong>城市边缘与几何记忆</strong><em>01</em></a>
+              <a href="#article" data-screen-link="article"><span>/articles/travel</span><strong>散步与中央轴线</strong><em>01</em></a>
+              <a href="#images" data-screen-link="images"><span>/images/city-walk</span><strong>城市步行影像</strong><em>01</em></a>
+              <a href="#images" data-screen-link="images"><span>/images/archive</span><strong>入口与建筑档案</strong><em>01</em></a>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="article" aria-labelledby="article-title" hidden>
+      <div class="public-layout">
+        <aside class="context-rail" aria-label="文章情境导航">
+          <p class="rail-index">Article 01</p>
+          <strong>黄昏中的方碑</strong>
+          <span class="rail-rule" aria-hidden="true"></span>
+          <a href="#article-intro">第一段路</a>
+          <a href="#article-plaza">广场尽头</a>
+          <a href="#article-return">折返</a>
+          <a href="#home" data-screen-link="home">返回首页</a>
+        </aside>
+
+        <div class="screen-content article-screen">
+          <details class="context-disclosure">
+            <summary>当前位置：文章 / 黄昏中的方碑</summary>
+            <nav aria-label="文章页内导航">
+              <a href="#article-intro">第一段路</a>
+              <a href="#article-plaza">广场尽头</a>
+              <a href="#article-return">折返</a>
+            </nav>
+          </details>
+
+          <nav class="breadcrumbs" aria-label="面包屑">
+            <a href="#home" data-screen-link="home">首页</a><span aria-hidden="true">/</span>
+            <span>文章</span><span aria-hidden="true">/</span>
+            <span aria-current="page">notes</span>
+          </nav>
+
+          <header class="article-header">
+            <div>
+              <p class="eyebrow">Article record / Notes</p>
+              <h1 id="article-title">黄昏中的方碑</h1>
+              <p>一次关于城市边缘与几何记忆的记录</p>
+            </div>
+            <dl class="article-head-meta">
+              <div><dt>Published</dt><dd>2026.05.31</dd></div>
+              <div><dt>Reading</dt><dd>04 min</dd></div>
+              <div><dt>Status</dt><dd>Public</dd></div>
+            </dl>
+          </header>
+
+          <div class="reading-layout">
+            <article class="reading-surface">
+              <p class="article-deck">穿过一条笔直道路后，建筑像沉默的仪器一样排列在远处。这里不急着解释，只先记下比例、光线与折返的路径。</p>
+              <h2 id="article-intro">第一段路</h2>
+              <p>路面在黄昏里变得像一张校准纸。每一条接缝都朝着远处延伸，把视线引向广场中央。</p>
+              <p>人群经过时没有留下连续的故事，只有几个短暂的坐标：十八点四十二分、城市西侧、风从建筑背后穿过。</p>
+              <figure class="article-figure">
+                <img src="./assets/orbital-archive-hero.svg" alt="球体、方碑与金字塔在轨道线中的几何构图">
+                <figcaption>Observation 04 · 球体记录天空，方碑校准方向。</figcaption>
+              </figure>
+              <h2 id="article-plaza">广场尽头</h2>
+              <p>球体记录天空的颜色，金字塔记录入口的角度。巨大的体量没有制造喧闹，反而让经过的人显得更像一组可移动的比例尺。</p>
+              <blockquote>档案并不替记忆下结论，它只保证折返时仍有路标。</blockquote>
+              <h2 id="article-return">折返</h2>
+              <p>光线彻底退去之前，我把最后一张照片放进 <code>/articles/notes</code>。文件夹名成为回家的路标，时间戳则留下那一刻的边界。</p>
+            </article>
+
+            <aside class="metadata-sidecar" aria-label="文章元数据">
+              <p class="eyebrow">Record metadata</p>
+              <dl>
+                <div><dt>Folder</dt><dd>notes</dd></div>
+                <div><dt>Slug</dt><dd>monolith-at-sunset</dd></div>
+                <div><dt>Tags</dt><dd>city / geometry / photo</dd></div>
+                <div><dt>Updated</dt><dd>2026.05.31 18:42</dd></div>
+              </dl>
+              <a class="text-link" href="#home" data-screen-link="home">返回公开索引 <span aria-hidden="true">↗</span></a>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="images" aria-labelledby="images-title" hidden>
+      <div class="public-layout">
+        <aside class="context-rail" aria-label="图片情境导航">
+          <p class="rail-index">Images 02</p>
+          <strong>公开影像</strong>
+          <span class="rail-rule" aria-hidden="true"></span>
+          <button type="button" data-image-tab-link="photos">照片列表</button>
+          <button type="button" data-image-tab-link="map">地图视图</button>
+          <a href="#home" data-screen-link="home">返回首页</a>
+          <p class="rail-foot">位置已降低精度<br>原图保持私有</p>
+        </aside>
+
+        <div class="screen-content images-screen">
+          <details class="context-disclosure">
+            <summary>当前位置：图片 / 公开影像</summary>
+            <nav aria-label="图片页内导航">
+              <button type="button" data-image-tab-link="photos">照片列表</button>
+              <button type="button" data-image-tab-link="map">地图视图</button>
+            </nav>
+          </details>
+
+          <div class="images-heading">
+            <div>
+              <p class="eyebrow">Photo records / Public only</p>
+              <h1 id="images-title">图片与地图</h1>
+              <p>地图只在明确切换后加载；公开位置按城市级精度展示。</p>
+            </div>
+            <div class="view-tabs" role="tablist" aria-label="图片浏览方式">
+              <button id="photos-tab" role="tab" type="button" aria-selected="true" aria-controls="photos-panel" tabindex="0" data-image-tab="photos">照片</button>
+              <button id="map-tab" role="tab" type="button" aria-selected="false" aria-controls="map-panel" tabindex="-1" data-image-tab="map">地图</button>
+            </div>
+          </div>
+
+          <section id="photos-panel" class="view-panel" role="tabpanel" aria-labelledby="photos-tab" tabindex="0" data-image-panel="photos">
+            <div class="photo-feature-grid">
+              <article class="photo-record">
+                <figure><img src="./assets/sphere-photo-v2.svg" alt="粉色天空下的球体"></figure>
+                <div class="photo-copy">
+                  <div><p class="eyebrow">City-walk / 01</p><h2>粉色天空下的球体</h2></div>
+                  <p>广场尽头的球体反射着珊瑚色晚霞，像一张旧世博会海报的边角。</p>
+                  <dl>
+                    <div><dt>拍摄</dt><dd>2026.05.31 18:42</dd></div>
+                    <div><dt>地点</dt><dd>Shanghai · 城市级</dd></div>
+                    <div><dt>镜头</dt><dd>26mm · f/1.8 · ISO 64</dd></div>
+                  </dl>
+                </div>
+              </article>
+              <article class="photo-record">
+                <figure><img src="./assets/pyramid-photo-v2.svg" alt="金字塔入口"></figure>
+                <div class="photo-copy">
+                  <div><p class="eyebrow">Archive / 02</p><h2>金字塔入口</h2></div>
+                  <p>入口被长阴影压低，行人显得像比例尺。</p>
+                  <dl>
+                    <div><dt>拍摄</dt><dd>2026.05.31 19:10</dd></div>
+                    <div><dt>地点</dt><dd>Shanghai · 城市级</dd></div>
+                    <div><dt>镜头</dt><dd>26mm · f/1.8 · ISO 80</dd></div>
+                  </dl>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <section id="map-panel" class="view-panel map-panel" role="tabpanel" aria-labelledby="map-tab" tabindex="0" data-image-panel="map" hidden>
+            <div class="map-state" aria-live="polite" data-map-state="idle">
+              <div class="map-placeholder" data-map-placeholder>
+                <p class="eyebrow">Map module / Explicit activation</p>
+                <h2>准备加载公开地图</h2>
+                <p>只有进入此视图后才请求地图资源。原图地址不会公开，坐标保持城市级精度。</p>
+              </div>
+              <div class="map-loading" data-map-loading tabindex="-1" hidden>
+                <span class="map-load-track" aria-hidden="true"><i></i></span>
+                <p>正在校准地图资源与公开坐标…</p>
+              </div>
+              <div class="map-error" data-map-error tabindex="-1" hidden>
+                <p class="eyebrow">Map unavailable</p>
+                <h2>地图暂时没有响应</h2>
+                <p>照片列表仍然可用。可以重试地图，也可以直接返回照片。</p>
+                <div class="inline-actions">
+                  <button class="button button-primary" type="button" data-map-retry>重试地图</button>
+                  <button class="button button-secondary" type="button" data-image-tab-link="photos">返回照片</button>
+                </div>
+              </div>
+              <div class="map-ready" data-map-ready hidden>
+                <div class="map-canvas" aria-label="上海城市级照片位置示意地图">
+                  <span class="map-road road-one" aria-hidden="true"></span>
+                  <span class="map-road road-two" aria-hidden="true"></span>
+                  <span class="map-road road-three" aria-hidden="true"></span>
+                  <button class="map-marker marker-one" type="button" aria-label="粉色天空下的球体，Shanghai，18:42" aria-pressed="false"><span>01</span></button>
+                  <button class="map-marker marker-two" type="button" aria-label="金字塔入口，Shanghai，19:10" aria-pressed="false"><span>02</span></button>
+                  <p class="map-attribution">V0 map surface · no external tile request</p>
+                </div>
+                <div class="map-sidebar">
+                  <div class="map-toolbar">
+                    <p><span class="status-dot"></span>2 个城市级坐标</p>
+                    <button type="button" data-map-reset>复位视野</button>
+                  </div>
+                  <ol class="map-list">
+                    <li><button type="button" data-map-record="one" aria-pressed="false"><span>01</span><strong>粉色天空下的球体</strong><small>18:42 · Shanghai</small></button></li>
+                    <li><button type="button" data-map-record="two" aria-pressed="false"><span>02</span><strong>金字塔入口</strong><small>19:10 · Shanghai</small></button></li>
+                  </ol>
+                  <button class="text-link map-failure-demo" type="button" data-map-fail>预览资源失败状态</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="admin" aria-labelledby="admin-title" hidden>
+      <div class="admin-shell">
+        <header class="admin-header">
+          <div>
+            <p class="eyebrow">CMS workspace / Authenticated prototype</p>
+            <h1 id="admin-title">内容工作台</h1>
+          </div>
+          <div class="admin-session"><span class="status-dot"></span><span>已登录</span><button type="button">退出</button></div>
+        </header>
+
+        <div class="admin-tabs" role="tablist" aria-label="后台栏目">
+          <button id="admin-articles-tab" role="tab" type="button" aria-selected="true" aria-controls="admin-articles-panel" tabindex="0" data-admin-tab="articles">文章</button>
+          <button id="admin-images-tab" role="tab" type="button" aria-selected="false" aria-controls="admin-images-panel" tabindex="-1" data-admin-tab="images">图片</button>
+          <button id="admin-folders-tab" role="tab" type="button" aria-selected="false" aria-controls="admin-folders-panel" tabindex="-1" data-admin-tab="folders">分组</button>
+        </div>
+
+        <section id="admin-articles-panel" class="admin-panel" role="tabpanel" aria-labelledby="admin-articles-tab" data-admin-panel="articles">
+          <div class="admin-workspace is-editing" data-admin-workspace>
+            <aside class="record-browser" aria-labelledby="record-browser-title">
+              <div class="browser-heading"><div><p class="eyebrow">Published + drafts</p><h2 id="record-browser-title">文章记录</h2></div><button class="mini-button" type="button">新建</button></div>
+              <div class="record-buttons" data-record-list>
+                <button type="button" aria-pressed="true" data-record="monolith"><span><strong>黄昏中的方碑</strong><small>/notes/monolith-at-sunset</small></span><em>公开</em></button>
+                <button type="button" aria-pressed="false" data-record="expo"><span><strong>像世博会海报一样散步</strong><small>/travel/world-expo-dream</small></span><em>公开</em></button>
+                <button type="button" aria-pressed="false" data-record="draft"><span><strong>未命名的中央轴线（演示草稿）</strong><small>/notes/untitled-axis</small></span><em>草稿</em></button>
+              </div>
+            </aside>
+
+            <form class="record-editor" data-admin-form novalidate>
+              <div class="editor-heading">
+                <button class="back-to-list" type="button" data-admin-back>返回列表</button>
+                <div><p class="eyebrow">Editing / notes</p><h2 tabindex="-1" data-editor-title>编辑：黄昏中的方碑</h2></div>
+                <p class="save-indicator" data-save-status><span class="status-dot"></span>已同步</p>
+              </div>
+
+              <div class="field-grid">
+                <label><span>标题</span><input name="title" value="黄昏中的方碑" autocomplete="off"></label>
+                <label><span>副标题</span><input name="subtitle" value="一次关于城市边缘与几何记忆的记录" autocomplete="off"></label>
+                <label><span>文件夹</span><select name="folder"><option>notes</option><option>travel</option></select></label>
+                <label><span>状态</span><select name="status"><option>published</option><option>draft</option></select></label>
+              </div>
+
+              <div class="markdown-grid">
+                <div class="markdown-editor">
+                  <div class="field-label-row"><label for="article-markdown">Markdown 正文</label><button class="mini-button" type="button" data-insert-image>在光标处插入图片</button></div>
+                  <textarea id="article-markdown" name="markdown" rows="15"># 黄昏中的方碑
+
+## 第一段路
+
+路面在黄昏里变得像一张校准纸。
+
+## 广场尽头
+
+球体记录天空的颜色，金字塔记录入口的角度。
+
+## 折返
+
+文件夹名成为回家的路标。</textarea>
+                </div>
+                <section class="markdown-preview" aria-labelledby="preview-title">
+                  <div class="preview-heading"><span>150ms delay</span><h3 id="preview-title">预览</h3></div>
+                  <div data-markdown-preview></div>
+                </section>
+              </div>
+
+              <div class="editor-actions">
+                <p data-inline-error role="alert"></p>
+                <div>
+                  <button class="button button-danger" type="button" data-delete-record>删除文章</button>
+                  <button class="button button-primary" type="submit" data-save-button>保存更改</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section id="admin-images-panel" class="admin-panel" role="tabpanel" aria-labelledby="admin-images-tab" data-admin-panel="images" hidden>
+          <div class="admin-empty-state">
+            <p class="eyebrow">Image pipeline</p>
+            <h2>图片处理状态</h2>
+            <p>这个 v0 会模拟一次解码及 display、thumb 两阶段处理的就地反馈；生产实现才会执行真实图片处理。</p>
+            <label class="upload-control"><span>选择图片</span><input type="file" accept="image/*" data-image-upload></label>
+            <div class="upload-progress" data-upload-status aria-live="polite">等待选择文件</div>
+          </div>
+        </section>
+
+        <section id="admin-folders-panel" class="admin-panel" role="tabpanel" aria-labelledby="admin-folders-tab" data-admin-panel="folders" hidden>
+          <div class="admin-empty-state">
+            <p class="eyebrow">Folder records</p>
+            <h2>分组配置</h2>
+            <p>当前共有 notes、travel、city-walk 与 archive 四个分组。空状态和错误状态使用同一套面板与焦点规则。</p>
+            <button class="button button-secondary" type="button" disabled>没有待处理的分组</button>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>Orbital Archive v2 · responsive v0 · 本地视觉原型，不连接生产数据</p>
+    <a href="#home" data-screen-link="home">回到观测站</a>
+  </footer>
+
+  <dialog class="confirm-dialog" data-confirm-dialog aria-labelledby="dialog-title">
+    <form method="dialog">
+      <p class="eyebrow">Confirm action</p>
+      <h2 id="dialog-title" data-dialog-title>确认操作</h2>
+      <p data-dialog-copy></p>
+      <div class="dialog-actions">
+        <button class="button button-secondary" value="cancel">取消</button>
+        <button class="button button-danger" value="confirm" data-dialog-confirm>确认</button>
+      </div>
+    </form>
+  </dialog>
+
+  <section class="tweaks-panel" id="tweaks-panel" role="dialog" aria-modal="false" aria-labelledby="tweaks-title" hidden>
+    <div class="tweaks-heading">
+      <div><p class="eyebrow">Prototype controls</p><h2 id="tweaks-title">Tweaks</h2></div>
+      <button type="button" data-tweaks-close aria-label="关闭预览调整">关闭</button>
+    </div>
+    <fieldset>
+      <legend>信息密度</legend>
+      <label><input type="radio" name="density" value="compact">紧凑</label>
+      <label><input type="radio" name="density" value="balanced" checked>均衡</label>
+      <label><input type="radio" name="density" value="airy">留白</label>
+    </fieldset>
+    <label class="tweak-toggle"><span><strong>界面动效</strong><small>关闭后保留即时状态反馈</small></span><input type="checkbox" data-motion-toggle checked></label>
+    <div class="tweak-jumps">
+      <span>快速查看</span>
+      <button type="button" data-screen-link="home">首页</button>
+      <button type="button" data-screen-link="article">文章</button>
+      <button type="button" data-screen-link="images">地图</button>
+      <button type="button" data-screen-link="admin">后台</button>
+    </div>
+  </section>
+</body>
+</html>

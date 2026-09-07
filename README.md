@@ -39,7 +39,10 @@ http://localhost:4321
 构建与类型检查：
 
 ```bash
+npm run check
 npm run build
+npx tsc --noEmit --ignoreDeprecations 6.0
+npm test
 ```
 
 Cloudflare Pages Functions 本地预览：
@@ -48,6 +51,15 @@ Cloudflare Pages Functions 本地预览：
 npm run build
 npm run pages:dev
 ```
+
+本地 Pages Functions 验收（使用隔离的 local R2，不写生产 bucket）：
+
+```bash
+BASE_URL=http://127.0.0.1:8791 node tests/route-matrix.mjs
+E2E_ADMIN_TOKEN=<local-test-token> BASE_URL=http://127.0.0.1:8791 ./tests/e2e-admin.smoke.sh
+```
+
+测试数据统一使用 `codex-fix-*` 标识；不要把真实 `ADMIN_TOKEN_SECRET` 写入命令记录、测试文件或仓库。
 
 ## 部署
 

@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
+  <title id="title">粉色天空下的球体，Orbital Archive v2 配色预览</title>
+  <desc id="desc">银白球体位于深色档案广场中，珊瑚色晚霞被压缩为一条光带。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0" stop-color="#181E24"/>
+      <stop offset="0.5" stop-color="#11151A"/>
+      <stop offset="1" stop-color="#080A0D"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="34%" cy="27%" r="72%">
+      <stop offset="0" stop-color="#F5F7FA"/>
+      <stop offset="0.3" stop-color="#9BA6B2"/>
+      <stop offset="0.76" stop-color="#181E24"/>
+      <stop offset="1" stop-color="#080A0D"/>
+    </radialGradient>
+  </defs>
+  <rect width="1000" height="700" fill="url(#bg)"/>
+  <path d="M0 386C188 336 394 374 1000 224V318C412 448 208 402 0 454Z" fill="#F06D52" opacity="0.54"/>
+  <g fill="none" stroke="#79D7E5" stroke-opacity="0.22">
+    <path d="M0 105H1000M0 610H1000"/>
+    <path d="M116 0V700M842 0V700"/>
+  </g>
+  <ellipse cx="514" cy="592" rx="368" ry="47" fill="#080A0D" opacity="0.72"/>
+  <path d="M222 607 510 178 628 607Z" fill="#9BA6B2" opacity="0.1"/>
+  <circle cx="458" cy="270" r="201" fill="#080A0D" opacity="0.42"/>
+  <circle cx="424" cy="236" r="198" fill="url(#orb)" stroke="#F5F7FA" stroke-opacity="0.5" stroke-width="7"/>
+  <circle cx="346" cy="157" r="44" fill="#F5F7FA" opacity="0.88"/>
+  <rect x="666" y="224" width="72" height="354" fill="#F5F7FA" opacity="0.82"/>
+  <rect x="738" y="224" width="16" height="354" fill="#79D7E5"/>
+  <g fill="#F5F7FA" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="19" letter-spacing="2">
+    <text x="62" y="72">CITY-WALK / 20260531-184200-A1B2</text>
+    <text x="682" y="122">SHANGHAI 18:42</text>
+  </g>
+</svg>

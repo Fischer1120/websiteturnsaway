@@ -1,21 +1,31 @@
 ---
-import "../styles/global.css";
+type SiteSection = "home" | "articles" | "images" | "admin";
 
 type Props = {
   title?: string;
   description?: string;
+  currentSection?: SiteSection;
 };
 
+const pathname = Astro.url.pathname;
+const inferredSection: SiteSection = pathname.startsWith("/articles")
+  ? "articles"
+  : pathname.startsWith("/images")
+    ? "images"
+    : pathname.startsWith("/admin")
+      ? "admin"
+      : "home";
 const {
-  title = "Website Turns Away",
-  description = "A retro-future personal archive for articles and photos.",
+  title = "Website Turns Away — Orbital Archive v2",
+  description = "Orbital Archive v2：文章、图片、文件夹与元数据构成的个人档案站。",
+  currentSection = inferredSection,
 } = Astro.props;
 
-const navItems = [
-  { href: "/", label: "首页" },
-  { href: "/articles", label: "文章" },
-  { href: "/images", label: "图片" },
-  { href: "/admin", label: "管理入口" },
+const navItems: Array<{ id: SiteSection; href: string; label: string }> = [
+  { id: "home", href: "/", label: "首页" },
+  { id: "articles", href: "/articles", label: "文章" },
+  { id: "images", href: "/images", label: "图片" },
+  { id: "admin", href: "/admin", label: "管理入口" },
 ];
 ---
 
@@ -25,22 +35,33 @@ const navItems = [
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="theme-color" content="#080A0D" />
     <title>{title}</title>
+    <link rel="stylesheet" href="/assets/site.css" />
+    <script is:inline src="/assets/site-ui.js" defer></script>
   </head>
-  <body>
+  <body data-site-section={currentSection}>
+    <a class="skip-link" href="#main-content">跳到正文</a>
     <div class="site-frame">
-      <header class="topbar" aria-label="主导航">
+      <header class="topbar">
         <a class="brand" href="/" aria-label="Website Turns Away 首页">
-          <span class="brand-mark" aria-hidden="true"></span>
-          <span>Website Turns Away</span>
+          <span class="brand-mark" aria-hidden="true"><span></span></span>
+          <span class="brand-copy">
+            <strong>Website Turns Away</strong>
+            <small>Orbital Archive v2</small>
+          </span>
         </a>
-        <nav class="system-strip">
-          {navItems.map((item) => <a href={item.href}>{item.label}</a>)}
+        <nav class="primary-nav" aria-label="主导航">
+          {navItems.map((item) => (
+            <a class="nav-link" href={item.href} aria-current={item.id === currentSection ? "page" : undefined}>{item.label}</a>
+          ))}
         </nav>
       </header>
       <slot />
-      <footer class="footer system-text">
-        ORBITAL MONOLITH INDEX / STATIC FRONTEND + CLOUDFLARE PAGES FUNCTIONS + R2
+      <footer class="footer">
+        <span class="system-text">ORBITAL ARCHIVE v2</span>
+        <span>Static fallback + Cloudflare Pages Functions + R2</span>
       </footer>
     </div>
   </body>

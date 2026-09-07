@@ -5,19 +5,29 @@
   "type": "module",
   "scripts": {
     "dev": "ASTRO_TELEMETRY_DISABLED=1 astro dev",
-    "build": "ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
+    "build:client": "node scripts/build-client.mjs",
+    "build": "npm run build:client && ASTRO_TELEMETRY_DISABLED=1 astro check && ASTRO_TELEMETRY_DISABLED=1 astro build",
     "preview": "ASTRO_TELEMETRY_DISABLED=1 astro preview",
     "check": "ASTRO_TELEMETRY_DISABLED=1 astro check",
+    "test": "vitest run",
+    "test:unit": "vitest run --config vitest.node.config.ts",
+    "test:watch": "vitest",
+    "test:e2e": "bash tests/e2e-admin.smoke.sh",
     "pages:dev": "wrangler pages dev dist --compatibility-date=2026-06-08",
-    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=website-turns-away"
+    "pages:deploy": "npm run build && wrangler pages deploy dist --project-name=website-turns-away --branch=main"
   },
   "dependencies": {
-    "astro": "^6.4.4"
+    "astro": "^7.3.1",
+    "exifr": "7.1.3",
+    "leaflet": "1.9.4",
+    "leaflet.markercluster": "1.5.3"
   },
   "devDependencies": {
-    "@astrojs/check": "^0.9.9",
-    "@cloudflare/workers-types": "^4.20260608.1",
+    "@astrojs/check": "^0.9.10",
+    "@cloudflare/vitest-pool-workers": "^0.22.0",
+    "esbuild": "0.28.2",
     "typescript": "^6.0.3",
-    "wrangler": "^4.98.0"
+    "vitest": "^4.1.11",
+    "wrangler": "^4.129.0"
   }
 }

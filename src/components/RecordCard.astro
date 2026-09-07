@@ -5,28 +5,30 @@ type Props = {
   href: string;
   title: string;
   subtitle?: string;
-  summary: string;
-  image: string;
+  summary?: string;
+  image?: string;
   date: string;
   folder: string;
   kind: "article" | "photo";
 };
 
-const { href, title, subtitle, summary, image, date, folder, kind } = Astro.props;
+const { href, title, subtitle, summary = "", image, date, folder, kind } = Astro.props;
 ---
 
 <a class="record-card" href={href}>
-  <div class="record-thumb">
-    <img src={image} alt="" loading="lazy" />
-  </div>
-  <div class="record-body">
-    <div class="chips">
+  <span class="record-thumb">
+    {image
+      ? <img src={image} alt="" loading="lazy" data-fallback-src="/assets/media/photo-placeholder.svg" />
+      : <span class="record-placeholder" aria-hidden="true">{kind === "article" ? "A" : "P"}</span>}
+  </span>
+  <span class="record-body">
+    <span class="chips">
       <span class="chip">{kind === "article" ? "article" : "photo"}</span>
       <span class="chip">{getFolderLabel(folder)}</span>
-      <span class="chip">{formatDate(date, kind === "photo")}</span>
-    </div>
-    <h3>{title}</h3>
-    {subtitle && <p class="subtitle">{subtitle}</p>}
-    <p>{summary}</p>
-  </div>
+    </span>
+    <strong class="record-title">{title}</strong>
+    {subtitle && <span class="record-subtitle">{subtitle}</span>}
+    {summary && <span class="record-summary">{summary}</span>}
+    <span class="record-meta system-text">{formatDate(date, kind === "photo")}</span>
+  </span>
 </a>

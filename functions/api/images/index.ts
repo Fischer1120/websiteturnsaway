@@ -1,8 +1,10 @@
-import { ok, type FunctionContext } from "../../_shared/responses";
-import { readJson } from "../../_shared/r2";
-import { imageFolders, photos } from "../../_shared/seed";
+import { listPublicPhotos } from "../../_shared/content";
+import { failFromError, ok, type FunctionContext } from "../../_shared/responses";
 
 export const onRequestGet = async (context: FunctionContext) => {
-  const r2Index = await readJson(context.env.MEDIA_BUCKET, "indexes/images.json");
-  return ok(context.request, context.env, r2Index || { folders: imageFolders(), photos });
+  try {
+    return ok(context.request, context.env, await listPublicPhotos(context.env));
+  } catch (error) {
+    return failFromError(context.request, context.env, error, "Could not read images.");
+  }
 };

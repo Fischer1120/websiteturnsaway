@@ -2,7 +2,7 @@
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import RouteMatrix from "@/components/RouteMatrix.astro";
 import MetadataSidecar from "@/components/MetadataSidecar.astro";
-import { formatDate, getArticles, getFolderLabel } from "@/lib/content";
+import { formatDate, getArticles } from "@/lib/content";
 
 export function getStaticPaths() {
   return getArticles().map((article) => ({
@@ -14,29 +14,45 @@ export function getStaticPaths() {
 const { article } = Astro.props;
 ---
 
-<BaseLayout title={`${article.title} - Website Turns Away`} description={article.summary}>
+<BaseLayout title={`${article.title} — Website Turns Away`} description={article.summary} currentSection="articles">
   <div class="layout-grid">
-    <RouteMatrix />
-    <main class="content-stack">
-      <article class="panel article-detail">
-        <div class="article-prose">
+    <RouteMatrix
+      section="articles"
+      breadcrumbs={[
+        { label: "首页", href: "/" },
+        { label: "文章", href: "/articles" },
+        { label: article.folder, href: `/articles/${article.folder}` },
+        { label: article.title },
+      ]}
+    />
+    <main id="main-content" class="reading-shell" tabindex="-1">
+      <article class="article-prose">
           <p class="eyebrow">Article Record / {article.folder}/{article.slug}</p>
           <h1>{article.title}</h1>
-          <p class="subtitle">{article.subtitle}</p>
+          {article.subtitle && <p class="dek">{article.subtitle}</p>}
+          {article.summary && article.summary !== article.subtitle && <p class="article-summary">{article.summary}</p>}
+          {article.coverImage && (
+            <figure class="article-cover immersive-cover">
+              <img src={article.coverImage} alt={article.title} loading="eager" data-fallback-src="/assets/media/photo-placeholder.svg" />
+            </figure>
+          )}
+          {article.tags.length > 0 && (
+            <div class="chips article-tags" aria-label="文章标签">
+              {article.tags.map((tag) => <span class="chip">{tag}</span>)}
+            </div>
+          )}
           <div class="article-body" set:html={article.html} />
-        </div>
-        <MetadataSidecar
-          title="Article sidecar"
-          rows={[
-            { label: "Folder", value: getFolderLabel(article.folder) },
-            { label: "Slug", value: article.slug },
-            { label: "Published", value: formatDate(article.publishedAt, true) },
-            { label: "Updated", value: formatDate(article.updatedAt, true) },
-            { label: "Headings", value: article.headings.join(" / ") },
-            { label: "R2 Key", value: `articles/${article.folder}/${article.slug}/index.md` },
-          ]}
-        />
       </article>
+      <MetadataSidecar
+        title="阅读信息"
+        rows={[
+          { label: "Folder", value: article.folder },
+          { label: "Slug", value: article.slug },
+          { label: "Published", value: formatDate(article.publishedAt, true) },
+          { label: "Updated", value: formatDate(article.updatedAt, true) },
+          { label: "Status", value: article.status },
+        ]}
+      />
     </main>
   </div>
 </BaseLayout>

@@ -1,0 +1,18 @@
+async (page) => {
+ await page.route("**/*", route => route.continue());
+ const base='screenshots/';
+ const files=[],problems=[],requests=[];page.on('pageerror',e=>problems.push(e.message));page.on('console',m=>{if(m.type()==='error'||m.type()==='warning')problems.push(m.type()+': '+m.text());});page.on('response',r=>{if(r.status()>=400)problems.push(r.status()+' '+r.url());});page.on('request',r=>{if(!/^(http:\/\/127\.0\.0\.1:4173|blob:|data:)/.test(r.url()))requests.push(r.url());});
+ await page.goto('http://127.0.0.1:4173/?final=1#/home');await page.reload();
+ const capture=async(name,hash,width,admin=false)=>{await page.setViewportSize({width,height:width<768?844:1000});await page.evaluate(h=>{location.hash=h},hash);await page.waitForTimeout(80);if(admin && !(await page.locator('#admin-form').count()))await page.getByRole('button',{name:'进入演示后台'}).click();if(admin&&width<768&&await page.locator('.admin-records').isVisible())await page.locator('[data-record-id]').first().click();if(hash.includes('view=map'))await page.locator('[data-map-id]').first().waitFor();await page.evaluate(()=>Promise.all([...document.images].map(i=>i.decode().catch(()=>{}))));if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))problems.push('overflow '+name+' '+width);const filename=name+'-'+width+'.png';await page.screenshot({path:base+filename,fullPage:true});files.push(filename);};
+ for(const width of [1440,1024,390,320])await capture('home','#/home',width);
+ for(const [name,hash] of [['articles','#/articles'],['article','#/articles/notes/monolith-at-sunset'],['images','#/images'],['photo','#/images/city-walk/20260531-184200-a1b2'],['map','#/images?view=map']])for(const width of [1440,390])await capture(name,hash,width);
+ for(const width of [1440,1024,390,320])await capture('admin-articles','#/admin/articles',width,true);
+ for(const [name,hash] of [['admin-images','#/admin/images'],['admin-folders','#/admin/folders']])for(const width of [1440,390])await capture(name,hash,width,true);
+ await page.locator('[data-admin-back]').click();await page.screenshot({path:base+'admin-list-390.png',fullPage:true});files.push('admin-list-390.png');
+ await capture('map-before-error','#/images?view=map',1440);
+ await page.locator('[data-tweaks-open]').click();await page.locator('#preview-map').check();await page.locator('[data-tweaks-close]').click();await page.locator('[data-map-retry]').waitFor();await page.screenshot({path:base+'map-error-1440.png',fullPage:true});files.push('map-error-1440.png');
+ await page.locator('nav.primary-nav a[href="#/admin"]').click();await page.locator('#field-title').fill('黄昏中的方碑（草稿）');await page.locator('[data-tweaks-open]').click();await page.locator('#preview-save').check();await page.locator('[data-tweaks-close]').click();await page.locator('#admin-save').click();await page.waitForFunction(()=>document.querySelector('#admin-message')?.textContent.includes('保存失败'));await page.locator('#admin-save').evaluate(el=>el.focus({preventScroll:true}));await page.evaluate(()=>window.scrollTo(0,0));await page.waitForTimeout(100);await page.screenshot({path:base+'save-error-1440.png',fullPage:true});files.push('save-error-1440.png');
+ await page.locator('[data-admin-delete]').click();await page.screenshot({path:base+'delete-confirm-1440.png'});files.push('delete-confirm-1440.png');await page.locator('#confirm-dialog button[value="cancel"]').click();
+ await page.locator('nav.primary-nav a[href="#/home"]').click();await page.locator('#confirm-dialog button[value="confirm"]').click();await page.waitForFunction(()=>location.hash==='#/home');await page.reload();
+ return {screenshots:files.length,files,problems,externalRequests:requests};
+}

@@ -1,0 +1,99 @@
+/* Document navigation keeps the archive's chrome in place while the content
+   changes. Loaded after global.css to replace its whole-frame transitions. */
+:root {
+  --page-enter-time: 280ms;
+  --page-exit-time: 140ms;
+}
+
+body > .site-frame,
+body.is-page-entering > .site-frame,
+html.is-navigating body > .site-frame {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+@view-transition {
+  navigation: auto;
+}
+
+.site-frame > .topbar {
+  view-transition-name: archive-navigation;
+}
+
+.site-frame > .layout-grid,
+.site-frame > main {
+  view-transition-name: archive-content;
+}
+
+/* Snapshot layers never consume input, even during a rapid second navigation. */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(root),
+::view-transition-group(archive-navigation),
+::view-transition-group(archive-content) {
+  animation: none;
+}
+
+::view-transition-old(root),
+::view-transition-old(archive-navigation) {
+  display: none;
+  animation: none;
+}
+
+::view-transition-new(root),
+::view-transition-new(archive-navigation) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-image-pair(archive-content) {
+  isolation: auto;
+}
+
+::view-transition-old(archive-content) {
+  animation: archive-content-out var(--page-exit-time) cubic-bezier(0.4, 0, 1, 1) both;
+  mix-blend-mode: normal;
+}
+
+::view-transition-new(archive-content) {
+  animation: archive-content-in var(--page-enter-time) var(--ease-out) 40ms both;
+  mix-blend-mode: normal;
+}
+
+@keyframes archive-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes archive-content-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+    transform: none !important;
+  }
+}

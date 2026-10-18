@@ -7,6 +7,9 @@
 /assets/admin.js
   Cache-Control: no-store
 
+/assets/article-editor.js
+  Cache-Control: no-store
+
 /assets/public-content.js
   Cache-Control: no-store
 
@@ -23,6 +26,9 @@
   Cache-Control: no-store
 
 /assets/site-ui.js
+  Cache-Control: no-store
+
+/assets/theme.js
   Cache-Control: no-store
 
 /*

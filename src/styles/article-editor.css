@@ -1,0 +1,647 @@
+.writing-workspace {
+  --writing-paper: var(--surface);
+  --writing-ink: var(--canvas);
+  min-width: 0;
+  border: 1px solid var(--line-strong);
+  background: var(--panel);
+}
+
+.writing-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--panel);
+}
+
+.writing-toolbar-top {
+  display: flex;
+  min-height: 60px;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+}
+
+.writing-label {
+  flex: 1;
+  color: var(--surface);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.writing-modes {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--line);
+  background: var(--canvas);
+}
+
+.writing-modes button,
+.writing-tool,
+.writing-table-tools button,
+.writing-focus-save {
+  min-height: 40px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+  transition: color var(--press-time), background var(--press-time), border-color var(--press-time);
+}
+
+.writing-modes button {
+  min-width: 58px;
+  padding: 6px 13px;
+  font-size: 0.78rem;
+}
+
+.writing-modes button[aria-pressed="true"] {
+  color: var(--surface);
+  background: var(--raised);
+  box-shadow: inset 0 -2px 0 var(--focus);
+}
+
+.writing-modes button:hover:not(:disabled),
+.writing-tool:hover:not(:disabled),
+.writing-table-tools button:hover:not(:disabled) {
+  color: var(--surface);
+  background: var(--raised);
+}
+
+.writing-formatbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 10px;
+  border-top: 1px solid var(--line);
+}
+
+.writing-tool {
+  display: inline-flex;
+  width: 38px;
+  flex: 0 0 38px;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid transparent;
+}
+
+.writing-tool svg {
+  width: 19px;
+  height: 19px;
+}
+
+.writing-tool[aria-pressed="true"] {
+  border-color: rgba(121, 215, 229, 0.28);
+  color: var(--focus);
+  background: rgba(121, 215, 229, 0.08);
+}
+
+.writing-tool:disabled,
+.writing-block-select:disabled {
+  opacity: 0.3;
+}
+
+.writing-tool-divider {
+  width: 1px;
+  height: 18px;
+  margin: 0 5px;
+  background: var(--line);
+}
+
+.admin-form .writing-block-select {
+  width: 105px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 5px 8px;
+  border-color: var(--line);
+  color: var(--surface);
+  background: var(--panel);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.writing-table-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px 8px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.writing-table-tools > span {
+  margin-right: 8px;
+  font-weight: 600;
+}
+
+.writing-table-tools button {
+  min-height: 36px;
+  padding: 4px 8px;
+}
+
+.writing-table-tools [data-writing-action="deleteTable"] {
+  color: var(--coral);
+}
+
+.writing-workspace [data-rich-editor] {
+  min-height: 480px;
+  background: var(--writing-paper);
+}
+
+.writing-document {
+  min-height: 480px;
+  padding: clamp(24px, 5vw, 56px) clamp(20px, 5vw, 64px) 80px;
+  outline: none;
+  color: var(--writing-ink);
+  font-size: 1.04rem;
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+  caret-color: var(--coral);
+  white-space: pre-wrap;
+}
+
+.writing-document:focus-visible {
+  outline: none;
+}
+
+.writing-document > :first-child {
+  margin-top: 0;
+}
+
+.writing-document > :last-child {
+  margin-bottom: 0;
+}
+
+.writing-document h1,
+.writing-document h2,
+.writing-document h3,
+.writing-document h4,
+.writing-document h5,
+.writing-document h6 {
+  margin: 1.65em 0 0.6em;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.4;
+}
+
+.writing-document h1 {
+  font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+}
+
+.writing-document h2 {
+  font-size: clamp(1.6rem, 3vw, 2rem);
+}
+
+.writing-document h3 {
+  font-size: 1.38rem;
+}
+
+.writing-document h4 {
+  font-size: 1.2rem;
+}
+
+.writing-document h5,
+.writing-document h6 {
+  font-size: 1.05rem;
+}
+
+.writing-document p {
+  margin: 0 0 1.15em;
+}
+
+.writing-document a {
+  color: var(--writing-ink);
+  text-decoration: underline;
+  text-decoration-color: var(--coral);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: text;
+}
+
+.writing-document blockquote {
+  margin: 1.5em 0;
+  padding: 8px 0 8px 22px;
+  border-left: 3px solid var(--coral);
+  color: var(--ink-soft);
+  font-family: var(--font-display);
+}
+
+.writing-document blockquote p:last-child {
+  margin-bottom: 0;
+}
+
+.writing-document ul,
+.writing-document ol {
+  padding-left: 1.6em;
+  margin: 0 0 1.15em;
+}
+
+.writing-document li > p {
+  margin-bottom: 0.3em;
+}
+
+.writing-document li > ul,
+.writing-document li > ol {
+  margin: 0.3em 0;
+}
+
+.writing-document code {
+  padding: 0.12em 0.3em;
+  color: var(--canvas);
+  background: rgba(8, 10, 13, 0.07);
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  border-radius: 2px;
+}
+
+.writing-document pre {
+  overflow-x: auto;
+  padding: 20px 24px;
+  margin: 1.4em 0;
+  color: var(--surface);
+  background: var(--panel);
+  tab-size: 2;
+  white-space: pre;
+}
+
+.writing-document pre code {
+  padding: 0;
+  color: inherit;
+  background: transparent;
+}
+
+.writing-document hr {
+  margin: 2.25em 0;
+  border: 0;
+  border-top: 1px solid var(--dark-line);
+}
+
+.writing-document img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.5em 0;
+}
+
+.writing-document .ProseMirror-selectednode {
+  outline: 2px solid var(--coral);
+  outline-offset: 3px;
+}
+
+.writing-document p.is-editor-empty:first-child::before {
+  float: left;
+  height: 0;
+  color: rgba(8, 10, 13, 0.42);
+  content: attr(data-placeholder);
+  pointer-events: none;
+}
+
+.writing-document .tableWrapper {
+  overflow-x: auto;
+}
+
+.writing-document table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+}
+
+.writing-document th,
+.writing-document td {
+  position: relative;
+  min-width: 70px;
+  padding: 8px 12px;
+  border: 1px solid var(--dark-line);
+  vertical-align: top;
+  text-align: left;
+}
+
+.writing-document th {
+  background: rgba(8, 10, 13, 0.055);
+  font-weight: 700;
+}
+
+.writing-document td > :last-child,
+.writing-document th > :last-child {
+  margin-bottom: 0;
+}
+
+.writing-document .selectedCell::after {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: rgba(121, 215, 229, 0.22);
+  content: "";
+  pointer-events: none;
+}
+
+.admin-form .writing-workspace [data-source-editor] {
+  gap: 0;
+  background: var(--canvas);
+}
+
+.writing-workspace [data-source-editor] > span {
+  padding: 16px 24px 0;
+}
+
+.admin-form .writing-workspace .code-editor {
+  min-height: 480px;
+  padding: 20px 24px 48px;
+  border: 0;
+  border-radius: 0;
+  color: var(--surface);
+  background: var(--canvas);
+  font-size: 0.88rem;
+  line-height: 1.85;
+  resize: vertical;
+  tab-size: 2;
+}
+
+.admin-form .writing-workspace .code-editor:focus {
+  outline: 0;
+  box-shadow: inset 2px 0 0 var(--focus);
+}
+
+.writing-workspace .admin-preview {
+  min-height: 480px;
+  padding: clamp(24px, 5vw, 56px) clamp(20px, 5vw, 64px);
+  border: 0;
+}
+
+.writing-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 20px;
+  min-height: 48px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--line-strong);
+  color: var(--muted);
+  background: var(--panel);
+  font-size: 0.68rem;
+  line-height: 1.6;
+}
+
+.writing-editor-status {
+  flex: 1 1 200px;
+  margin: 0;
+}
+
+.writing-footer-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}
+
+.writing-focus-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  border: 1px solid var(--coral);
+  color: var(--canvas);
+  background: var(--coral);
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+body.has-writing-focus {
+  overflow: hidden;
+}
+
+body.has-writing-focus > .site-frame > .topbar {
+  visibility: hidden;
+}
+
+.writing-workspace.is-focused {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  overflow: auto;
+  border: 0;
+  background: var(--writing-paper);
+  overscroll-behavior: contain;
+}
+
+.writing-workspace.is-focused .writing-toolbar,
+.writing-workspace.is-focused .writing-footer {
+  padding-right: max(16px, calc((100vw - 1040px) / 2));
+  padding-left: max(16px, calc((100vw - 1040px) / 2));
+}
+
+.writing-workspace.is-focused .writing-toolbar-top,
+.writing-workspace.is-focused .writing-formatbar {
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.writing-workspace.is-focused .writing-document,
+.writing-workspace.is-focused .admin-preview,
+.admin-form .writing-workspace.is-focused [data-source-editor] {
+  max-width: 960px;
+  min-height: calc(100dvh - 190px);
+  margin: 0 auto;
+}
+
+.writing-workspace.is-focused .writing-document,
+.writing-workspace.is-focused .admin-preview {
+  padding-top: 56px;
+  padding-bottom: 100px;
+}
+
+.writing-workspace.is-focused [data-source-editor] {
+  max-width: none !important;
+}
+
+.admin-form .writing-workspace.is-focused [data-source-editor] > span,
+.admin-form .writing-workspace.is-focused .code-editor {
+  width: min(100%, 960px);
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.writing-workspace.is-focused .writing-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+}
+
+.writing-workspace.is-focused .writing-focus-save {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.writing-link-dialog {
+  position: fixed;
+  z-index: 120;
+  width: min(460px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid var(--line-strong);
+  color: var(--surface);
+  background: var(--panel);
+  box-shadow: 0 24px 80px rgba(8, 10, 13, 0.5);
+}
+
+.writing-link-dialog::backdrop {
+  background: rgba(8, 10, 13, 0.7);
+  backdrop-filter: blur(4px);
+}
+
+.writing-link-form {
+  display: grid;
+  gap: 10px;
+  padding: 28px;
+}
+
+.writing-link-form h2 {
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+
+.writing-link-form label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.writing-link-form input {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  color: var(--surface);
+  background: var(--canvas);
+}
+
+.writing-link-help,
+.writing-link-error {
+  margin: 0;
+  font-size: 0.74rem;
+  line-height: 1.6;
+}
+
+.writing-link-help {
+  color: var(--muted);
+}
+
+.writing-link-error {
+  color: var(--coral);
+}
+
+.writing-link-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.writing-link-actions button {
+  min-height: 42px;
+  padding: 8px 14px;
+  border: 1px solid var(--line-strong);
+  color: var(--surface);
+  background: transparent;
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.writing-link-actions [data-link-remove] {
+  margin-right: auto;
+  border-color: transparent;
+  color: var(--coral);
+}
+
+.writing-link-actions .writing-link-apply {
+  border-color: var(--focus);
+  color: var(--canvas);
+  background: var(--focus);
+}
+
+@media (max-width: 600px) {
+  .writing-toolbar-top {
+    min-height: 56px;
+    gap: 8px;
+    padding: 6px 10px;
+  }
+
+  .writing-modes button {
+    min-width: 48px;
+    min-height: 40px;
+    padding-right: 8px;
+    padding-left: 8px;
+  }
+
+  .writing-formatbar {
+    gap: 1px;
+    padding: 6px;
+  }
+
+  .writing-tool {
+    width: 36px;
+    min-height: 40px;
+    flex-basis: 36px;
+  }
+
+  .writing-tool-divider {
+    margin-right: 3px;
+    margin-left: 3px;
+  }
+
+  .admin-form .writing-block-select {
+    width: 94px;
+    font-size: 0.72rem;
+  }
+
+  .writing-document,
+  .writing-workspace .admin-preview {
+    padding: 28px 20px 60px;
+    font-size: 1rem;
+  }
+
+  .admin-form .writing-workspace .code-editor {
+    padding-right: 18px;
+    padding-left: 18px;
+  }
+
+  .writing-footer {
+    padding: 10px 12px;
+  }
+
+  .writing-footer-meta {
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .writing-link-form {
+    padding: 22px;
+  }
+
+  .writing-workspace.is-focused .writing-toolbar,
+  .writing-workspace.is-focused .writing-footer {
+    padding-right: 10px;
+    padding-left: 10px;
+  }
+
+  .writing-workspace.is-focused .writing-document,
+  .writing-workspace.is-focused .admin-preview {
+    padding-top: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .writing-workspace *,
+  .writing-link-dialog * {
+    transition: none !important;
+  }
+}

@@ -50,7 +50,12 @@ export function siteHeader(currentSection: SiteSection) {
       return `<a class="nav-link" href="${item.href}"${current}>${item.label}</a>`;
     })
     .join("");
-  return `<header class="topbar"><a class="brand" href="/" aria-label="Website Turns Away 首页"><span class="brand-mark" aria-hidden="true"><span></span></span><span class="brand-copy"><strong>Website Turns Away</strong><small>Orbital Archive v2</small></span></a><nav class="primary-nav" aria-label="主导航">${links}</nav></header>`;
+  return `<header class="topbar"><a class="brand" href="/" aria-label="Website Turns Away 首页"><span class="brand-mark" aria-hidden="true"><span></span></span><span class="brand-copy"><strong>Website Turns Away</strong><small>Orbital Archive v2</small></span></a><div class="header-actions"><nav class="primary-nav" aria-label="主导航">${links}</nav><label class="theme-picker" data-theme-control hidden>
+  <span class="visually-hidden">外观模式</span>
+  <svg class="theme-icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>
+  <svg class="theme-icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></svg>
+  <select data-theme-preference aria-label="外观模式"><option value="system">跟随系统</option><option value="light">白天模式</option><option value="dark">黑夜模式</option></select>
+</label></div></header>`;
 }
 
 function breadcrumbItems(breadcrumbs: Breadcrumb[]) {
@@ -95,6 +100,7 @@ export function htmlPage(options: PublicPageOptions) {
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="theme-color" content="#080A0D">
     <title>${escapeHtml(documentTitle)}</title>
+    <script src="/assets/theme.js"></script>
     <link rel="stylesheet" href="/assets/site.css">
     <script src="/assets/site-ui.js" defer></script>
   </head>

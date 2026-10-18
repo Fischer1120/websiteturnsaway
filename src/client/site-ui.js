@@ -3,6 +3,8 @@ const MAP_SCRIPT_URL = "/assets/photo-map.js";
 const MAP_ASSET_TIMEOUT = 12_000;
 
 let mapAssetPromise;
+let nativePageTransition;
+const motionAnimations = new Map();
 
 function prefersReducedMotion() {
   return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
@@ -72,13 +74,106 @@ function setupImageFallbacks() {
   );
 }
 
+function supportsDocumentTransitions() {
+  return "onpagereveal" in window && globalThis.CSS?.supports("view-transition-name", "archive-content");
+}
+
+function pageMotionTarget() {
+  return document.querySelector(".site-frame > .layout-grid, .site-frame > main");
+}
+
+function animateMotion(element, keyframes, options) {
+  if (!element?.animate || prefersReducedMotion() || !element.isConnected || !element.getClientRects().length) return;
+  motionAnimations.get(element)?.cancel();
+  const animation = element.animate(keyframes, { easing: "cubic-bezier(0.22, 0.8, 0.24, 1)", fill: "none", ...options });
+  motionAnimations.set(element, animation);
+  const cleanup = () => {
+    if (motionAnimations.get(element) === animation) motionAnimations.delete(element);
+  };
+  animation.finished.then(cleanup, cleanup);
+  return animation;
+}
+
+function enterContent(element, { distance = 6, duration = 220 } = {}) {
+  if (element?.closest("[hidden]")) return;
+  return animateMotion(element, [
+    { opacity: 0, transform: `translateY(${distance}px)` },
+    { opacity: 1, transform: "translateY(0)" },
+  ], { duration });
+}
+
+function resetPageMotion() {
+  for (const animation of motionAnimations.values()) animation.cancel();
+  motionAnimations.clear();
+  document.body.classList.remove("is-page-entering");
+  document.documentElement.classList.remove("is-navigating");
+}
+
 function setupPageMotion() {
   document.documentElement.dataset.uiReady = "true";
-  if ("startViewTransition" in document) document.documentElement.classList.add("supports-view-transitions");
-  if (prefersReducedMotion()) return;
+  document.documentElement.classList.toggle("supports-view-transitions", Boolean(supportsDocumentTransitions()));
+  resetPageMotion();
 
-  document.body.classList.add("is-page-entering");
-  requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.remove("is-page-entering")));
+  // The browser owns document navigation, snapshots, scroll and history restoration.
+  // An entry animation is only needed when no native snapshot is being revealed.
+  const enterPage = () => requestAnimationFrame(() => {
+    if (!nativePageTransition && !document.activeViewTransition) enterContent(pageMotionTarget(), { distance: 10, duration: 280 });
+  });
+  window.addEventListener("pagereveal", (event) => {
+    nativePageTransition = event.viewTransition;
+    if (!nativePageTransition) return;
+    resetPageMotion();
+    if (prefersReducedMotion()) nativePageTransition.skipTransition();
+    const transition = nativePageTransition;
+    transition.finished.then(() => {
+      if (nativePageTransition === transition) nativePageTransition = undefined;
+    }, () => {
+      if (nativePageTransition === transition) nativePageTransition = undefined;
+    });
+  });
+  window.addEventListener("pageswap", (event) => {
+    resetPageMotion();
+    if (prefersReducedMotion()) event.viewTransition?.skipTransition();
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (!event.persisted) return;
+    resetPageMotion();
+    // bfcache keeps JS state; a departing transition must not suppress later entries.
+    nativePageTransition = undefined;
+    if (!supportsDocumentTransitions()) enterPage();
+  });
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").addEventListener?.("change", (event) => {
+    if (!event.matches) return;
+    resetPageMotion();
+    nativePageTransition?.skipTransition();
+    document.activeViewTransition?.skipTransition();
+  });
+  enterPage();
+}
+
+function setupLocalContentMotion() {
+  const admin = document.getElementById("admin-root");
+  if (!admin || !globalThis.MutationObserver) return;
+  // Observe only structural workspace changes, never typing, busy indicators or
+  // Markdown previews. Existing CMS focus management remains in charge.
+  const observer = new MutationObserver((records) => {
+    const targets = new Set();
+    for (const record of records) {
+      const target = record.target;
+      if (!(target instanceof Element)) continue;
+      if (record.type === "attributes" && target.matches("#admin-panels > [role='tabpanel']") && !target.hidden) targets.add(target);
+      if (record.type === "childList" && target.matches("[data-panel-body], [data-editor]")) targets.add(target);
+      if (record.type === "childList" && target === admin) {
+        const initial = admin.querySelector(".admin-login, #admin-panels > section:not([hidden])");
+        if (initial) targets.add(initial);
+      }
+    }
+    // A panel and its editor may change together; animate just the outer target.
+    for (const target of targets) {
+      if (![...targets].some((other) => other !== target && other.contains(target))) enterContent(target);
+    }
+  });
+  observer.observe(admin, { subtree: true, childList: true, attributes: true, attributeFilter: ["hidden"] });
 }
 
 function setupOrbitalHero() {
@@ -468,15 +563,27 @@ function setupMapInteractions() {
 }
 
 function setupSafeNavigationMotion() {
-  if (prefersReducedMotion()) return;
   document.addEventListener("click", (event) => {
     const link = event.target.closest?.("a[href]");
-    if (!link || !isPrimaryActivation(event) || link.target || link.hasAttribute("download")) return;
+    if (!link || event.defaultPrevented || !isPrimaryActivation(event) || (link.target && link.target !== "_self") || link.hasAttribute("download")) return;
     const url = new URL(link.href, window.location.href);
-    if (url.origin !== window.location.origin || url.pathname === window.location.pathname) return;
-    document.documentElement.classList.add("is-navigating");
+    if (!/^https?:$/.test(url.protocol) || url.origin !== window.location.origin || url.hash) return;
+    if (url.pathname === window.location.pathname && url.search === window.location.search) return;
+    if (supportsDocumentTransitions() || prefersReducedMotion()) return;
+    // Never delay or replace native navigation. With no cross-document API, this
+    // brief response automatically releases its styles if navigation is cancelled,
+    // fails, becomes a download, or waits on a slow server.
+    queueMicrotask(() => {
+      if (event.defaultPrevented) return;
+      const target = pageMotionTarget();
+      if (!target) return;
+      const current = getComputedStyle(target);
+      animateMotion(target, [
+        { opacity: current.opacity, transform: current.transform },
+        { opacity: 0.35, transform: "translateY(-8px)" },
+      ], { duration: 140 });
+    });
   });
-  window.addEventListener("pageshow", () => document.documentElement.classList.remove("is-navigating"));
 }
 
 function boot() {
@@ -484,12 +591,13 @@ function boot() {
   setupDisclosures();
   setupImageFallbacks();
   setupPageMotion();
+  setupLocalContentMotion();
   setupOrbitalHero();
   setupMapInteractions();
   setupSafeNavigationMotion();
 }
 
-globalThis.WTASiteUI = { activateMap, loadMapAssets };
+globalThis.WTASiteUI = { activateMap, loadMapAssets, enterContent };
 
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot, { once: true });
 else boot();

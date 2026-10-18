@@ -23,7 +23,7 @@ await build({
   sourcemap: false,
   legalComments: "none",
   logLevel: "warning",
-  entryPoints: [fileURLToPath(new URL("../src/styles/global.css", import.meta.url))],
+  entryPoints: [fileURLToPath(new URL("../src/styles/site.css", import.meta.url))],
   outfile: fileURLToPath(new URL("../public/assets/site.css", import.meta.url)),
 });
 
@@ -47,4 +47,18 @@ await build({
   format: "iife",
   outfile: fileURLToPath(new URL("../public/assets/photo-map.js", import.meta.url)),
   loader: { ".css": "css", ".png": "dataurl" },
+});
+
+await build({
+  ...common,
+  entryPoints: [fileURLToPath(new URL("../src/client/article-editor.js", import.meta.url))],
+  format: "iife",
+  outfile: fileURLToPath(new URL("../public/assets/article-editor.js", import.meta.url)),
+});
+
+await build({
+  ...common,
+  entryPoints: [fileURLToPath(new URL("../src/client/theme.js", import.meta.url))],
+  format: "iife",
+  outfile: fileURLToPath(new URL("../public/assets/theme.js", import.meta.url)),
 });

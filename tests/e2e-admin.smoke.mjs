@@ -20,6 +20,8 @@ const consoleErrors = [];
     await page.getByLabel("管理密码").fill(token);
     await page.getByRole("button", { name: "进入后台" }).click();
 
+    await page.locator(".article-settings summary").click();
+    await page.getByRole("button", { name: "源码", exact: true }).click();
     const title = page.getByRole("textbox", { name: "标题", exact: true });
     const slugInput = page.getByRole("textbox", { name: "Slug" });
     const markdown = page.getByRole("textbox", { name: "Markdown 正文" });
@@ -33,9 +35,10 @@ const consoleErrors = [];
     }
 
     await page.getByRole("combobox", { name: "状态" }).selectOption("published");
-    await page.getByRole("button", { name: "创建文章" }).click();
+    await page.locator("[data-mutation=article-save]").click();
     created = true;
-    await page.waitForTimeout(250);
+    await page.locator("#article-action-status").filter({ hasText: "文章已保存" }).waitFor({ state: "visible" });
+    await page.getByRole("button", { name: "源码", exact: true }).click();
 
     const articlePage = await page.context().newPage();
     articlePage.on("console", (message) => {
@@ -62,7 +65,7 @@ const consoleErrors = [];
       page.getByRole("button", { name: "上传插图并插入" }).click(),
       page.getByRole("button", { name: "上传插图并插入" }).click(),
     ]);
-    await page.waitForTimeout(400);
+    await page.locator("#article-action-status").filter({ hasText: "插图已上传并插入正文" }).waitFor({ state: "visible" });
     page.off("request", requestListener);
     if (assetRequests !== 1) throw new Error(`expected one asset mutation, got ${assetRequests}`);
     if (!(await markdown.inputValue()).includes("screenshot-mobile.png")) throw new Error("successful asset upload removed Markdown");
@@ -72,11 +75,13 @@ const consoleErrors = [];
     await discardDialog.waitFor({ state: "visible" });
     await discardDialog.getByRole("button", { name: "放弃修改" }).click();
     await startNew;
-    await page.getByRole("button", { name: "创建文章" }).waitFor();
+    await page.locator("[data-mutation=article-save]").waitFor();
+    await page.getByRole("button", { name: "源码", exact: true }).click();
+    await page.locator(".article-settings summary").click();
     await title.fill("冲突草稿标题");
     await slugInput.fill(slug);
     await markdown.fill("冲突正文");
-    await page.getByRole("button", { name: "创建文章" }).click();
+    await page.locator("[data-mutation=article-save]").click();
     await page.locator("#admin-error-region").waitFor({ state: "visible" });
     if (!(await title.inputValue()).includes("冲突草稿标题") || await markdown.inputValue() !== "冲突正文") throw new Error("409 conflict cleared the draft");
     if (!(await page.getByRole("alert").textContent()).includes("冲突")) throw new Error("409 conflict was not readable");

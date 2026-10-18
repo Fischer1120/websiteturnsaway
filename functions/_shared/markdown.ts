@@ -1,118 +1,78 @@
+import MarkdownIt from "markdown-it";
+
 function escapeHtml(value: unknown) {
   return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
+    .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
 }
 
 function safeUrl(value: string) {
   const trimmed = value.trim();
-  if ((trimmed.startsWith("/") && !trimmed.startsWith("//")) || /^https?:\/\//i.test(trimmed)) return trimmed;
+  if (/[\u0000-\u0020\u007f\\]/.test(trimmed)) return "#";
+  if (trimmed.startsWith("#") || (trimmed.startsWith("/") && !trimmed.startsWith("//"))) return trimmed;
+  if (/^https?:\/\//i.test(trimmed)) {
+    try {
+      const url = new URL(trimmed);
+      if (url.hostname && !url.username && !url.password) return trimmed;
+    } catch { /* Invalid destinations render as inert anchors. */ }
+  }
   return "#";
 }
 
-function inlineMarkdown(value: string) {
-  let html = escapeHtml(value);
-  html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
-  html = html.replace(/!\[([^\]]*)\]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)/g, (_match, alt, url, title) => {
-    const caption = title || alt;
-    return `<img src="${escapeHtml(safeUrl(url))}" alt="${escapeHtml(alt)}" loading="lazy">${caption ? `<span class="image-caption">${escapeHtml(caption)}</span>` : ""}`;
-  });
-  html = html.replace(/\[([^\]]+)\]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)/g, (_match, label, url, title) => {
-    const titleAttr = title ? ` title="${escapeHtml(title)}"` : "";
-    return `<a href="${escapeHtml(safeUrl(url))}"${titleAttr}>${label}</a>`;
-  });
-  return html;
-}
+// Both the public article and the editor preview use this renderer. Raw HTML
+// stays text; URLs are checked again after Markdown has decoded entities.
+const parser = new MarkdownIt({ html: false, linkify: false, typographer: false });
+parser.validateLink = () => true;
+// The visual editor serializes line breaks inside Markdown table cells as pure
+// <br>. Accept only this inert tag; all other raw HTML remains escaped.
+parser.inline.ruler.before("text", "editor_line_break", (state, silent) => {
+  const match = /^<br\s*\/?>/i.exec(state.src.slice(state.pos));
+  if (!match) return false;
+  if (!silent) state.push("hardbreak", "br", 0);
+  state.pos += match[0].length;
+  return true;
+});
+const originalLinkOpen = parser.renderer.rules.link_open;
+parser.renderer.rules.link_open = (tokens, index, options, env, renderer) => {
+  const token = tokens[index];
+  token.attrSet("href", safeUrl(String(token.attrGet("href") || "")));
+  return originalLinkOpen ? originalLinkOpen(tokens, index, options, env, renderer) : renderer.renderToken(tokens, index, options);
+};
+parser.renderer.rules.image = (tokens, index, _options, _env, renderer) => {
+  const token = tokens[index];
+  const alt = renderer.renderInlineAsText(token.children || [], _options, _env);
+  const source = safeUrl(String(token.attrGet("src") || ""));
+  const title = token.attrGet("title");
+  const image = `<img src="${escapeHtml(source)}" alt="${escapeHtml(alt)}"${title ? ` title="${escapeHtml(title)}"` : ""} loading="lazy">`;
+  return image + (token.meta?.standalone ? `<figcaption>${escapeHtml(title || alt)}</figcaption>` : "");
+};
 
 export function markdownToHtml(markdown: string) {
-  const html: string[] = [];
-  let paragraph: string[] = [];
-  let list: "ul" | "ol" | undefined;
-  let code: string[] | undefined;
-
-  const closeList = () => {
-    if (!list) return;
-    html.push(`</${list}>`);
-    list = undefined;
-  };
-  const flushParagraph = () => {
-    if (paragraph.length === 0) return;
-    html.push(`<p>${inlineMarkdown(paragraph.join(" "))}</p>`);
-    paragraph = [];
-  };
-
-  for (const rawLine of String(markdown || "").split("\n")) {
-    const line = rawLine.trimEnd();
-    if (code) {
-      if (line.trim() === "```") {
-        html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-        code = undefined;
-      } else {
-        code.push(line);
+  const tokens = parser.parse(String(markdown || ""), {});
+  // The archive already renders the article title above the body. Preserve H1
+  // in stored Markdown while avoiding a repeated title on the public page.
+  const visible = [];
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
+    if (token.type === "heading_open" && token.tag === "h1") {
+      while (index < tokens.length && tokens[index].type !== "heading_close") index += 1;
+      continue;
+    }
+    if (token.type === "paragraph_open" && tokens[index + 1]?.type === "inline" && tokens[index + 2]?.type === "paragraph_close") {
+      const children = tokens[index + 1].children || [];
+      if (children.length === 1 && children[0].type === "image") {
+        token.tag = "figure";
+        token.attrSet("class", "inline-figure");
+        tokens[index + 2].tag = "figure";
+        children[0].meta = { standalone: true };
       }
-      continue;
     }
-    if (line.trim().startsWith("```")) {
-      flushParagraph();
-      closeList();
-      code = [];
-      continue;
-    }
-    if (!line.trim()) {
-      flushParagraph();
-      closeList();
-      continue;
-    }
-    const heading = line.match(/^(#{1,3})\s+(.+)$/);
-    if (heading) {
-      flushParagraph();
-      closeList();
-      const level = Number(heading[1].length);
-      if (level > 1) html.push(`<h${level}>${inlineMarkdown(heading[2])}</h${level}>`);
-      continue;
-    }
-    const quote = line.match(/^>\s?(.*)$/);
-    if (quote) {
-      flushParagraph();
-      closeList();
-      html.push(`<blockquote>${inlineMarkdown(quote[1])}</blockquote>`);
-      continue;
-    }
-    const ordered = line.match(/^\d+\.\s+(.+)$/);
-    const unordered = line.match(/^[-*+]\s+(.+)$/);
-    if (ordered || unordered) {
-      flushParagraph();
-      const nextList = ordered ? "ol" : "ul";
-      if (list !== nextList) {
-        closeList();
-        html.push(`<${nextList}>`);
-        list = nextList;
-      }
-      html.push(`<li>${inlineMarkdown((ordered || unordered)?.[1] || "")}</li>`);
-      continue;
-    }
-    closeList();
-    const imageOnly = line.match(/^!\[([^\]]*)\]\(([^\s)]+)(?:\s+\"([^\"]*)\")?\)$/);
-    if (imageOnly) {
-      flushParagraph();
-      const caption = imageOnly[3] || imageOnly[1];
-      html.push(`<figure class="inline-figure"><img src="${escapeHtml(safeUrl(imageOnly[2]))}" alt="${escapeHtml(imageOnly[1])}" loading="lazy"><figcaption>${escapeHtml(caption)}</figcaption></figure>`);
-      continue;
-    }
-    paragraph.push(line.trim());
+    visible.push(token);
   }
-  if (code) html.push(`<pre><code>${escapeHtml(code.join("\n"))}</code></pre>`);
-  flushParagraph();
-  closeList();
-  return html.join("\n");
+  return parser.renderer.render(visible, parser.options, {});
 }
 
 export function getHeadings(markdown: string) {
-  return String(markdown || "")
-    .split("\n")
-    .filter((line) => /^#{2,3}\s+/.test(line))
-    .map((line) => line.replace(/^#{2,3}\s+/, "").trim());
+  const tokens = parser.parse(String(markdown || ""), {});
+  return tokens.flatMap((token, index) => token.type === "heading_open" && /^h[2-6]$/.test(token.tag) ? [tokens[index + 1]?.content || ""] : []);
 }

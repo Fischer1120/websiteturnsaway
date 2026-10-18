@@ -10,6 +10,7 @@
   };
   const API_TIMEOUT_MS = 15_000;
   const MARKDOWN_PREVIEW_DELAY_MS = 150;
+  const LOCAL_DRAFT_DELAY_MS = 600;
   const MAX_ORIGINAL_IMAGE_BYTES = 15 * 1024 * 1024;
 
   const state = {
@@ -39,6 +40,130 @@
   };
 
   let markdownPreviewTimer = 0;
+  let articleEditor = null;
+  let localDraftTimer = 0;
+  let localDraftKey = "";
+  let localDrafts = {};
+  let localDraftAvailable = true;
+  let restoredArticleDraftId = null;
+
+  async function prepareLocalDrafts() {
+    try {
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(state.token));
+      const owner = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+      localDraftKey = `wta:article-drafts:v1:${owner}`;
+      const parsed = JSON.parse(localStorage.getItem(localDraftKey) || "{}");
+      localDrafts = parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+      for (const [id, draft] of Object.entries(localDrafts)) {
+        if (!draft || draft.version !== 1 || typeof draft.payload?.markdown !== "string" || typeof draft.savedAt !== "number") delete localDrafts[id];
+      }
+      localDraftAvailable = true;
+    } catch {
+      localDrafts = {};
+      localDraftAvailable = false;
+    }
+  }
+
+  function articleDraftId(article = state.editingArticle) {
+    return restoredArticleDraftId || (article ? JSON.stringify([article.folder, article.slug]) : "new");
+  }
+
+  function writeLocalDrafts() {
+    if (!localDraftKey || !localDraftAvailable) return false;
+    try {
+      localStorage.setItem(localDraftKey, JSON.stringify(localDrafts));
+      return true;
+    } catch {
+      localDraftAvailable = false;
+      return false;
+    }
+  }
+
+  function backupArticleDraft() {
+    clearTimeout(localDraftTimer);
+    const form = document.getElementById("article-form");
+    if (!state.authed || state.tab !== "articles" || !state.dirty || !form) return;
+    const id = articleDraftId();
+    localDrafts[id] = {
+      version: 1,
+      savedAt: Date.now(),
+      base: state.editingArticle ? { folder: state.editingArticle.folder, slug: state.editingArticle.slug, updatedAt: state.editingArticle.updatedAt } : null,
+      payload: articlePayload(form),
+    };
+    // Keep recent backups bounded without touching any server records.
+    const entries = Object.entries(localDrafts).sort((a, b) => b[1].savedAt - a[1].savedAt);
+    localDrafts = Object.fromEntries(entries.slice(0, 20));
+    const saved = writeLocalDrafts();
+    const status = form.querySelector("[data-local-draft-status]");
+    if (status) status.textContent = saved ? `已备份到本机 · ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}` : "本机备份不可用，请及时保存";
+  }
+
+  function scheduleArticleBackup() {
+    clearTimeout(localDraftTimer);
+    const status = document.querySelector("#article-form [data-local-draft-status]");
+    if (status) status.textContent = localDraftAvailable ? "正在备份到本机…" : "本机备份不可用，请及时保存";
+    localDraftTimer = window.setTimeout(backupArticleDraft, LOCAL_DRAFT_DELAY_MS);
+  }
+
+  function removeArticleBackup(article = state.editingArticle) {
+    clearTimeout(localDraftTimer);
+    delete localDrafts[articleDraftId(article)];
+    restoredArticleDraftId = null;
+    writeLocalDrafts();
+    updateRecoveryUi();
+  }
+
+  function latestLocalDraft() {
+    return Object.entries(localDrafts).sort((a, b) => b[1].savedAt - a[1].savedAt)[0];
+  }
+
+  function updateRecoveryUi() {
+    const region = document.getElementById("article-draft-recovery");
+    if (!region) return;
+    const latest = latestLocalDraft();
+    region.hidden = !latest;
+    if (!latest) return;
+    const draft = latest[1];
+    region.querySelector("[data-recovery-description]").textContent = `本机有未保存的草稿：${draft.payload.title || "未命名文章"}（${new Date(draft.savedAt).toLocaleString("zh-CN", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}）`;
+  }
+
+  async function restoreLocalDraft() {
+    if (isBusy()) return;
+    const latest = latestLocalDraft();
+    if (!latest || !await confirmDiscard()) return;
+    if (state.dirty) clearDraftForTab();
+    const [id, draft] = latest;
+    restoredArticleDraftId = id;
+    // confirmDiscard may update the cache; keep the selected backup for recovery.
+    localDrafts[id] = draft;
+    writeLocalDrafts();
+    state.editingArticle = draft.base ? state.articles.find((item) => item.folder === draft.base.folder && item.slug === draft.base.slug) || null : null;
+    state.tab = "articles";
+    state.drafts.article = { ...draft.payload };
+    if (draft.base && state.editingArticle && draft.base.updatedAt) state.editingArticle = { ...state.editingArticle, updatedAt: draft.base.updatedAt };
+    state.mobileView.articles = "editor";
+    setDirty(true);
+    renderWorkspace({ focusSelector: "[name='title']" });
+    setStatus(draft.base && !state.editingArticle ? "草稿已恢复，原文章已不存在；保存时将创建新文章。" : "本机草稿已恢复，保存后才会更新服务器。", false, { scope: "article" });
+  }
+
+  function disposeArticleEditor() {
+    articleEditor?.destroy();
+    articleEditor = null;
+  }
+
+  function mountArticleEditor() {
+    if (state.tab !== "articles") return;
+    const form = document.getElementById("article-form");
+    const workspace = form?.querySelector("[data-writing-workspace]");
+    if (!form || !workspace || !window.WTAArticleEditor?.mount) return;
+    try {
+      articleEditor = window.WTAArticleEditor.mount({ form, textarea: form.elements.namedItem("markdown"), workspace });
+    } catch {
+      const status = form.querySelector("[data-local-draft-status]");
+      if (status) status.textContent = "可视化编辑器未能加载，可继续编辑 Markdown。";
+    }
+  }
 
   class ApiError extends Error {
     constructor(message, status = 0, code = "unknown", details = {}) {
@@ -105,58 +230,9 @@
     return date.toISOString().slice(0, 16);
   }
 
-  function renderInlineMarkdown(value) {
-    return escapeHtml(value).replaceAll(/`([^`]+)`/g, "<code>$1</code>");
-  }
-
   function markdownToHtml(markdown) {
-    const html = [];
-    let paragraph = [];
-    const flush = () => {
-      if (!paragraph.length) return;
-      html.push(`<p>${renderInlineMarkdown(paragraph.join(" "))}</p>`);
-      paragraph = [];
-    };
-
-    for (const rawLine of String(markdown ?? "").split("\n")) {
-      const line = rawLine.trim();
-      if (!line) {
-        flush();
-        continue;
-      }
-      const image = line.match(/^!\[(.*?)\]\((.*?)(?:\s+"(.*?)")?\)$/);
-      if (image) {
-        flush();
-        const source = safeLocalMediaUrl(image[2]);
-        if (source) {
-          html.push(
-            `<figure class="inline-figure"><img src="${escapeAttr(source)}" alt="${escapeAttr(
-              image[1],
-            )}" loading="lazy"><figcaption>${escapeHtml(image[3] || image[1])}</figcaption></figure>`,
-          );
-        } else {
-          html.push(`<p class="system-text">${escapeHtml(`[图片地址不可预览] ${image[1] || image[2]}`)}</p>`);
-        }
-        continue;
-      }
-      if (line.startsWith("### ")) {
-        flush();
-        html.push(`<h3>${renderInlineMarkdown(line.slice(4))}</h3>`);
-        continue;
-      }
-      if (line.startsWith("## ")) {
-        flush();
-        html.push(`<h2>${renderInlineMarkdown(line.slice(3))}</h2>`);
-        continue;
-      }
-      if (line.startsWith("# ")) {
-        flush();
-        continue;
-      }
-      paragraph.push(line);
-    }
-    flush();
-    return html.join("\n");
+    if (window.WTAArticleEditor?.renderMarkdown) return window.WTAArticleEditor.renderMarkdown(markdown);
+    return `<p>${escapeHtml(markdown).replaceAll("\n", "<br>")}</p>`;
   }
 
   async function api(path, options = {}) {
@@ -236,7 +312,7 @@
   }
 
   function updateDirtyUi() {
-    const text = state.dirty ? "未保存" : "已同步";
+    const text = state.dirty ? "未保存到服务器" : "已同步";
     root.dataset.unsaved = state.dirty ? "true" : "false";
     root.querySelectorAll(".save-indicator").forEach((indicator) => {
       indicator.textContent = text;
@@ -269,6 +345,7 @@
 
   function updateBusyUi() {
     const busy = isBusy();
+    articleEditor?.setBusy(isScopeBusy("article"));
     root.setAttribute("aria-busy", busy ? "true" : "false");
     const pendingRegion = document.getElementById("admin-pending-region");
     if (pendingRegion) {
@@ -350,6 +427,7 @@
 
   function clearDraftForTab(tab = state.tab) {
     const kind = kindForTab(tab);
+    if (kind === "article") removeArticleBackup();
     state.drafts[kind] = null;
   }
 
@@ -370,6 +448,7 @@
   }
 
   async function reconcileAfterMutation(kind, record, { deleted = false, message = "已保存。" } = {}) {
+    if (kind === "article") removeArticleBackup();
     captureListScroll();
     let refreshError = null;
     try {
@@ -407,6 +486,7 @@
         ? "[data-list-items] .admin-list-item, [data-action^='new-']"
         : `[data-mutation="${kind === "article" ? "article-save" : kind === "photo" ? "image-save" : "folder-save"}"]`,
     });
+    setActionStatus(kind, message, "success");
     return true;
   }
 
@@ -422,6 +502,11 @@
         || (item.folder === previous?.folder && item.slug === previous?.slug),
       );
       if (!record) return false;
+      const fields = ["title", "subtitle", "summary", "folder", "slug", "coverImage", "status"];
+      if (fields.some((key) => String(record[key] || "") !== String(desired[key] || ""))
+        || String(record.markdown || "").trim() !== String(desired.markdown || "").trim()
+        || JSON.stringify(record.tags || []) !== JSON.stringify(desired.tags || [])) return false;
+      removeArticleBackup(previous);
       state.editingArticle = record;
       state.drafts.article = null;
     } else if (kind === "photo") {
@@ -437,6 +522,7 @@
     setDirty(false);
     setStatus("请求超时，但服务端已保存；界面已同步。", false, { scope: kind });
     renderWorkspace({ focusSelector: `[data-mutation="${kind === "article" ? "article-save" : "image-save"}"]` });
+    setActionStatus(kind, "请求超时，但服务端已保存；界面已同步。", "success");
     return true;
   }
 
@@ -450,7 +536,7 @@
       ? state.articles.some((item) => item.folder === target.folder && item.slug === target.slug)
       : state.photos.some((item) => item.folder === target.folder && item.id === target.id);
     if (exists) return false;
-    if (kind === "article") state.editingArticle = null;
+    if (kind === "article") { removeArticleBackup(target); state.editingArticle = null; }
     if (kind === "photo") state.editingPhoto = null;
     state.drafts[kind] = null;
     state.mobileView[state.tab] = "list";
@@ -488,7 +574,7 @@
           <p class="eyebrow">Admin Console / R2 CMS</p>
           <h1>内容管理</h1>
         </div>
-        <p>当前会话已登录；所有保存动作都会写入 R2，并刷新公开索引。</p>
+        <p>写下想法，整理成篇。保存后即可更新网站内容。</p>
       </div>
       <div class="admin-toolbar">
         <div class="admin-tabs" role="tablist" aria-label="后台内容类型" aria-orientation="horizontal">
@@ -500,6 +586,11 @@
       <p id="admin-status-region" class="admin-message success" role="status" aria-live="polite" ${state.status ? "" : "hidden"}>${escapeHtml(state.status)}</p>
       <p id="admin-error-region" class="admin-message error" role="alert" tabindex="-1" ${state.error ? "" : "hidden"}>${escapeHtml(state.error)}</p>
       <p id="admin-pending-region" class="admin-message" role="status" aria-live="polite" hidden></p>
+      <div id="article-draft-recovery" class="article-draft-recovery" role="status" hidden>
+        <span data-recovery-description></span>
+        <button class="admin-mini-action" data-action="restore-article-draft" data-navigation-control type="button">恢复草稿</button>
+        <button class="admin-mini-action" data-action="remove-article-draft" data-navigation-control type="button">清除备份</button>
+      </div>
       <div id="admin-panels">
         ${TAB_IDS.map((id) => `<section id="admin-panel-${id}" role="tabpanel" aria-labelledby="admin-tab-${id}" tabindex="0" ${id === state.tab ? "" : "hidden"}><div data-panel-body="${id}"></div></section>`).join("")}
       </div>
@@ -536,43 +627,50 @@
 
   function articleForm() {
     const article = state.drafts.article || state.editingArticle || {
-      title: "",
-      subtitle: "",
-      summary: "",
-      folder: state.folders.articles?.[0]?.slug || "notes",
-      slug: "",
-      coverImage: "",
-      publishedAt: nowLocal(),
-      tags: "",
-      status: "published",
-      markdown: "# 新文章\n\n## 第一段\n\n从这里开始写。",
+      title: "", subtitle: "", summary: "", folder: state.folders.articles?.[0]?.slug || "notes", slug: "",
+      coverImage: "", publishedAt: nowLocal(), tags: "", status: "draft", markdown: "",
     };
     const editing = Boolean(state.editingArticle);
+    const publicLink = editing && article.status === "published"
+      ? `<a class="button secondary" href="/articles/${escapeAttr(state.editingArticle.folder)}/${escapeAttr(state.editingArticle.slug)}" target="_blank" rel="noopener">查看文章 ↗</a>` : "";
     return `${editorHeader(editing ? "编辑文章" : "新建文章")}
-      <form class="admin-form" id="article-form" data-scope="article" ${state.dirty ? 'data-unsaved="true"' : ""}>
-        <div class="form-grid two">
-          <label><span>标题</span><input name="title" value="${escapeAttr(article.title)}" required></label>
-          <label><span>副标题</span><input name="subtitle" value="${escapeAttr(article.subtitle)}"></label>
-          <label><span>分组</span><select name="folder">${folderOptions("articles", article.folder)}</select></label>
-          <label><span>Slug</span><input name="slug" value="${escapeAttr(article.slug)}" pattern="[a-z0-9]+(-[a-z0-9]+)*" required></label>
-          <label><span>发布时间</span><input name="publishedAt" type="datetime-local" value="${escapeAttr(fromIso(article.publishedAt))}"></label>
-          <label><span>状态</span><select name="status"><option value="published" ${article.status !== "draft" ? "selected" : ""}>published</option><option value="draft" ${article.status === "draft" ? "selected" : ""}>draft</option></select></label>
-        </div>
-        <label><span>摘要</span><textarea name="summary" rows="2">${escapeHtml(article.summary)}</textarea></label>
-        <label><span>封面图 URL</span><input name="coverImage" value="${escapeAttr(article.coverImage)}" placeholder="/media/articles/.../assets/cover.webp"></label>
-        <label><span>标签（逗号分隔）</span><input name="tags" value="${escapeAttr(Array.isArray(article.tags) ? article.tags.join(", ") : article.tags || "")}"></label>
-        <label><span>Markdown 正文</span><textarea class="code-editor" name="markdown" rows="16">${escapeHtml(article.markdown)}</textarea></label>
+      <form class="admin-form article-composer" id="article-form" data-scope="article" ${state.dirty ? 'data-unsaved="true"' : ""}>
+        <label class="article-title-field"><span>标题</span><input name="title" value="${escapeAttr(article.title)}" placeholder="文章标题" autocomplete="off" required></label>
+        <label class="article-subtitle-field"><span>副标题</span><input name="subtitle" value="${escapeAttr(article.subtitle)}" placeholder="添加一句副标题（选填）"></label>
+        <details class="article-settings">
+          <summary><span>发布设置</span><small>分组、地址与文章信息</small></summary>
+          <div class="article-settings-body">
+            <div class="form-grid two">
+              <label><span>分组</span><select name="folder">${folderOptions("articles", article.folder)}</select></label>
+              <label><span>Slug</span><input name="slug" value="${escapeAttr(article.slug)}" pattern="[a-z0-9]+(-[a-z0-9]+)*" placeholder="article-address" required><small>用小写字母、数字和连字符设置文章地址。</small></label>
+              <label><span>发布时间</span><input name="publishedAt" type="datetime-local" value="${escapeAttr(fromIso(article.publishedAt))}"></label>
+              <label><span>状态</span><select name="status"><option value="draft" ${article.status === "draft" ? "selected" : ""}>草稿</option><option value="published" ${article.status !== "draft" ? "selected" : ""}>公开发布</option></select></label>
+            </div>
+            <label><span>摘要</span><textarea name="summary" rows="2" placeholder="用于文章列表的简短介绍">${escapeHtml(article.summary)}</textarea></label>
+            <label><span>封面图 URL</span><input name="coverImage" value="${escapeAttr(article.coverImage)}" placeholder="/media/articles/.../assets/cover.webp"></label>
+            <label><span>标签（逗号分隔）</span><input name="tags" value="${escapeAttr(Array.isArray(article.tags) ? article.tags.join(", ") : article.tags || "")}" placeholder="随笔, 旅行"></label>
+          </div>
+        </details>
+        <section class="writing-workspace" data-writing-workspace aria-label="文章写作区">
+          <div data-writing-toolbar></div>
+          <div data-rich-editor></div>
+          <label data-source-editor><span>Markdown 正文</span><textarea class="code-editor" name="markdown" rows="20" spellcheck="false">${escapeHtml(article.markdown)}</textarea></label>
+          <div class="admin-preview article-body" id="article-preview" hidden>${markdownToHtml(article.markdown)}</div>
+          <div data-writing-footer></div>
+        </section>
         <div class="asset-uploader">
-          <input id="article-asset-file" type="file" accept="image/jpeg,image/png,image/webp">
+          <label><span>正文插图</span><input id="article-asset-file" type="file" accept="image/jpeg,image/png,image/webp"></label>
           <button class="button secondary" data-action="upload-article-asset" data-mutation="article-asset" data-scope="article" data-pending-label="正在上传…" type="button">上传插图并插入</button>
+          <small>保存文章后可上传插图，图片会插入光标所在位置。</small>
         </div>
-        <div class="form-actions">
+        <div class="form-actions article-savebar">
+          <span class="article-local-status" data-local-draft-status role="status">${localDraftAvailable ? "修改会自动备份到本机" : "本机备份不可用，请及时保存"}</span>
           <button class="button primary" data-mutation="article-save" data-scope="article" data-pending-label="正在保存…" type="submit">${editing ? "保存文章" : "创建文章"}</button>
+          ${publicLink}
           <button class="button secondary" data-action="new-article" data-navigation-control type="button">新建</button>
           ${editing ? '<button class="button danger" data-action="delete-article" data-mutation="article-delete" data-scope="article" data-pending-label="正在删除…" type="button">删除</button>' : ""}
         </div>
         <p id="article-action-status" class="admin-progress" role="status" aria-live="polite" hidden></p>
-        <div class="admin-preview article-body" id="article-preview">${markdownToHtml(article.markdown)}</div>
       </form>`;
   }
 
@@ -728,11 +826,14 @@
 
   function renderWorkspace({ focusSelector = "" } = {}) {
     clearTimeout(markdownPreviewTimer);
+    disposeArticleEditor();
     captureListScroll();
     updateTabUi();
     const body = document.querySelector(`[data-panel-body="${state.tab}"]`);
     if (!body) return;
     body.innerHTML = workbenchView(state.tab);
+    mountArticleEditor();
+    updateRecoveryUi();
     restoreListScroll();
     setStatus(state.status || state.error || "", Boolean(state.error));
     updateDirtyUi();
@@ -744,12 +845,15 @@
     clearTimeout(markdownPreviewTimer);
     const editor = document.querySelector(`#admin-panel-${tab} [data-editor="${tab}"]`);
     if (!editor) return;
+    disposeArticleEditor();
     editor.innerHTML = tab === "articles" ? articleForm() : tab === "images" ? imageForm() : folderForm();
     const workbench = editor.closest(".admin-workbench");
     if (workbench) {
       workbench.dataset.view = state.mobileView[tab];
       workbench.classList.toggle("is-editing", state.mobileView[tab] === "editor");
     }
+    mountArticleEditor();
+    updateRecoveryUi();
     updateListSelection(tab);
     updateDirtyUi();
     updateBusyUi();
@@ -769,6 +873,7 @@
 
   function mountLogin({ focus = false } = {}) {
     clearTimeout(markdownPreviewTimer);
+    disposeArticleEditor();
     root.innerHTML = loginView();
     root.setAttribute("aria-busy", "false");
     updateBusyUi();
@@ -824,6 +929,11 @@
 
   function articlePayload(form) {
     const data = new FormData(form);
+    // Disabled controls are absent from FormData while a save is pending. The
+    // local recovery copy must still contain the complete article.
+    for (const field of form.querySelectorAll("input[name], select[name], textarea[name]")) {
+      if (field.matches(":disabled") && field.type !== "file") data.set(field.name, field.value);
+    }
     return {
       title: formString(data, "title"),
       subtitle: formString(data, "subtitle"),
@@ -1177,10 +1287,9 @@
 
   async function startNew(tab) {
     if (isBusy()) return;
-    const alreadyNew = !editingForKind(kindForTab(tab));
-    if (!alreadyNew && !await confirmDiscard()) return;
-    if (!alreadyNew) clearDraftForTab(tab);
-    if (!alreadyNew) setDirty(false);
+    if (!await confirmDiscard()) return;
+    clearDraftForTab(tab);
+    setDirty(false);
     if (tab === "articles") state.editingArticle = null;
     if (tab === "images") {
       state.editingPhoto = null;
@@ -1198,6 +1307,7 @@
       try {
         const path = previous ? `/api/admin/articles/${previous.folder}/${previous.slug}` : "/api/admin/articles";
         const article = await api(path, { method: previous ? "PATCH" : "POST", body: JSON.stringify(payload) });
+        removeArticleBackup(previous);
         state.editingArticle = article;
         await reconcileAfterMutation("article", article, { message: "文章已保存。" });
       } catch (error) {
@@ -1216,6 +1326,14 @@
     if (!file) {
       setStatus("请选择要上传的插图。", true, { scope: "article" });
       input?.focus();
+      return;
+    }
+    if (!state.editingArticle) {
+      setStatus("请先保存文章，再上传插图。", true, { scope: "article" });
+      return;
+    }
+    if (payload.folder !== state.editingArticle.folder || payload.slug !== state.editingArticle.slug) {
+      setStatus("文章地址已修改，请先保存新地址，再上传插图。", true, { scope: "article" });
       return;
     }
     if (!payload.folder || !payload.slug) {
@@ -1242,10 +1360,14 @@
         const after = textarea.value.slice(end);
         const prefix = before && !before.endsWith("\n") ? "\n\n" : "";
         const suffix = after && !after.startsWith("\n") ? "\n\n" : "";
-        textarea.setRangeText(`${prefix}${token}${suffix}`, start, end, "end");
-        textarea.dispatchEvent(new Event("input", { bubbles: true }));
+        if (articleEditor) articleEditor.insertImage({ src: source, alt: selectedLabel || file.name, title: file.name });
+        else {
+          textarea.setRangeText(`${prefix}${token}${suffix}`, start, end, "end");
+          textarea.dispatchEvent(new Event("input", { bubbles: true }));
+          textarea.focus();
+        }
         input.value = "";
-        textarea.focus();
+        articleEditor?.focus();
         setStatus("插图已上传并插入正文。", false, { scope: "article" });
       } catch (error) {
         reportFormError(error, "article", form);
@@ -1383,6 +1505,7 @@
         await loadAll();
         sessionStorage.setItem("adminToken", state.token);
         state.authed = true;
+        await prepareLocalDrafts();
         state.dirty = false;
         state.drafts = { article: null, photo: null, folder: null };
         state.error = "";
@@ -1429,6 +1552,16 @@
     }
     const action = button.dataset.action;
     if (!action) return;
+    if (action === "restore-article-draft") return restoreLocalDraft();
+    if (action === "remove-article-draft") {
+      const latest = latestLocalDraft();
+      if (!latest || isBusy()) return;
+      if (!await requestConfirmation({ title: "清除本机草稿？", message: "这份未保存的本机备份将被清除，服务器上的文章不受影响。", confirmLabel: "清除备份" })) return;
+      delete localDrafts[latest[0]];
+      writeLocalDrafts();
+      updateRecoveryUi();
+      return;
+    }
     if (action === "logout") {
       if (isBusy() || !await confirmDiscard("当前草稿尚未保存，确定退出吗？")) return;
       sessionStorage.removeItem("adminToken");
@@ -1438,6 +1571,8 @@
       state.error = "";
       clearDraftForTab();
       setDirty(false);
+      localDrafts = {};
+      localDraftKey = "";
       mountLogin({ focus: true });
       return;
     }
@@ -1485,6 +1620,7 @@
       state.drafts.article = articlePayload(form);
       setDirty();
       if (target.name === "markdown") scheduleMarkdownPreview(target.value);
+      scheduleArticleBackup();
     }
     if (form.id === "image-form" && target.name !== "file") {
       markPhotoTouched(target.name);
@@ -1520,6 +1656,11 @@
   }
 
   async function handleKeydown(event) {
+    if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "s") {
+      event.preventDefault();
+      if (state.authed && !isBusy()) currentForm()?.requestSubmit();
+      return;
+    }
     const tab = event.target.closest('[role="tab"][data-tab]');
     if (!tab || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End"].includes(event.key)) return;
     event.preventDefault();
@@ -1532,6 +1673,10 @@
     await activateTab(TAB_IDS[nextIndex], { focusTab: true });
   }
 
+  root.addEventListener("invalid", (event) => {
+    const details = event.target.closest("details");
+    if (details) details.open = true;
+  }, true);
   root.addEventListener("submit", handleSubmit);
   root.addEventListener("click", handleClick);
   root.addEventListener("input", handleInput);
@@ -1540,13 +1685,20 @@
 
   window.addEventListener("beforeunload", (event) => {
     if (!state.dirty) return;
+    backupArticleDraft();
     event.preventDefault();
+    event.returnValue = "";
+  });
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") backupArticleDraft();
   });
 
   if (state.token) {
     loadAll()
-      .then(() => {
+      .then(async () => {
         state.authed = true;
+        await prepareLocalDrafts();
         mountApp();
       })
       .catch((error) => {

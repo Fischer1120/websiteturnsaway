@@ -12,7 +12,7 @@ import { onRequestGet as getImagesPage } from "../functions/images/index";
 import { onRequestGet as getImageDetailPage } from "../functions/images/[folder]/[photoId]";
 import { onRequestGet as getPublicArticleDetail } from "../functions/api/articles/[folder]/[slug]";
 import { markdownToHtml } from "../functions/_shared/markdown";
-import { createArticle, deleteFolderRecord, patchArticle, patchPhoto, savePhotoMetadata } from "../functions/_shared/content";
+import { createArticle, getArticle, deleteArticle, deleteFolderRecord, patchArticle, patchPhoto, savePhotoMetadata } from "../functions/_shared/content";
 import { deletePrefix, listAllObjects, withR2TransientRetry } from "../functions/_shared/r2";
 import type { FunctionContext } from "../functions/_shared/responses";
 
@@ -82,6 +82,39 @@ afterEach(async () => {
 });
 
 describe("CMS security and API contracts", () => {
+  it.each(["save", "delete"] as const)("rejects an edit when another editor finishes a %s between the version and ETag reads", async (operation) => {
+    const folder = `codex-fix-race-${crypto.randomUUID().slice(0, 8)}`;
+    const slug = "interleaved-editor";
+    trackArticleFixture(folder);
+    const initial = await createArticle(env, { folder, slug, title: "Original", status: "draft", markdown: "Original body", updatedAt: "2026-01-01T00:00:00.000Z" });
+    let recordReads = 0;
+    const bucket = new Proxy(env.MEDIA_BUCKET, {
+      get(target, property) {
+        if (property === "get") return async (key: string) => {
+          if (key === initial.jsonKey && ++recordReads === 2) {
+            if (operation === "save") {
+              // Explicitly separate timestamps so this exercises the interleaving,
+              // independent of the host clock's millisecond resolution.
+              await new Promise((resolve) => setTimeout(resolve, 2));
+              const newer = { title: "Other editor saved", markdown: "Newer body", expectedUpdatedAt: initial.updatedAt };
+              await patchArticle(env, folder, slug, newer);
+            } else await deleteArticle(env, folder, slug);
+          }
+          return target.get(key);
+        };
+        const value = Reflect.get(target, property, target);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    });
+    const stale = { title: "Stale editor", markdown: "Stale body", expectedUpdatedAt: initial.updatedAt };
+    await expect(patchArticle({ ...env, MEDIA_BUCKET: bucket }, folder, slug, stale)).rejects.toMatchObject({ status: 409, code: "conflict" });
+    const final = await getArticle(env, folder, slug, { includePrivate: true });
+    if (operation === "save") {
+      expect(final?.title).toBe("Other editor saved");
+      expect(final?.markdown).toBe("Newer body");
+    } else expect(final).toBeUndefined();
+  });
+
   it("retries transient R2 throttling without retrying non-transient errors", async () => {
     let attempts = 0;
     const result = await withR2TransientRetry(async () => {

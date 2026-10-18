@@ -956,6 +956,15 @@ export async function patchArticle(env: Env, folder: string, slug: string, patch
 
   if (currentId === nextId) {
     const stored = await readJsonObject<ArticleRecord>(env.MEDIA_BUCKET, existing.jsonKey);
+    // Bind the version check to the same snapshot whose ETag guards the write.
+    // A second editor can finish after getArticle() but before this read.
+    if ((stored && stored.value.updatedAt !== (expectedUpdatedAt || existing.updatedAt))
+      || (!stored && existing.source === "r2")) {
+      throw new ApiError("conflict", "The article changed while you were editing it.", 409, {
+        expectedUpdatedAt: expectedUpdatedAt || existing.updatedAt,
+        actualUpdatedAt: stored?.value.updatedAt,
+      });
+    }
     if (stored) await updateArticleRecord(env, nextArticle, stored.etag);
     else await writeNewArticle(env, nextArticle);
     await removeTombstone(env, "articles", nextId);

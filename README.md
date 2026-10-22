@@ -39,7 +39,10 @@ http://localhost:4321
 构建与类型检查：
 
 ```bash
+npm run check
 npm run build
+npx tsc --noEmit --ignoreDeprecations 6.0
+npm test
 ```
 
 Cloudflare Pages Functions 本地预览：
@@ -48,6 +51,23 @@ Cloudflare Pages Functions 本地预览：
 npm run build
 npm run pages:dev
 ```
+
+本地 Pages Functions 验收（使用隔离的 local R2，不写生产 bucket）：
+
+```bash
+BASE_URL=http://127.0.0.1:8791 node tests/route-matrix.mjs
+E2E_ADMIN_TOKEN=<local-test-token> BASE_URL=http://127.0.0.1:8791 ./tests/e2e-admin.smoke.sh
+```
+
+测试数据统一使用 `codex-fix-*` 标识；不要把真实 `ADMIN_TOKEN_SECRET` 写入命令记录、测试文件或仓库。
+
+## 文章编辑
+
+后台默认使用可视化编辑，可在“编辑”“源码”和“预览”之间切换。工具栏支持标题、加粗、列表、引用、链接、代码和表格，`Ctrl/⌘ S` 保存当前表单。专注写作可用 `Esc` 退出。发布设置包含分组、文章地址、摘要、封面、标签和公开状态，新文章默认为草稿。
+
+修改会自动备份到当前浏览器的本机存储，刷新后可通过“恢复草稿”取回。备份与登录会话所用的管理身份关联；本机备份不会更新服务器。只有点击创建或保存成功后，文章才会写入服务器。浏览器禁用存储或空间不足时，会提示及时保存。清除浏览器站点数据会清除备份。
+
+插图上传前需保存文章。图片插入光标位置后仍需保存正文。预览和公开文章使用同一套 Markdown 渲染；原文含有可视化编辑暂不支持的语法时，会保留源码供编辑。
 
 ## 部署
 

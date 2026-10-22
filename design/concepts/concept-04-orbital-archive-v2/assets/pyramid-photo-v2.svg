@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
+  <title id="title">金字塔入口，Orbital Archive v2 配色预览</title>
+  <desc id="desc">冷白金字塔入口与方碑位于石墨色广场，珊瑚色标记入口平面。</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#080A0D"/>
+      <stop offset="0.58" stop-color="#11151A"/>
+      <stop offset="1" stop-color="#181E24"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="32%" cy="25%" r="72%">
+      <stop offset="0" stop-color="#F5F7FA"/>
+      <stop offset="0.4" stop-color="#9BA6B2"/>
+      <stop offset="1" stop-color="#181E24"/>
+    </radialGradient>
+  </defs>
+  <rect width="1000" height="700" fill="url(#bg)"/>
+  <g fill="none" stroke="#9BA6B2" stroke-opacity="0.16">
+    <path d="M0 144H1000M0 610H1000"/>
+    <path d="M120 0V700M860 0V700"/>
+  </g>
+  <path d="M132 610H872" stroke="#79D7E5" stroke-opacity="0.48" stroke-width="4"/>
+  <path d="M270 610 622 128 844 610Z" fill="#080A0D" stroke="#9BA6B2" stroke-opacity="0.56" stroke-width="3"/>
+  <path d="M622 128 844 610 568 486Z" fill="#F5F7FA" opacity="0.94"/>
+  <path d="M568 486 844 610 304 610Z" fill="#F06D52"/>
+  <rect x="196" y="168" width="96" height="450" fill="#F5F7FA" opacity="0.84"/>
+  <rect x="292" y="182" width="22" height="438" fill="#79D7E5"/>
+  <circle cx="366" cy="192" r="96" fill="url(#orb)" stroke="#F5F7FA" stroke-opacity="0.5" stroke-width="6"/>
+  <circle cx="332" cy="154" r="24" fill="#F5F7FA"/>
+  <g fill="#F5F7FA" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="19" letter-spacing="2">
+    <text x="62" y="72">ARCHIVE / 20260531-191000-C3D4</text>
+    <text x="650" y="122">ENTRANCE 19:10</text>
+  </g>
+</svg>

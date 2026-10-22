@@ -1,9 +1,9 @@
-import { fail, ok, param, type FunctionContext } from "../../../_shared/responses";
-import { articleKey, readJson } from "../../../_shared/r2";
-import { articles } from "../../../_shared/seed";
+import { fail, failFromError, ok, param, type FunctionContext } from "../../../_shared/responses";
+import { getArticle, toPublicArticle } from "../../../_shared/content";
 import { isSlug } from "../../../_shared/validators";
 
 export const onRequestGet = async (context: FunctionContext) => {
+  try {
   const folder = param(context.params.folder);
   const slug = param(context.params.slug);
   if (!isSlug(folder) || !isSlug(slug)) {
@@ -13,13 +13,13 @@ export const onRequestGet = async (context: FunctionContext) => {
     });
   }
 
-  const r2Article = await readJson(context.env.MEDIA_BUCKET, articleKey(folder, slug).replace(/\.md$/, ".json"));
-  if (r2Article) return ok(context.request, context.env, r2Article);
-
-  const article = articles.find((item) => item.folder === folder && item.slug === slug);
+  const article = await getArticle(context.env, folder, slug);
   if (!article) {
     return fail(context.request, context.env, "not_found", "Article not found.", 404, { folder, slug });
   }
 
-  return ok(context.request, context.env, article);
+    return ok(context.request, context.env, toPublicArticle(article, { includeMarkdown: true }));
+  } catch (error) {
+    return failFromError(context.request, context.env, error, "Could not read article.");
+  }
 };

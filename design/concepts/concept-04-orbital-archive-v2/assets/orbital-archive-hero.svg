@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 860" role="img" aria-labelledby="title desc">
+  <title id="title">Orbital Archive v2 轨道档案站</title>
+  <desc id="desc">冷黑背景中，一枚银白球体、方碑与金字塔由冰蓝轨道线连接，少量珊瑚色标记观测坐标。</desc>
+  <defs>
+    <linearGradient id="field" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#080A0D"/>
+      <stop offset="0.58" stop-color="#11151A"/>
+      <stop offset="1" stop-color="#181E24"/>
+    </linearGradient>
+    <radialGradient id="orb" cx="30%" cy="24%" r="74%">
+      <stop offset="0" stop-color="#F5F7FA"/>
+      <stop offset="0.28" stop-color="#9BA6B2"/>
+      <stop offset="0.7" stop-color="#181E24"/>
+      <stop offset="1" stop-color="#080A0D"/>
+    </radialGradient>
+    <linearGradient id="monolith" x1="0" x2="1">
+      <stop offset="0" stop-color="#F5F7FA"/>
+      <stop offset="0.18" stop-color="#9BA6B2"/>
+      <stop offset="0.2" stop-color="#181E24"/>
+      <stop offset="1" stop-color="#080A0D"/>
+    </linearGradient>
+    <filter id="grain" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence baseFrequency="0.82" numOctaves="2" seed="17" type="fractalNoise"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncA slope="0.09" type="linear"/>
+      </feComponentTransfer>
+    </filter>
+  </defs>
+  <rect width="1200" height="860" fill="url(#field)"/>
+  <g fill="none" stroke="#9BA6B2" stroke-opacity="0.17">
+    <path d="M0 120H1200M0 260H1200M0 400H1200M0 540H1200M0 680H1200"/>
+    <path d="M150 0V860M340 0V860M530 0V860M720 0V860M910 0V860M1100 0V860"/>
+  </g>
+  <g fill="none" stroke="#79D7E5">
+    <ellipse cx="487" cy="389" rx="344" ry="118" stroke-opacity="0.62" stroke-width="3" transform="rotate(-18 487 389)"/>
+    <ellipse cx="487" cy="389" rx="404" ry="162" stroke-dasharray="8 22" stroke-opacity="0.28" stroke-width="2" transform="rotate(13 487 389)"/>
+    <path d="M52 710C310 636 623 654 1148 468" stroke-dasharray="3 14" stroke-opacity="0.42" stroke-width="2"/>
+  </g>
+  <ellipse cx="515" cy="650" rx="390" ry="62" fill="#080A0D" opacity="0.74"/>
+  <circle cx="440" cy="371" r="226" fill="#080A0D" opacity="0.54"/>
+  <circle cx="408" cy="337" r="226" fill="url(#orb)" stroke="#F5F7FA" stroke-opacity="0.42" stroke-width="4"/>
+  <circle cx="326" cy="249" r="36" fill="#F5F7FA" opacity="0.84"/>
+  <path d="M151 643 538 186 742 643Z" fill="#9BA6B2" opacity="0.09"/>
+  <rect x="681" y="148" width="110" height="498" fill="url(#monolith)"/>
+  <rect x="791" y="173" width="25" height="473" fill="#79D7E5" opacity="0.86"/>
+  <path d="M813 646 1127 646 981 268Z" fill="#080A0D" stroke="#9BA6B2" stroke-opacity="0.55" stroke-width="3"/>
+  <path d="M981 268 1127 646 941 527Z" fill="#F5F7FA" opacity="0.92"/>
+  <path d="M941 527 1127 646 835 646Z" fill="#F06D52"/>
+  <g fill="#F06D52">
+    <circle cx="92" cy="710" r="7"/>
+    <circle cx="1058" cy="184" r="7"/>
+    <rect x="88" y="176" width="9" height="88"/>
+  </g>
+  <g fill="#F5F7FA" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="22" letter-spacing="4">
+    <text x="74" y="82">ORBITAL ARCHIVE / V2</text>
+    <text x="846" y="116">SHANGHAI / 31.2304 N</text>
+    <text x="74" y="786">AZIMUTH 18:42 / NODE 04</text>
+  </g>
+  <g fill="#9BA6B2" font-family="SFMono-Regular, Menlo, Consolas, monospace" font-size="15" letter-spacing="2">
+    <text x="74" y="112">PUBLIC RECORD / CALIBRATED</text>
+    <text x="902" y="778">121.4737 E</text>
+  </g>
+  <rect width="1200" height="860" filter="url(#grain)" opacity="0.46"/>
+</svg>

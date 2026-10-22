@@ -1,14 +1,26 @@
 import { requireAdmin } from "../../_shared/auth";
-import { fail, ok, options, type FunctionContext } from "../../_shared/responses";
-import { imageMetadataKey, imageOriginalKey, imageThumbKey } from "../../_shared/r2";
+import { listPhotos, savePhotoUpload, toAdminPhoto } from "../../_shared/content";
+import { fail, failFromError, ok, options, type FunctionContext } from "../../_shared/responses";
 import { extensionForContentType, isSafeImageType, isSlug } from "../../_shared/validators";
+
+const MAX_IMAGE_BYTES = 15 * 1024 * 1024;
+const MAX_DISPLAY_BYTES = 10 * 1024 * 1024;
+const MAX_THUMB_BYTES = 2 * 1024 * 1024;
 
 export const onRequestOptions = async (context: FunctionContext) => {
   return options(context.request, context.env);
 };
 
+export const onRequestGet = async (context: FunctionContext) => {
+  const authError = await requireAdmin(context);
+  if (authError) return authError;
+
+  const data = await listPhotos(context.env, { includePrivate: true });
+  return ok(context.request, context.env, { ...data, photos: data.photos.map(toAdminPhoto) });
+};
+
 export const onRequestPost = async (context: FunctionContext) => {
-  const authError = requireAdmin(context);
+  const authError = await requireAdmin(context);
   if (authError) return authError;
 
   if (!context.env.MEDIA_BUCKET) {
@@ -17,39 +29,48 @@ export const onRequestPost = async (context: FunctionContext) => {
 
   const form = await context.request.formData();
   const file = form.get("file");
+  const display = form.get("display");
+  const thumb = form.get("thumb");
   const folder = String(form.get("folder") || "");
   const metadataText = String(form.get("metadata") || "{}");
 
-  if (!(file instanceof File) || !isSlug(folder)) {
-    return fail(context.request, context.env, "invalid_request", "Expected file and valid folder.", 400);
+  if (!(file instanceof File) || !(display instanceof File) || !(thumb instanceof File) || !isSlug(folder)) {
+    return fail(context.request, context.env, "invalid_request", "Expected file, display, thumb and valid folder.", 400);
   }
 
   if (!isSafeImageType(file.type)) {
-    return fail(context.request, context.env, "unsupported_media_type", "Only JPEG, PNG, WebP and SVG are allowed.", 415);
+    return fail(context.request, context.env, "unsupported_media_type", "Only JPEG, PNG and WebP are allowed.", 415);
   }
 
-  const metadata = JSON.parse(metadataText) as Record<string, unknown>;
-  const photoId = String(metadata.id || `${new Date().toISOString().replaceAll(/[-:.TZ]/g, "").slice(0, 14)}-${crypto.randomUUID().slice(0, 8)}`);
-  const ext = extensionForContentType(file.type);
-  const originalKey = imageOriginalKey(folder, photoId, ext);
-  const thumbKey = imageThumbKey(folder, photoId, ext);
-  const metaKey = imageMetadataKey(folder, photoId);
+  if (file.size > MAX_IMAGE_BYTES) {
+    return fail(context.request, context.env, "payload_too_large", "Image file must be 15 MB or smaller.", 413);
+  }
 
-  const fullMetadata = {
-    ...metadata,
-    id: photoId,
-    folder,
-    objectKey: originalKey,
-    thumbKey,
-    visibility: metadata.visibility || "public",
-  };
+  if (display.type !== "image/webp") {
+    return fail(context.request, context.env, "unsupported_media_type", "Display must be a WebP file.", 415);
+  }
 
-  await context.env.MEDIA_BUCKET.put(originalKey, file.stream(), {
-    httpMetadata: { contentType: file.type },
-  });
-  await context.env.MEDIA_BUCKET.put(metaKey, JSON.stringify(fullMetadata, null, 2), {
-    httpMetadata: { contentType: "application/json; charset=utf-8" },
-  });
+  if (display.size > MAX_DISPLAY_BYTES) {
+    return fail(context.request, context.env, "payload_too_large", "Display must be 10 MB or smaller.", 413);
+  }
 
-  return ok(context.request, context.env, { photoId, objectKey: originalKey, metadataKey: metaKey }, 201);
+  if (thumb.type !== "image/webp") {
+    return fail(context.request, context.env, "unsupported_media_type", "Thumbnail must be a WebP file.", 415);
+  }
+
+  if (thumb.size > MAX_THUMB_BYTES) {
+    return fail(context.request, context.env, "payload_too_large", "Thumbnail must be 2 MB or smaller.", 413);
+  }
+
+  try {
+    const metadata = JSON.parse(metadataText) as Record<string, unknown>;
+    const ext = extensionForContentType(file.type);
+    const photo = await savePhotoUpload(context.env, folder, file, display, thumb, metadata, ext);
+    return ok(context.request, context.env, toAdminPhoto(photo), 201);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      return fail(context.request, context.env, "invalid_request", "metadata must be valid JSON.", 400, { field: "metadata" });
+    }
+    return failFromError(context.request, context.env, error, "Could not upload image.");
+  }
 };

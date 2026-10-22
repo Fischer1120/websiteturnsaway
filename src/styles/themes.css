@@ -1,0 +1,199 @@
+/* Keep the current black palette as night mode. The day palette comes from
+   concept-05-royal-lime-archive; layout and content interactions are shared. */
+:root {
+  --chrome-bg: rgba(8, 10, 13, .9);
+  --context-bg: rgba(17, 21, 26, .78);
+  --editor-chrome-bg: rgba(8, 10, 13, .42);
+  --savebar-bg: rgba(17, 21, 26, .96);
+  --document-bg: #f5f7fa;
+  --document-ink: #080a0d;
+  --document-code-bg: #11151a;
+  --document-code-ink: #f5f7fa;
+  --brand-accent: #f06d52;
+  --primary-bg: var(--surface);
+  --primary-hover-bg: var(--focus);
+  --primary-ink: var(--canvas);
+  --on-focus: var(--canvas);
+  --focus-wash: rgba(121, 215, 229, .08);
+  --focus-line: rgba(121, 215, 229, .28);
+  --selection-bg: var(--focus);
+  --selection-ink: var(--canvas);
+  --shadow-color: rgba(8, 10, 13, .72);
+  --grid-color: rgba(155, 166, 178, .045);
+  --grid-opacity: .2;
+  --page-glow: rgba(121, 215, 229, .055);
+  --page-warm-glow: rgba(240, 109, 82, .035);
+}
+
+:root[data-theme="dark"] { color-scheme: dark; }
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --canvas: #fff;
+  --panel: #f3f4f6;
+  --raised: #e9edf2;
+  --surface: #17191f;
+  --muted: #5c626d;
+  --focus: #2448ff;
+  --coral: #bd4736;
+  --ink: #17191f;
+  --ink-soft: rgba(23, 25, 31, .76);
+  --paper: #fff;
+  --paper-2: #f3f4f6;
+  --paper-3: #e9edf2;
+  --line: #dde1e7;
+  --line-strong: #aeb7c4;
+  --dark-line: rgba(23, 25, 31, .2);
+  --chrome-bg: rgba(255, 255, 255, .94);
+  --context-bg: rgba(243, 244, 246, .94);
+  --editor-chrome-bg: #fff;
+  --savebar-bg: rgba(243, 244, 246, .96);
+  --document-bg: #fff;
+  --document-ink: #17191f;
+  --document-code-bg: #edf0f5;
+  --document-code-ink: #17191f;
+  --brand-accent: #2448ff;
+  --primary-bg: #2448ff;
+  --primary-hover-bg: #1738d3;
+  --primary-ink: #fff;
+  --on-focus: #fff;
+  --focus-wash: rgba(36, 72, 255, .07);
+  --focus-line: rgba(36, 72, 255, .28);
+  --selection-bg: #d7f542;
+  --selection-ink: #17191f;
+  --shadow-color: rgba(23, 25, 31, .16);
+  --grid-color: rgba(23, 25, 31, .04);
+  --grid-opacity: .1;
+  --page-glow: rgba(36, 72, 255, .018);
+  --page-warm-glow: rgba(215, 245, 66, .025);
+}
+
+/* The public pages retain system appearance even when JavaScript is disabled. */
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme]) {
+    color-scheme: light;
+    --canvas: #fff;
+    --panel: #f3f4f6;
+    --raised: #e9edf2;
+    --surface: #17191f;
+    --muted: #5c626d;
+    --focus: #2448ff;
+    --coral: #bd4736;
+    --ink: #17191f;
+    --ink-soft: rgba(23, 25, 31, .76);
+    --paper: #fff;
+    --paper-2: #f3f4f6;
+    --paper-3: #e9edf2;
+    --line: #dde1e7;
+    --line-strong: #aeb7c4;
+    --dark-line: rgba(23, 25, 31, .2);
+    --chrome-bg: rgba(255, 255, 255, .94);
+    --context-bg: rgba(243, 244, 246, .94);
+    --editor-chrome-bg: #fff;
+    --savebar-bg: rgba(243, 244, 246, .96);
+    --document-bg: #fff;
+    --document-ink: #17191f;
+    --document-code-bg: #edf0f5;
+    --document-code-ink: #17191f;
+    --brand-accent: #2448ff;
+    --primary-bg: #2448ff;
+    --primary-hover-bg: #1738d3;
+    --primary-ink: #fff;
+    --on-focus: #fff;
+    --focus-wash: rgba(36, 72, 255, .07);
+    --focus-line: rgba(36, 72, 255, .28);
+    --selection-bg: #d7f542;
+    --selection-ink: #17191f;
+    --shadow-color: rgba(23, 25, 31, .16);
+    --grid-color: rgba(23, 25, 31, .04);
+    --grid-opacity: .1;
+    --page-glow: rgba(36, 72, 255, .018);
+    --page-warm-glow: rgba(215, 245, 66, .025);
+  }
+}
+
+body {
+  background:
+    radial-gradient(circle at 86% 6%, var(--page-glow), transparent 26rem),
+    radial-gradient(circle at 4% 72%, var(--page-warm-glow), transparent 24rem),
+    var(--canvas);
+}
+body::before {
+  opacity: var(--grid-opacity);
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+}
+::selection { color: var(--selection-ink); background: var(--selection-bg); }
+.topbar, .photo-map-reset { background: var(--chrome-bg); }
+.context-rail, .route-matrix { background: var(--context-bg); }
+.admin-list, .admin-editor { background: var(--editor-chrome-bg); }
+.admin-console .article-savebar { background: var(--savebar-bg); }
+.hero-copy::before { background: var(--brand-accent); }
+.hero-visual figcaption { color: #f5f7fa; }
+
+.button.primary, .button-primary {
+  color: var(--primary-ink);
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
+}
+.button.primary:hover, .button-primary:hover {
+  background: var(--primary-hover-bg);
+  border-color: var(--primary-hover-bg);
+}
+.skip-link, .admin-tab[aria-selected="true"], .admin-tab.active,
+.photo-view-switch button[aria-selected="true"], .view-tabs button[aria-selected="true"] {
+  color: var(--on-focus);
+}
+.admin-message.success { border-color: var(--focus-line); }
+.admin-console .article-draft-recovery { background: var(--focus-wash); }
+.writing-tool[aria-pressed="true"] { border-color: var(--focus-line); background: var(--focus-wash); }
+.writing-document .selectedCell::after { background: var(--focus-wash); }
+
+/* Reading and writing sheets keep their own ink/paper pair instead of inheriting
+   the inverted chrome tokens. Existing white writing sheets remain white. */
+.article-prose, .admin-preview, .photo-main {
+  color: var(--document-ink);
+  background: var(--document-bg);
+}
+.photo-main h1, .writing-document code { color: var(--document-ink); }
+.writing-workspace { --writing-paper: var(--document-bg); --writing-ink: var(--document-ink); }
+.writing-document pre { color: var(--document-code-ink); background: var(--document-code-bg); }
+.writing-document pre code { color: inherit; }
+.writing-document a { text-decoration-color: var(--brand-accent); }
+.writing-document { caret-color: var(--brand-accent); }
+.article-body blockquote, .writing-document blockquote { border-left-color: var(--brand-accent); }
+.writing-focus-save { color: var(--on-focus); border-color: var(--brand-accent); background: var(--brand-accent); }
+.confirm-dialog, .admin-dialog, .writing-link-dialog { box-shadow: 0 24px 80px var(--shadow-color); }
+.photo-map-shell .leaflet-control a { color: #17191f; }
+.photo-map-shell .leaflet-popup-content-wrapper, .photo-map-shell .leaflet-popup-tip {
+  color: var(--document-ink); background: var(--document-bg);
+}
+.photo-map-shell .leaflet-popup-content .photo-map-popup a {
+  color: var(--on-focus); background: var(--focus);
+}
+
+/* Appearance is a compact header control; the existing navigation stays intact. */
+.header-actions { display: flex; min-width: 0; align-items: center; gap: 20px; }
+.theme-picker {
+  position: relative; display: inline-flex; min-height: 44px; align-items: center;
+  gap: 8px; padding: 0 10px; border: 1px solid var(--line);
+  color: var(--muted); background: var(--panel);
+}
+.theme-picker svg { width: 17px; height: 17px; flex: 0 0 17px; pointer-events: none; }
+.theme-picker select {
+  min-width: 0; min-height: 42px; max-width: 112px; border: 0;
+  color: var(--surface); background: transparent; font-size: 12px; cursor: pointer;
+}
+.theme-picker select option { color: var(--surface); background: var(--panel); font-size: 14px; }
+.theme-picker:focus-within { outline: 2px solid var(--focus); outline-offset: 3px; }
+.theme-picker select:focus-visible { outline: none; }
+.theme-icon-sun { display: none; }
+:root[data-theme="light"] .theme-icon-sun { display: block; }
+:root[data-theme="light"] .theme-icon-moon { display: none; }
+@media (max-width: 760px) {
+  .header-actions { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 8px; }
+  .header-actions .primary-nav { width: 100%; }
+  .theme-picker { width: 44px; justify-content: center; padding: 0; }
+  .theme-picker select { position: absolute; inset: 0; width: 100%; max-width: none; opacity: 0; }
+}

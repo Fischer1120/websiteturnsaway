@@ -1,0 +1,3 @@
+.playwright-cli/
+output/playwright/tool-logs/
+output/playwright/astra-*.png

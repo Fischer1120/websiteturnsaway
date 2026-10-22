@@ -1,0 +1,137 @@
+[
+  {
+    "file": "admin-articles-1024.png",
+    "width": 1024,
+    "height": 2121
+  },
+  {
+    "file": "admin-articles-1440.png",
+    "width": 1440,
+    "height": 1584
+  },
+  {
+    "file": "admin-articles-320.png",
+    "width": 320,
+    "height": 2203
+  },
+  {
+    "file": "admin-articles-390.png",
+    "width": 390,
+    "height": 2231
+  },
+  {
+    "file": "admin-folders-1440.png",
+    "width": 1440,
+    "height": 1118
+  },
+  {
+    "file": "admin-folders-390.png",
+    "width": 390,
+    "height": 1135
+  },
+  {
+    "file": "admin-images-1440.png",
+    "width": 1440,
+    "height": 1406
+  },
+  {
+    "file": "admin-images-390.png",
+    "width": 390,
+    "height": 1959
+  },
+  {
+    "file": "admin-list-390.png",
+    "width": 390,
+    "height": 995
+  },
+  {
+    "file": "article-1440.png",
+    "width": 1440,
+    "height": 1708
+  },
+  {
+    "file": "article-390.png",
+    "width": 390,
+    "height": 1588
+  },
+  {
+    "file": "articles-1440.png",
+    "width": 1440,
+    "height": 1116
+  },
+  {
+    "file": "articles-390.png",
+    "width": 390,
+    "height": 1087
+  },
+  {
+    "file": "delete-confirm-1440.png",
+    "width": 1440,
+    "height": 1000
+  },
+  {
+    "file": "home-1024.png",
+    "width": 1024,
+    "height": 2413
+  },
+  {
+    "file": "home-1440.png",
+    "width": 1440,
+    "height": 2849
+  },
+  {
+    "file": "home-320.png",
+    "width": 320,
+    "height": 2976
+  },
+  {
+    "file": "home-390.png",
+    "width": 390,
+    "height": 3124
+  },
+  {
+    "file": "images-1440.png",
+    "width": 1440,
+    "height": 1369
+  },
+  {
+    "file": "images-390.png",
+    "width": 390,
+    "height": 1458
+  },
+  {
+    "file": "map-1440.png",
+    "width": 1440,
+    "height": 1212
+  },
+  {
+    "file": "map-390.png",
+    "width": 390,
+    "height": 1350
+  },
+  {
+    "file": "map-before-error-1440.png",
+    "width": 1440,
+    "height": 1212
+  },
+  {
+    "file": "map-error-1440.png",
+    "width": 1440,
+    "height": 1015
+  },
+  {
+    "file": "photo-1440.png",
+    "width": 1440,
+    "height": 1249
+  },
+  {
+    "file": "photo-390.png",
+    "width": 390,
+    "height": 1159
+  },
+  {
+    "file": "save-error-1440.png",
+    "width": 1440,
+    "height": 1647
+  }
+]

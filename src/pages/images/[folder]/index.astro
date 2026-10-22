@@ -1,8 +1,8 @@
 ---
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import RouteMatrix from "@/components/RouteMatrix.astro";
-import RecordCard from "@/components/RecordCard.astro";
-import { formatDate, getPhotoFolders } from "@/lib/content";
+import PublicContentShell from "@/components/PublicContentShell.astro";
+import { getPhotoFolders } from "@/lib/content";
 
 export function getStaticPaths() {
   return getPhotoFolders().map((folder) => ({
@@ -14,32 +14,17 @@ export function getStaticPaths() {
 const { folder } = Astro.props;
 ---
 
-<BaseLayout title={`${folder.label} - 图片文件夹`}>
+<BaseLayout title={`${folder.label} — 图片文件夹`} description={folder.description} currentSection="images">
   <div class="layout-grid">
-    <RouteMatrix />
-    <main class="content-stack">
-      <section class="panel dark">
-        <div class="section-heading">
-          <div>
-            <p class="eyebrow">/images/{folder.slug}</p>
-            <h1>{folder.label}</h1>
-          </div>
-          <p>{folder.description}</p>
-        </div>
-        <div class="record-grid">
-          {folder.items.map((photo) => (
-            <RecordCard
-              href={`/images/${photo.folder}/${photo.id}`}
-              title={photo.title}
-              summary={`${formatDate(photo.capturedAt, true)} / ${photo.location.label} / ${photo.description}`}
-              image={photo.thumbUrl}
-              date={photo.capturedAt}
-              folder={photo.folder}
-              kind="photo"
-            />
-          ))}
-        </div>
-      </section>
-    </main>
+    <RouteMatrix
+      section="images"
+      breadcrumbs={[{ label: "首页", href: "/" }, { label: "图片", href: "/images" }, { label: folder.label }]}
+    />
+    <PublicContentShell
+      kind="images"
+      eyebrow={`/images/${folder.slug}`}
+      title={folder.label}
+      description={folder.description}
+    />
   </div>
 </BaseLayout>

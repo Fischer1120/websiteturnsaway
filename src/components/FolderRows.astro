@@ -18,9 +18,9 @@ const { folders, basePath } = Astro.props;
   {folders.map((folder) => (
     <a class="folder-row" href={`${basePath}/${folder.slug}`}>
       <span class="path">{basePath}/{folder.slug}</span>
-      <span>
+      <span class="folder-copy">
         <strong>{folder.label}</strong>
-        <p>{folder.description}</p>
+        <span>{folder.description}</span>
       </span>
       <span class="count">{folder.count} records</span>
     </a>
